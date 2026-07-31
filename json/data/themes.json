@@ -142,7 +142,18 @@
         "primary": "#5F4B8B",
         "cell": "#FFFFFF"
       }
+    },
+    {
+      "id": "royal-book",
+      "name": "Королевский котопарк",
+      "description": "Кожаный переплёт, золото и пергамент — книжная тема",
+      "cssFile": "assets/themes/royal-book/theme.css",
+      "preview": {
+        "background": "#0a0a14",
+        "primary": "#d49a3c",
+        "cell": "#5e1638"
+      }
     }
   ],
-  "defaultTheme": "neon-light"
+  "defaultTheme": "royal-book"
 }

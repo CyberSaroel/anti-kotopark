@@ -1,7 +1,9 @@
 import { showRulesScreen } from "./rulesScreen.js";
 import { showSettingsScreen } from "./settingsScreen.js";
-import { showStatsScreen } from "./statsScreen.js";
+import { showGameScreen } from "./gameScreen.js";
+import { showLevelSelect } from "./levelSelect.js";
 import { showAntiGameScreen } from "./antiGameScreen.js";
+import { LEVELS, LEVEL_IDS } from "../levels/levelRegistry.js";
 import { audioManager, isMusicEnabled, setMusicEnabled, isSfxEnabled, setSfxEnabled, getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume } from "../core/audioManager.js";
 import NavigationService from "../core/navigation.js";
 import { removeFloatingAudioControls } from "../ui/floatingAudioControls.js";
@@ -24,36 +26,59 @@ export function showIntroScreen(root) {
   titleImage.alt = "СОБЕРИ ВСЕХ КОРОЛЕЙ";
   titleImage.className = "intro-title-image";
 
-  const startBtn = document.createElement("button");
-  startBtn.className = "intro-start-btn";
-  startBtn.textContent = "🎮 Начать игру";
-  startBtn.addEventListener("click", () => {
+  // ==== Общий обработчик клика для кнопок меню ====
+  function playClick() {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
+  }
+
+  // ==== Кнопка «Начать игру» → уровень 10 ====
+  const startBtn = document.createElement("button");
+  startBtn.className = "intro-start-btn";
+  startBtn.textContent = "📖 Начать игру (уровень 10)";
+  startBtn.title = "Тестовый уровень 10";
+  startBtn.addEventListener("click", () => {
+    playClick();
+    NavigationService.navigate("game", () => showGameScreen(root, 10));
+  });
+
+  // ==== Кнопка «Все уровни» ====
+  const levelsBtn = document.createElement("button");
+  levelsBtn.className = "intro-music-btn";
+  levelsBtn.textContent = "🗺️ Все уровни (1–100)";
+  levelsBtn.addEventListener("click", () => {
+    playClick();
+    NavigationService.navigate("levelSelect", () => showLevelSelect(root));
+  });
+
+  // ==== Кнопка «Анти-режим» (режим угадывания социотипов) ====
+  const antiBtn = document.createElement("button");
+  antiBtn.className = "intro-music-btn";
+  antiBtn.textContent = "🕵️ Анти Котопарк";
+  antiBtn.addEventListener("click", () => {
+    playClick();
     NavigationService.navigate("antiGame", () => showAntiGameScreen(root));
   });
 
-  // Rules button
+  // ==== Кнопка «Правила» ====
   const rulesBtn = document.createElement("button");
   rulesBtn.className = "intro-music-btn";
   rulesBtn.textContent = "📖 Правила игры";
   rulesBtn.addEventListener("click", () => {
-    audioManager.initAudioContext();
-    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    playClick();
     NavigationService.navigate("rules", () => showRulesScreen(root));
   });
 
-  // Settings button
+  // ==== Кнопка «Настройки» ====
   const settingsBtn = document.createElement("button");
   settingsBtn.className = "intro-music-btn";
   settingsBtn.textContent = "⚙️ Настройки";
   settingsBtn.addEventListener("click", () => {
-    audioManager.initAudioContext();
-    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    playClick();
     NavigationService.navigate("settings", () => showSettingsScreen(root));
   });
 
-  // Wrapper for music controls
+  // ==== Music toggle ====
   const musicWrapper = document.createElement("div");
   musicWrapper.style.position = "relative";
   musicWrapper.style.display = "inline-block";
@@ -70,8 +95,7 @@ export function showIntroScreen(root) {
   musicBtn.appendChild(musicText);
   musicBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    audioManager.initAudioContext();
-    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    playClick();
     const enabled = !isMusicEnabled();
     setMusicEnabled(enabled);
     musicIcon.textContent = "🎵";
@@ -101,8 +125,8 @@ export function showIntroScreen(root) {
   musicVolumeLabel.style.display = "block";
   musicVolumeLabel.style.marginBottom = "5px";
   musicVolumeLabel.style.fontSize = "12px";
-  musicVolumeLabel.style.color = "#333";
-  
+  musicVolumeLabel.style.color = "#f4e6b0";
+
   const musicVolumeSlider = document.createElement("input");
   musicVolumeSlider.type = "range";
   musicVolumeSlider.min = "0";
@@ -159,14 +183,7 @@ export function showIntroScreen(root) {
     }, 300);
   });
 
-  const controls = document.createElement("div");
-  controls.className = "intro-controls";
-  controls.appendChild(startBtn);
-  controls.appendChild(rulesBtn);
-  controls.appendChild(settingsBtn);
-  controls.appendChild(musicWrapper);
-
-  // Wrapper for SFX controls
+  // ==== SFX toggle ====
   const sfxWrapper = document.createElement("div");
   sfxWrapper.style.position = "relative";
   sfxWrapper.style.display = "inline-block";
@@ -183,8 +200,7 @@ export function showIntroScreen(root) {
   sfxBtn.appendChild(sfxText);
   sfxBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    audioManager.initAudioContext();
-    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    playClick();
     const enabled = !isSfxEnabled();
     setSfxEnabled(enabled);
     sfxIcon.textContent = "🔊";
@@ -209,8 +225,8 @@ export function showIntroScreen(root) {
   sfxVolumeLabel.style.display = "block";
   sfxVolumeLabel.style.marginBottom = "5px";
   sfxVolumeLabel.style.fontSize = "12px";
-  sfxVolumeLabel.style.color = "#333";
-  
+  sfxVolumeLabel.style.color = "#f4e6b0";
+
   const sfxVolumeSlider = document.createElement("input");
   sfxVolumeSlider.type = "range";
   sfxVolumeSlider.min = "0";
@@ -224,7 +240,6 @@ export function showIntroScreen(root) {
     audioManager.updateSfxVolume();
   });
 
-  // Prevent event propagation for SFX volume controls
   sfxVolumePopup.addEventListener("click", preventPropagation);
   sfxVolumePopup.addEventListener("mousedown", preventPropagation);
   sfxVolumePopup.addEventListener("mouseup", preventPropagation);
@@ -264,6 +279,15 @@ export function showIntroScreen(root) {
     }, 300);
   });
 
+  // ==== Столбец кнопок ====
+  const controls = document.createElement("div");
+  controls.className = "intro-controls";
+  controls.appendChild(startBtn);
+  controls.appendChild(levelsBtn);
+  controls.appendChild(antiBtn);
+  controls.appendChild(rulesBtn);
+  controls.appendChild(settingsBtn);
+  controls.appendChild(musicWrapper);
   controls.appendChild(sfxWrapper);
 
   const hero = document.createElement("div");
@@ -273,6 +297,36 @@ export function showIntroScreen(root) {
   hero.appendChild(controls);
 
   overlay.appendChild(hero);
+
+  // ==== Dev-кнопка: быстрый запуск уровней 11–21 ====
+  const devBtn = document.createElement("button");
+  devBtn.className = "dev-levels-btn";
+  devBtn.textContent = "🔧 Dev: уровни 11–21";
+  devBtn.title = "Открыть панель быстрого запуска уровней 11–21";
+  devBtn.addEventListener("click", () => {
+    playClick();
+    devPanel.hidden = !devPanel.hidden;
+  });
+  overlay.appendChild(devBtn);
+
+  const devPanel = document.createElement("div");
+  devPanel.className = "dev-levels-panel";
+  devPanel.hidden = true;
+  devPanel.innerHTML = `<div class="dev-levels-title">Уровни 11–21 (структура готова)</div>`;
+  LEVEL_IDS.forEach(id => {
+    if (id === 10) return; // 10 запускается главной кнопкой
+    const b = document.createElement("button");
+    b.className = "dev-level-btn";
+    b.textContent = `Уровень ${id}`;
+    b.title = LEVELS[id]?.title || "";
+    b.addEventListener("click", () => {
+      playClick();
+      NavigationService.navigate("game", () => showGameScreen(root, id));
+    });
+    devPanel.appendChild(b);
+  });
+  overlay.appendChild(devPanel);
+
   root.appendChild(overlay);
 
   NavigationService.saveCurrentRender(() => showIntroScreen(root));

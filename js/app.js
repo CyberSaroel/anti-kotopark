@@ -1,12 +1,12 @@
 import { showIntroScreen } from "./screens/introScreen.js";
-import { applyTheme, getSelectedTheme } from "./screens/themeSelect.js";
+import { applyTheme } from "./theme.js";
 import NavigationService from "./core/navigation.js";
 import { VERSION, saveVersion } from "./core/version.js";
 
 const root = document.getElementById("app");
 
-// Apply selected theme on load
-applyTheme(getSelectedTheme());
+// Apply book theme (dark/light via data-theme) on load
+applyTheme();
 
 // Save current version
 saveVersion();

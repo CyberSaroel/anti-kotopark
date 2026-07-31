@@ -1,0 +1,204 @@
+/* ===== Темы «Королевский котопарк» (тёмная/светлая) =====
+ * Переключение через data-theme на <html>: js/theme.js
+ * Подключается ПОСЛЕДНИМ, поэтому переопределяет :root в main.css
+ * и любой файл темы из themes.json.
+ */
+
+:root {
+  /* Книжные цвета (общие) */
+  --leather: #5e1638;
+  --leather-top: #8a2350;
+  --leather-bot: #3a0d24;
+  --gilt: #d49a3c;
+  --gilt-highlight: #f3d27a;
+  --parchment: #f4e6b0;
+  --ink: #2a0a14;
+}
+
+/* ==== Тёмная (по умолчанию) ==== */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-color: #0a0a14;              /* тёмный бархатный фон */
+  --text-color: #f4e6b0;            /* пергаментный текст */
+  --primary-color: #d49a3c;         /* золото */
+  --primary-hover: #e8b85a;         /* светлое золото */
+
+  --cell-bg: #3d1130;               /* тёмная кожа клеток */
+  --cell-border: #d49a3c;           /* золотая окантовка */
+  --cell-selected: #f4e6b0;         /* пергаментная рамка выбора */
+  --cell-target: #7ac74f;           /* золотисто-зелёная цель */
+  --water-bg: #1a3a5c;              /* чернильно-синяя вода */
+
+  --button-bg: #5e1638;             /* кожа кнопок */
+  --button-hover: #7a2050;
+  --button-text: #f4e6b0;
+
+  --level-btn-bg: #5e1638;
+  --level-btn-done-bg: #2d4a3e;
+  --level-btn-done-border: #d49a3c;
+}
+
+/* ==== Светлая ==== */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-color: #f5f0e8;              /* тёплый пергаментный фон */
+  --text-color: #3a2a1a;            /* чернильно-коричневый текст */
+  --primary-color: #b8860b;         /* тёмное золото */
+  --primary-hover: #daa520;
+
+  --cell-bg: #fffdf5;               /* светлый пергамент клеток */
+  --cell-border: #b8860b;
+  --cell-selected: #8b4513;
+  --cell-target: #2e7d32;
+  --water-bg: #bcd9f0;
+
+  --button-bg: #c9a87c;             /* светлая кожа */
+  --button-hover: #d4b896;
+  --button-text: #3a2a1a;
+
+  --level-btn-bg: #fffdf5;
+  --level-btn-done-bg: #e8f0d8;
+  --level-btn-done-border: #b8860b;
+}
+
+/* ==== Общие книжные стили (работают в обеих схемах) ==== */
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.cell {
+  background: var(--cell-bg);
+  border-color: var(--cell-border);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+.cell.selected {
+  outline-color: var(--cell-selected);
+}
+
+.cell.target {
+  outline-color: var(--cell-target);
+}
+
+.cell.water {
+  background-color: var(--water-bg);
+}
+
+button {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-color: var(--cell-border);
+}
+
+button:hover {
+  background: var(--button-hover);
+}
+
+.level-btn {
+  background: var(--level-btn-bg);
+}
+
+.level-btn.done {
+  background: var(--level-btn-done-bg);
+  border-color: var(--level-btn-done-border);
+}
+
+/* — Кожаная главная кнопка с золотой рамкой — */
+.intro-start-btn {
+  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 55%, var(--leather-bot) 100%);
+  border: 2px solid var(--gilt);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(244, 230, 176, 0.25),
+    0 0 12px rgba(212, 154, 60, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme="light"] .intro-start-btn {
+  background: linear-gradient(180deg, #d4b896 0%, #c9a87c 55%, #a8845c 100%);
+  border-color: #b8860b;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.intro-start-btn:hover {
+  filter: brightness(1.08);
+}
+
+/* — Тиснение на вторичных кнопках — */
+.intro-music-btn {
+  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
+  border: 1px solid rgba(212, 154, 60, 0.55);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(244, 230, 176, 0.18);
+}
+
+:root[data-theme="light"] .intro-music-btn {
+  background: linear-gradient(180deg, #e3d2b8 0%, #c9a87c 60%, #b0926c 100%);
+  border: 1px solid rgba(184, 134, 11, 0.55);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.intro-music-btn:hover {
+  filter: brightness(1.08);
+}
+
+/* — Карточки в пергаментно-книжном стиле — */
+.settings-section,
+.win-stats,
+.victory-sound-card,
+.dev-levels-panel {
+  background: linear-gradient(135deg, rgba(94, 22, 56, 0.55) 0%, rgba(42, 10, 20, 0.65) 100%);
+  border: 1px solid rgba(212, 154, 60, 0.4);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(244, 230, 176, 0.15);
+}
+
+:root[data-theme="light"] .settings-section,
+:root[data-theme="light"] .win-stats,
+:root[data-theme="light"] .victory-sound-card,
+:root[data-theme="light"] .dev-levels-panel {
+  background: linear-gradient(135deg, rgba(201, 168, 124, 0.55) 0%, rgba(240, 232, 216, 0.7) 100%);
+  border: 1px solid rgba(184, 134, 11, 0.45);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* — Таблицы рекордов — */
+.records-table {
+  background: var(--button-bg);
+  border: 1px solid var(--cell-border);
+}
+
+.records-table th {
+  background: var(--leather);
+  color: var(--text-color);
+}
+
+:root[data-theme="light"] .records-table th {
+  background: #c9a87c;
+}
+
+/* — Кнопки победы / импичмента — */
+.win-btn {
+  background: var(--button-bg);
+  border-color: var(--cell-border);
+  color: var(--button-text);
+}
+
+.win-btn:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--ink);
+}
+
+:root[data-theme="light"] .win-btn:hover {
+  color: #fffdf5;
+}

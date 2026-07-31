@@ -1,26 +1,45 @@
 /**
- * Реестр уровней 10–21.
+ * Реестр уровней 10–100 (план v4).
  *
- * Уровень 10 — «Тестовый» (запускается из главного меню кнопкой «Начать игру»).
- * Уровни 11–21 — структура для дальнейшей разработки; доступны через dev-кнопку
- * в главном меню (и через стандартный выбор уровней).
- *
- * id — номер уровня в json/levels/levelNNN.json.
+ * - Уровень 10 — «Антикотопарк» (главный, запускается кнопкой «Начать игру»).
+ * - Уровни 1–9 НЕ существуют (выключены).
+ * - Уровни 11–21 — заготовки: доступ к игре есть только через классический экран
+ *   (json/levels/levelNNN.json); в реестре помечены как "в разработке".
+ * - Уровни 22–100 — доступны в классическом режиме.
  */
+
 export const LEVELS = {
-  10: { title: "Тестовый" },
-  11: { title: "Уровень 11" },
-  12: { title: "Уровень 12" },
-  13: { title: "Уровень 13" },
-  14: { title: "Уровень 14" },
-  15: { title: "Уровень 15" },
-  16: { title: "Уровень 16" },
-  17: { title: "Уровень 17" },
-  18: { title: "Уровень 18" },
-  19: { title: "Уровень 19" },
-  20: { title: "Уровень 20" },
-  21: { title: "Уровень 21" }
+  // 1–9: не существуют
+  10: { id: 10, title: "Антикотопарк", enabled: true, mode: "anti" },
+  11: { id: 11, title: "Уровень 11", enabled: true, mode: "classic", wip: true },
+  12: { id: 12, title: "Уровень 12", enabled: true, mode: "classic", wip: true },
+  13: { id: 13, title: "Уровень 13", enabled: true, mode: "classic", wip: true },
+  14: { id: 14, title: "Уровень 14", enabled: true, mode: "classic", wip: true },
+  15: { id: 15, title: "Уровень 15", enabled: true, mode: "classic", wip: true },
+  16: { id: 16, title: "Уровень 16", enabled: true, mode: "classic", wip: true },
+  17: { id: 17, title: "Уровень 17", enabled: true, mode: "classic", wip: true },
+  18: { id: 18, title: "Уровень 18", enabled: true, mode: "classic", wip: true },
+  19: { id: 19, title: "Уровень 19", enabled: true, mode: "classic", wip: true },
+  20: { id: 20, title: "Уровень 20", enabled: true, mode: "classic", wip: true },
+  21: { id: 21, title: "Уровень 21", enabled: true, mode: "classic", wip: true },
 };
 
-/** Список id уровней 10–21 в порядке возрастания. */
-export const LEVEL_IDS = Object.keys(LEVELS).map(Number).sort((a, b) => a - b);
+// Уровни 22–100 — классический режим (JSON уже есть)
+for (let id = 22; id <= 100; id++) {
+  LEVELS[id] = { id, title: `Уровень ${id}`, enabled: true, mode: "classic" };
+}
+
+/** Получить описание уровня или null. */
+export function getLevel(id) {
+  return LEVELS[id] || null;
+}
+
+/** Список включённых уровней в порядке возрастания. */
+export function getEnabledLevels() {
+  return Object.values(LEVELS)
+    .filter(l => l.enabled)
+    .sort((a, b) => a.id - b.id);
+}
+
+/** Список id включённых уровней. */
+export const LEVEL_IDS = getEnabledLevels().map(l => l.id);

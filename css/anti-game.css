@@ -1,0 +1,151 @@
+/* Anti-Kotopark game screen styles */
+.anti-game-stage {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Left sidebar for sociotype selection */
+.anti-sidebar {
+  width: 200px;
+  background: var(--cell-bg);
+  border: 2px solid var(--cell-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.anti-sidebar-title {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--button-text);
+  border-bottom: 2px solid var(--cell-border);
+  padding-bottom: 8px;
+}
+
+.anti-selected-cat-info {
+  font-size: 14px;
+  text-align: center;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.anti-type-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.anti-type-btn {
+  padding: 8px 12px;
+  font-size: 12px;
+  border: 2px solid var(--cell-border);
+  border-radius: 8px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.anti-type-btn:hover {
+  background: var(--button-hover);
+  transform: scale(1.02);
+}
+
+.anti-type-btn:active {
+  transform: scale(0.98);
+}
+
+/* Highlight for type-selected cat */
+.cell.type-selected {
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.8), 0 0 15px rgba(255, 152, 0, 0.5);
+  z-index: 10;
+}
+
+/* Win overlay */
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.win-content {
+  background: var(--cell-bg);
+  border: 3px solid var(--primary-color);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  color: var(--button-text);
+  max-width: 400px;
+}
+
+.win-content h2 {
+  font-size: 28px;
+  margin-bottom: 16px;
+  color: #4caf50;
+}
+
+.win-content p {
+  font-size: 16px;
+  margin: 8px 0;
+}
+
+.win-restart-btn,
+.win-menu-btn {
+  margin-top: 16px;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+  margin: 8px;
+}
+
+.win-restart-btn:hover,
+.win-menu-btn:hover {
+  background: var(--button-hover);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .anti-game-stage {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .anti-sidebar {
+    width: 100%;
+    max-width: 300px;
+    order: 2;
+  }
+  
+  .board-area {
+    order: 1;
+  }
+  
+  .anti-type-buttons {
+    max-height: 200px;
+  }
+}

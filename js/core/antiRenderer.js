@@ -28,6 +28,23 @@ async function loadSkinPath() {
   }
 }
 
+// Уменьшить шрифт подписи, чтобы имя социотипа помещалось в одну строку
+function fitTypeLabel(label) {
+  requestAnimationFrame(() => {
+    const cellEl = label.closest(".cell");
+    if (!cellEl) return;
+    const maxW = cellEl.clientWidth - 6;
+    if (maxW <= 0) return;
+    let fs = parseFloat(getComputedStyle(label).fontSize) || 11;
+    let attempts = 0;
+    while (label.scrollWidth > maxW && fs > 7 && attempts < 12) {
+      fs -= 0.5;
+      label.style.fontSize = `${fs}px`;
+      attempts++;
+    }
+  });
+}
+
 // Render board for Anti-Kotopark mode with cat numbers and sociotype display
 export async function renderAntiBoard(container, game, onCell, onCatClick) {
   if (!skinPath) skinPath = await loadSkinPath();
@@ -49,13 +66,32 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
       if (game.isSelected(r, c)) cell.classList.add("selected");
       if (game.isTarget(r, c)) cell.classList.add("target");
 
+      let typeLabel = null;
+
       if (board.isCat(r, c)) {
         const mood = game.moodAt(r, c);
         cell.dataset.mood = String(mood);
         
         const catNum = game.getCatNumber(r, c);
         const catIndex = game.getCatIndex(r, c);
-        
+
+        // Клик/тап по коту или его подписи открывает меню социотипов.
+        // На сенсорных экранах после touchend браузер шлёт эмуляционный click,
+        // поэтому используем флаг, чтобы не вызвать обработчик дважды.
+        let touchUsed = false;
+        const fireCatClick = () => {
+          if (onCatClick && catIndex !== null && !game.isTypeKnown(catIndex)) {
+            onCatClick(catIndex, r, c);
+          }
+        };
+        const guardClick = () => {
+          if (touchUsed) {
+            touchUsed = false;
+            return;
+          }
+          fireCatClick();
+        };
+
         // Cat image
         const img = document.createElement("img");
         img.className = "cat";
@@ -69,7 +105,7 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
         numberBadge.textContent = catNum;
         
         // Sociotype display (or ? for unknown) at bottom
-        const typeLabel = document.createElement("div");
+        typeLabel = document.createElement("div");
         typeLabel.className = "cat-type-label";
         
         if (game.isTypeKnown(catIndex)) {
@@ -79,24 +115,51 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
         } else {
           typeLabel.textContent = "?";
           typeLabel.classList.add("unknown");
+          // Неизвестный тип: подпись работает как кнопка (свечение, hover, tap)
+          typeLabel.classList.add("cat-type-btn-label");
         }
-        
+
         cell.appendChild(img);
         cell.appendChild(numberBadge);
         cell.appendChild(typeLabel);
         
-        // Make cat clickable for type selection
+        // Интерактивная подпись социотипа: работает как кнопка
+        typeLabel.addEventListener("click", (e) => {
+          e.stopPropagation();
+          guardClick();
+        });
+        // Общий таймер сброса флага (как в cellInteraction: 450 мс)
+        const markTouch = () => {
+          touchUsed = true;
+          setTimeout(() => { touchUsed = false; }, 500);
+        };
+
+        typeLabel.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          markTouch();
+          fireCatClick();
+          typeLabel.classList.add("cat-type-label--tap");
+          setTimeout(() => typeLabel.classList.remove("cat-type-label--tap"), 300);
+        }, { passive: false });
+        
+        // Кот целиком кликабелен (и на сенсорных экранах)
         cell.addEventListener("click", (e) => {
           e.stopPropagation();
-          if (onCatClick && catIndex !== null && !game.isTypeKnown(catIndex)) {
-            onCatClick(catIndex, r, c);
-          }
+          guardClick();
         });
+        cell.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          markTouch();
+          fireCatClick();
+        }, { passive: false });
       }
 
       const rr = r, cc = c;
       bindCellInteraction(cell, () => onCell(rr, cc));
       container.appendChild(cell);
+      if (typeLabel) fitTypeLabel(typeLabel);
     }
   }
 

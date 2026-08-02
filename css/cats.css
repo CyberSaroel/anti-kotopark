@@ -2,6 +2,12 @@
 .cell img.cat { width: var(--cat-size); height: var(--cat-size); pointer-events: none; filter: drop-shadow(2px 6px 7px rgba(0, 0, 0, 0.5)); position: relative; z-index: 3; }
 .cell .label { margin-top: 2px; font-weight: bold; position: relative; z-index: 3; }
 
+/* Клетка с котом кликабельна (открывает меню социотипа) */
+.cell:has(> img.cat) {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Anti-Kotopark: Cat number badge */
 .cell .cat-number {
   position: absolute;
@@ -482,11 +488,50 @@
   box-shadow:
     0 2px 7px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  white-space: normal;
-  overflow-wrap: anywhere;
+  /* Имя социотипа всегда в одну строку: шрифт при необходимости
+     уменьшает JS (fitTypeLabel), но не переносим на две строки. */
+  white-space: nowrap;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: clip;
   position: relative;
   z-index: 7;
   pointer-events: none;
+}
+
+/* ===== Интерактивная подпись социотипа (как кнопка) ===== */
+.cell .cat-type-label.cat-type-btn-label {
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    box-shadow 0.25s ease,
+    filter 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Свечение при наведении (ПК) */
+.cell .cat-type-label.cat-type-btn-label:hover {
+  filter: brightness(1.15);
+  transform: scale(1.06);
+  border-color: var(--gilt-highlight, #f3d27a);
+  box-shadow:
+    0 2px 7px rgba(0, 0, 0, 0.22),
+    0 0 10px rgba(255, 215, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Короткая анимация при касании (смартфоны) */
+.cell .cat-type-label.cat-type-btn-label:active,
+.cell .cat-type-label.cat-type-btn-label.cat-type-label--tap {
+  transform: scale(0.92);
+  filter: brightness(1.25);
+  box-shadow:
+    0 2px 7px rgba(0, 0, 0, 0.22),
+    0 0 14px rgba(255, 215, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 /* Цвета по настроению кота */

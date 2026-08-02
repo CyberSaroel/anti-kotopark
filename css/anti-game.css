@@ -52,19 +52,17 @@
   transform: scale(0.98);
 }
 
-/* ===== Модальное окно выбора социотипа ===== */
+/* ===== Всплывающее окно выбора социотипа ===== */
 .socio-modal {
+  /* Без затемнения поля: pointer-events только на карточке,
+     клики вне окна уходят на поле (закрытие — по Escape или повторному тапу). */
   position: fixed;
-  inset: 0;
-  /* Полупрозрачный фон: поле остаётся видно, окно не перекрывает всю игру */
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 12px;
+  pointer-events: none;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -77,14 +75,16 @@
   border: 2px solid var(--gilt, #d49a3c);
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 16px rgba(212, 154, 60, 0.2);
-  /* Компактное окно: ~70% ширины (60–80%), по центру, не на весь экран */
-  width: 72%;
-  max-width: 460px;
+  /* Компактное окно: ширина подстраивается под контент */
+  width: max-content;
   min-width: 260px;
+  max-width: calc(100vw - 16px);
   max-height: min(70vh, 520px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  pointer-events: auto;
+  box-sizing: border-box;
 }
 
 .socio-modal-header {
@@ -92,7 +92,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid rgba(212, 154, 60, 0.4);
   flex-shrink: 0;
 }
@@ -103,6 +103,9 @@
   color: var(--gilt-highlight, #f3d27a);
   text-align: center;
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .socio-modal-close {
@@ -129,21 +132,26 @@
   transform: rotate(90deg);
 }
 
-/* Прокручиваемый список типов */
+/* Сетка типов: 2 колонки по 8, одинаковая ширина по самому длинному названию */
 .socio-modal-list {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  padding: 16px;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: 6px;
+  padding: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
+  justify-content: center;
 }
 
-.socio-modal-type-btn {
+/* Все кнопки одной ширины: сетка выравнивает по самой широкой */
+.socio-modal-list .socio-modal-type-btn {
   text-align: center;
-  font-size: 14px;
-  padding: 10px 14px;
+  font-size: 13px;
+  padding: 8px 10px;
+  /* Короткие названия центрируются, ширина колонок — по самой длинной кнопке */
+  justify-self: stretch;
+  white-space: nowrap;
 }
 
 /* Highlight for type-selected cat */
@@ -222,27 +230,27 @@
   }
   
   .socio-modal {
-    padding: 12px;
-    align-items: center;
+    padding: 0;
+    align-items: flex-start;
   }
   
-  /* На телефоне окно тоже компактное: 60–80% ширины, не на весь экран */
+  /* На телефоне окно тоже компактное, ширина по контенту */
   .socio-modal-card {
-    width: 78%;
-    max-width: 460px;
+    width: max-content;
+    max-width: calc(100vw - 12px);
     min-width: 0;
     max-height: min(78vh, 520px);
   }
   
-  /* На телефонах список типов — в две колонки, чтобы не вылезал за экран */
+  /* На телефонах список типов — в две колонки по 8, ширина по самой длинной кнопке */
   .socio-modal-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, auto));
     gap: 6px;
-    padding: 12px;
+    padding: 10px;
   }
   
-  .socio-modal-type-btn {
-    font-size: 13px;
-    padding: 9px 8px;
+  .socio-modal-list .socio-modal-type-btn {
+    font-size: 12px;
+    padding: 8px 8px;
   }
 }

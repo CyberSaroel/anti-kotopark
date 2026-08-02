@@ -167,15 +167,23 @@ export async function startAntiLevel(root, levelId) {
   socioModalCard.appendChild(socioModalList);
   socioModal.appendChild(socioModalCard);
 
-  // Клик по затемнению фона закрывает окно
-  socioModal.addEventListener("click", (e) => {
-    if (e.target === socioModal) {
-      audioManager.initAudioContext();
-      audioManager.playSoundEffect("assets/sounds/click.mp3");
-      resetCatSelection();
-      hideSocioMenu();
-    }
-  });
+  // Клик вне карточки (по полю/мимо) закрывает окно — как раньше по затемнению.
+  // Клик по коту не закрывает: его обрабатывает onCatClick (переключение/закрытие).
+  let suppressNextBoardClick = false;
+  const onDocPointerDown = (e) => {
+    if (socioModal.hidden) return;
+    if (socioModalCard.contains(e.target)) return;
+    // Клик по коту (или его подписи) — не закрываем, обработает onCatClick
+    const cell = e.target.closest && e.target.closest(".cell");
+    if (cell && cell.querySelector("img.cat")) return;
+    audioManager.initAudioContext();
+    resetCatSelection();
+    hideSocioMenu();
+    // Этот клик уже ушёл на поле — не даём ему передвинуть кота/выделить клетку
+    suppressNextBoardClick = true;
+    setTimeout(() => { suppressNextBoardClick = false; }, 50);
+  };
+  document.addEventListener("pointerdown", onDocPointerDown);
 
   root.appendChild(socioModal);
 
@@ -188,47 +196,81 @@ export async function startAntiLevel(root, levelId) {
   // --- Рендер ---
   function render() {
     renderAntiBoard(boardEl, game, (r, c) => {
+      // Пока открыто окно выбора социотипа, поле не реагирует на клики
+      // (раньше это обеспечивало затемнение) — игровая логика не меняется.
+      if (!socioModal.hidden) return;
+      // Клик, который только что закрыл окно, не должен двигать кота
+      if (suppressNextBoardClick) return;
+      // Клик по пустой клетке при выбранном коте (1-е нажатие) снимает выбор
+      if (catState === "selected" && !game.board.isCat(r, c)) {
+        resetCatSelection();
+      }
       audioManager.initAudioContext();
       const result = game.clickCell(r, c);
       if (result.needRedraw) {
         if (result.moved) {
           movesRemaining--;
           audioManager.playSoundEffect("assets/sounds/move.mp3");
+          render();
+          if (movesRemaining <= 0) {
+            checkImpeachment("Ходы закончились");
+            return;
+          }
+          checkWin();
+        } else if (!game.board.isCat(r, c)) {
+          // Клик мимо кота (выделение/снятие через пустую клетку) — перерисовать.
+          render();
+          checkWin();
         }
-        render();
-        if (result.moved && movesRemaining <= 0) {
-          checkImpeachment("Ходы закончились");
-          return;
-        }
-        checkWin();
+        // Клик по коту без хода: рамку и меню обрабатывает onCatClick,
+        // перерисовка не нужна (на сенсорных экранах она ломала открытие меню).
       }
     }, onCatClick);
     updateStats();
     refitBoard();
+    // После перерисовки восстановить рамку выбранного кота
+    if ((catState === "selected" || catState === "choosing") && selectedCatRC) {
+      const el = findCatCell(selectedCatRC.r, selectedCatRC.c);
+      if (el) {
+        el.classList.add("cat--selected");
+        selectedCatEl = el;
+      }
+    }
   }
 
-  // Тап по коту: idle → selected → choosing → hide
+  // Логика выбора: первое нажатие выбирает кота, второе по тому же — открывает меню.
+  // Нажатие на нового кота считается первым (выбор переключается на него).
   function onCatClick(catIndex, r, c) {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
     if (won || impeached) return;
-    if (catState === "idle") {
-      catState = "selected";
-      selectedCatRC = { r, c };
-      currentCatIndex = catIndex;
-      selectedCatEl = findCatCell(r, c);
-      if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
-    } else if (catState === "selected") {
-      catState = "choosing";
-      showSocioMenu(catIndex);
-    } else {
+
+    // Меню открыто: повторный тап по тому же коту закрывает его
+    if (catState === "choosing" && currentCatIndex === catIndex) {
       catState = "idle";
       hideSocioMenu();
       if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
       selectedCatEl = null;
       selectedCatRC = null;
       currentCatIndex = null;
+      return;
     }
+
+    // Второе нажатие по тому же коту: открыть меню социотипов
+    if (catState === "selected" && currentCatIndex === catIndex) {
+      catState = "choosing";
+      showSocioMenu(catIndex);
+      return;
+    }
+
+    // Новый кот (или первое нажатие): выбираем его; меню другого кота закрываем
+    if (catState === "choosing") hideSocioMenu();
+    catState = "selected";
+    selectedCatRC = { r, c };
+    currentCatIndex = catIndex;
+    if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
+    selectedCatEl = findCatCell(r, c);
+    if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
   }
 
   function findCatCell(r, c) {
@@ -253,6 +295,13 @@ export async function startAntiLevel(root, levelId) {
       });
       socioModalList.appendChild(btn);
     });
+    // Обе колонки одной ширины — по самому длинному названию (короткие центрируются)
+    const btns = socioModalList.querySelectorAll(".socio-modal-type-btn");
+    let maxW = 0;
+    btns.forEach(b => { maxW = Math.max(maxW, b.scrollWidth); });
+    if (maxW > 0) {
+      btns.forEach(b => { b.style.width = `${maxW}px`; });
+    }
   }
 
   function resetCatSelection() {
@@ -272,6 +321,37 @@ export async function startAntiLevel(root, levelId) {
     socioModalTitle.textContent = `Выберите социотип — кот №${catIndex + 1}`;
     createTypeButtons();
     socioModal.hidden = false;
+
+    // --- Позиционирование рядом с котом (подстройка под экран) ---
+    // Скрываем окно до вычисления координат, чтобы оно не мелькало в углу
+    socioModal.style.visibility = "hidden";
+
+    requestAnimationFrame(() => {
+      if (socioModal.hidden || !selectedCatEl) {
+        socioModal.style.visibility = "";
+        return;
+      }
+      const cellRect = selectedCatEl.getBoundingClientRect();
+      const modalRect = socioModal.getBoundingClientRect();
+      const margin = 8;
+      const pad = 8;
+
+      // Вертикаль: сначала под котом, если не влезает — над котом
+      let top = cellRect.bottom + margin;
+      if (top + modalRect.height > window.innerHeight - pad) {
+        top = Math.max(pad, cellRect.top - modalRect.height - margin);
+      }
+      top = Math.min(Math.max(pad, top), window.innerHeight - modalRect.height - pad);
+
+      // Горизонталь: по центру кота, с подстраиванием под экран
+      let left = cellRect.left + cellRect.width / 2 - modalRect.width / 2;
+      left = Math.min(Math.max(pad, left), window.innerWidth - modalRect.width - pad);
+
+      socioModal.style.visibility = "";
+      socioModal.style.left = `${left}px`;
+      socioModal.style.top = `${top}px`;
+      socioModal.style.transform = "none";
+    });
   }
 
   // Закрытие модального окна по Escape
@@ -447,6 +527,7 @@ export async function startAntiLevel(root, levelId) {
     if (timerId) { clearInterval(timerId); timerId = null; }
     stopBoardLayoutListener();
     document.removeEventListener("keydown", onModalKeyDown);
+    document.removeEventListener("pointerdown", onDocPointerDown);
   }
 
   function showMenu() {

@@ -9,6 +9,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Анти Котопарк</title>
+  <script>
+    // Устанавливаем тему ДО отрисовки, чтобы не было вспышки не той темы.
+    // Первый запуск (localStorage пуст) → светлая тема «Королевский Котопарк».
+    (function () {
+      try {
+        var t = localStorage.getItem('ak_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="vendor/bootstrap/bootstrap-grid.min.css">
   <link rel="stylesheet" href="vendor/bootstrap/bootstrap-utilities.min.css">
   <link rel="stylesheet" href="css/main.css">

@@ -1,11 +1,14 @@
-/* ===== Темы «Королевский котопарк» (тёмная/светлая) =====
- * Переключение через data-theme на <html>: js/theme.js
- * Подключается ПОСЛЕДНИМ, поэтому переопределяет :root в main.css
- * и любой файл темы из themes.json.
+/* ===== Королевский Котопарк — книжная тема (кожа + золото + пергамент) =====
+ * Перенесено ИЗ royal-socio-cats/css/theme-royal.css — палитра источника 1:1.
+ * ПАЛ ИСТОЧНИКА (СВЕТЛАЯ): фонарь #f0e6d2, чернила #2a0a14.
+ * Игровые цвета наследуются из :root (кожа, золото, пергамент).
+ * Тёмную схему [data-theme="dark"] НЕ трогаем (сохранена как раньше).
  */
 
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&subset=cyrillic&display=swap");
+
+/* ===== Книжные цвета (общие) ===== */
 :root {
-  /* Книжные цвета (общие) */
   --leather: #5e1638;
   --leather-top: #8a2350;
   --leather-bot: #3a0d24;
@@ -13,6 +16,7 @@
   --gilt-highlight: #f3d27a;
   --parchment: #f4e6b0;
   --ink: #2a0a14;
+  --font-book: "Cormorant Garamond", Georgia, "Times New Roman", serif;
 }
 
 /* ==== Тёмная (по умолчанию) ==== */
@@ -40,34 +44,35 @@
   --level-btn-done-border: #d49a3c;
 }
 
-/* ==== Светлая ==== */
+/* ==== Светлая (из royal-socio-cats = бежевый фон + тёмные чернила) ==== */
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-color: #f5f0e8;              /* тёплый пергаментный фон */
-  --text-color: #3a2a1a;            /* чернильно-коричневый текст */
-  --primary-color: #b8860b;         /* тёмное золото */
-  --primary-hover: #daa520;
+  /* ЕДИНСТВЕННОЕ изменение фона — тёплый бежевый/пергаментный (источник) */
+  --bg-color: #f0e6d2;
 
-  --cell-bg: #fffdf5;               /* светлый пергамент клеток */
-  --cell-border: #b8860b;
-  --cell-selected: #8b4513;
-  --cell-target: #2e7d32;
-  --water-bg: #bcd9f0;
-
-  --button-bg: #c9a87c;             /* светлая кожа */
-  --button-hover: #d4b896;
-  --button-text: #3a2a1a;
-
-  --level-btn-bg: #fffdf5;
-  --level-btn-done-bg: #e8f0d8;
-  --level-btn-done-border: #b8860b;
+  /* Текст на голом фоне — тёмные чернила (источник) */
+  --text-color: #2a0a14;
 }
 
-/* ==== Общие книжные стили (работают в обеих схемах) ==== */
+/* ===== Применяем книжный шрифт ===== */
+body {
+  font-family: var(--font-book), Georgia, serif;
+}
+
+h1, h2, h3, .topbar-title, .intro-title, .win-stat-value {
+  font-family: var(--font-book), Georgia, serif;
+}
+
+/* ===== Общие книжные стили (работают в обеих схемах) ===== */
 body {
   background: var(--bg-color);
   color: var(--text-color);
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+#app {
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 .cell {
@@ -102,12 +107,16 @@ button:hover {
   background: var(--level-btn-bg);
 }
 
+.level-btn:hover {
+  background: var(--button-hover);
+}
+
 .level-btn.done {
   background: var(--level-btn-done-bg);
   border-color: var(--level-btn-done-border);
 }
 
-/* — Кожаная главная кнопка с золотой рамкой — */
+/* ===== Кожаная главная кнопка «Играть» с золотой рамкой ===== */
 .intro-start-btn {
   background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 55%, var(--leather-bot) 100%);
   border: 2px solid var(--gilt);
@@ -118,41 +127,28 @@ button:hover {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
-:root[data-theme="light"] .intro-start-btn {
-  background: linear-gradient(180deg, #d4b896 0%, #c9a87c 55%, #a8845c 100%);
-  border-color: #b8860b;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
 .intro-start-btn:hover {
   filter: brightness(1.08);
 }
 
-/* — Тиснение на вторичных кнопках — */
+/* ===== Тиснение на вторичных кнопках меню ===== */
 .intro-music-btn {
   background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
   border: 1px solid rgba(212, 154, 60, 0.55);
+  color: var(--parchment);
   box-shadow:
     0 3px 10px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(244, 230, 176, 0.18);
-}
-
-:root[data-theme="light"] .intro-music-btn {
-  background: linear-gradient(180deg, #e3d2b8 0%, #c9a87c 60%, #b0926c 100%);
-  border: 1px solid rgba(184, 134, 11, 0.55);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 .intro-music-btn:hover {
   filter: brightness(1.08);
 }
 
-/* — Карточки в пергаментно-книжном стиле — */
+/* ===== Карточки в пергаментно-книжном стиле ===== */
 .settings-section,
 .win-stats,
-.victory-sound-card,
-.dev-levels-panel {
+.victory-sound-card {
   background: linear-gradient(135deg, rgba(94, 22, 56, 0.55) 0%, rgba(42, 10, 20, 0.65) 100%);
   border: 1px solid rgba(212, 154, 60, 0.4);
   box-shadow:
@@ -160,33 +156,35 @@ button:hover {
     inset 0 1px 0 rgba(244, 230, 176, 0.15);
 }
 
-:root[data-theme="light"] .settings-section,
-:root[data-theme="light"] .win-stats,
-:root[data-theme="light"] .victory-sound-card,
-:root[data-theme="light"] .dev-levels-panel {
-  background: linear-gradient(135deg, rgba(201, 168, 124, 0.55) 0%, rgba(240, 232, 216, 0.7) 100%);
-  border: 1px solid rgba(184, 134, 11, 0.45);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+.settings-section h2,
+.settings-section p,
+.settings-option label,
+.victory-sound-name,
+.victory-sound-desc {
+  color: var(--parchment);
 }
 
-/* — Таблицы рекордов — */
+.victory-sound-desc {
+  opacity: 0.75;
+}
+
+/* ===== Таблицы рекордов ===== */
 .records-table {
   background: var(--button-bg);
   border: 1px solid var(--cell-border);
+  color: var(--parchment);
 }
 
 .records-table th {
   background: var(--leather);
-  color: var(--text-color);
+  color: var(--parchment);
 }
 
-:root[data-theme="light"] .records-table th {
-  background: #c9a87c;
+.records-table td {
+  border-bottom-color: rgba(212, 154, 60, 0.25);
 }
 
-/* — Кнопки победы / импичмента — */
+/* ===== Кнопки победы / импичмента ===== */
 .win-btn {
   background: var(--button-bg);
   border-color: var(--cell-border);
@@ -199,6 +197,198 @@ button:hover {
   color: var(--ink);
 }
 
-:root[data-theme="light"] .win-btn:hover {
-  color: #fffdf5;
+/* ===== Кнопки меню (выбор темы, скины, звук победы) в книжном стиле ===== */
+.skin-btn,
+.theme-select-btn,
+.victory-sound-select-btn,
+.settings-btn,
+.back-btn {
+  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
+  border: 1px solid rgba(212, 154, 60, 0.55);
+  color: var(--parchment);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(244, 230, 176, 0.18);
+}
+
+.skin-btn:hover,
+.theme-select-btn:hover:not(:disabled),
+.victory-sound-select-btn:hover:not(:disabled),
+.settings-btn:hover,
+.back-btn:hover {
+  background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
+  filter: brightness(1.08);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(244, 230, 176, 0.18),
+    0 0 10px rgba(212, 154, 60, 0.45);
+}
+
+.skin-btn:disabled,
+.theme-select-btn:disabled,
+.victory-sound-select-btn:disabled {
+  background: #3a3a44;
+  border-color: rgba(212, 154, 60, 0.3);
+  color: rgba(244, 230, 176, 0.5);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ===== Стат-панели HUD в книжном стиле ===== */
+.stat-item {
+  background: var(--level-btn-bg);
+  border: 1px solid rgba(212, 154, 60, 0.45);
+  color: var(--parchment);
+  box-shadow: inset 0 1px 0 rgba(244, 230, 176, 0.12);
+}
+
+/* ===== Карточки скинов и тем (тёмные в обеих схемах) ===== */
+.skin-card,
+.theme-card {
+  background: linear-gradient(135deg, rgba(94, 22, 56, 0.4) 0%, rgba(42, 10, 20, 0.5) 100%);
+  border: 1px solid rgba(212, 154, 60, 0.35);
+}
+
+.skin-card:hover,
+.theme-card:hover {
+  border-color: var(--gilt);
+  box-shadow: 0 4px 12px rgba(212, 154, 60, 0.3);
+}
+
+.skin-card.selected,
+.theme-card.selected {
+  border-color: var(--gilt-highlight);
+  background: linear-gradient(135deg, rgba(139, 35, 80, 0.5) 0%, rgba(42, 10, 20, 0.6) 100%);
+  box-shadow: 0 0 12px rgba(212, 154, 60, 0.35);
+}
+
+.skin-name,
+.theme-name {
+  color: var(--parchment);
+}
+
+.skin-desc,
+.theme-desc {
+  color: rgba(244, 230, 176, 0.7);
+}
+
+/* ===== Кнопки меню уровня (тема, звук победы) в книжном стиле ===== */
+.theme-btn,
+.victory-sound-btn {
+  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
+  border: 1px solid rgba(212, 154, 60, 0.55);
+  color: var(--parchment);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(244, 230, 176, 0.18);
+}
+
+.theme-btn:hover,
+.victory-sound-btn:hover {
+  background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
+  filter: brightness(1.08);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(244, 230, 176, 0.18),
+    0 0 10px rgba(212, 154, 60, 0.45);
+}
+
+/* ===== Номера ходов в кнопках уровня ===== */
+.level-moves {
+  color: rgba(244, 230, 176, 0.65);
+}
+
+/* ===== Кнопки «назад» и прочие вспомогательные ===== */
+.victory-sound-preview-btn {
+  background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
+  border: 1px solid rgba(212, 154, 60, 0.45);
+  color: var(--parchment);
+}
+
+.victory-sound-preview-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ===== Лейблы громкости в меню (пергаментный текст) ===== */
+#intro-screen .intro-music-btn label {
+  color: var(--parchment) !important;
+}
+
+/* ===== Тема по умолчанию = СВЕТЛАЯ =====
+ * Страховка от вспышки не той темы:
+ * голый :root (без атрибута) = светлая палитра источника. */
+:root {
+  --bg-color: #f0e6d2;
+  --text-color: #2a0a14;
+}
+
+:root[data-theme="dark"] {
+  --bg-color: #0a0a14;
+  --text-color: #f4e6b0;
+}
+
+/* ===== Плавный переход темы (фон/текст) ===== */
+body,
+#app {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ===== Кнопка переключения темы ===== */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.theme-toggle-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--gilt);
+  box-shadow: 0 0 4px rgba(212, 154, 60, 0.5);
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle-icon {
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle-text {
+  font-size: 16px;
+}
+
+.theme-toggle-btn:hover .theme-toggle-swatch {
+  box-shadow: 0 0 8px rgba(212, 154, 60, 0.8);
+}
+
+.theme-toggle-btn:hover .theme-toggle-icon {
+  transform: scale(1.15);
+}
+
+.theme-toggle-btn:active .theme-toggle-icon {
+  transform: scale(0.9);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--gilt-highlight);
+  outline-offset: 2px;
+}
+
+.theme-toggle-btn.theme-toggle-flip .theme-toggle-swatch {
+  animation: themeSwatchFlip 0.35s ease;
+}
+
+@keyframes themeSwatchFlip {
+  0%   { transform: scale(1) rotate(0deg); }
+  40%  { transform: scale(1.3) rotate(180deg); opacity: 0.6; }
+  100% { transform: scale(1) rotate(360deg); }
 }

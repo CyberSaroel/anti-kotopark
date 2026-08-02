@@ -85,9 +85,13 @@ export async function showLevelSelect(root) {
     return;
   }
 
+  // Уровни 1–9 отключены; доступны только уровни 10–21
+  const lockedIds = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
   for (const lvl of manifest.levels) {
     const btn = document.createElement("button");
-    btn.className = "level-btn" + (isCompleted(lvl.id) ? " done" : "");
+    const locked = lockedIds.has(lvl.id);
+    btn.className = "level-btn" + (isCompleted(lvl.id) ? " done" : "") + (locked ? " locked" : "");
     
     const bestMove = getBestMoveCount(lvl.id);
     
@@ -99,7 +103,7 @@ export async function showLevelSelect(root) {
     levelNum.textContent = lvl.id;
     content.appendChild(levelNum);
     
-    if (bestMove !== undefined) {
+    if (bestMove !== undefined && !locked) {
       const trophy = document.createElement("span");
       trophy.className = "level-trophy";
       trophy.textContent = "🏆";
@@ -112,9 +116,13 @@ export async function showLevelSelect(root) {
     }
     
     btn.appendChild(content);
-    btn.title = lvl.name || ("Уровень " + lvl.id);
+    btn.title = locked ? "Уровень отключён" : (lvl.name || ("Уровень " + lvl.id));
     btn.addEventListener("click", () => {
       audioManager.playSoundEffect("assets/sounds/click.mp3");
+      if (locked) {
+        alert("Уровень отключён");
+        return;
+      }
       if (getLevel(lvl.id)?.mode === "anti") {
         NavigationService.navigate("game", () => startAntiLevel(root, lvl.id));
       } else {

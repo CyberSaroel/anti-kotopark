@@ -1,10 +1,6 @@
 import { showRulesScreen } from "./rulesScreen.js";
 import { showSettingsScreen } from "./settingsScreen.js";
-import { showGameScreen } from "./gameScreen.js";
 import { showLevelSelect } from "./levelSelect.js";
-import { showAntiGameScreen } from "./antiGameScreen.js";
-import { LEVELS, LEVEL_IDS, getLevel } from "../levels/levelRegistry.js";
-import { startLevel10, startAntiLevel } from "../level10.js";
 import { toggleTheme, getTheme } from "../theme.js";
 import { audioManager, isMusicEnabled, setMusicEnabled, isSfxEnabled, setSfxEnabled, getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume } from "../core/audioManager.js";
 import NavigationService from "../core/navigation.js";
@@ -34,32 +30,13 @@ export function showIntroScreen(root) {
     audioManager.playSoundEffect("assets/sounds/click.mp3");
   }
 
-  // ==== Кнопка «Начать игру» → уровень 10 (анти-геймплей v4) ====
+  // ==== Кнопка «Начать игру» → выбор уровней ====
   const startBtn = document.createElement("button");
-  startBtn.className = "intro-start-btn";
-  startBtn.textContent = "📖 Начать игру — уровень 10";
-  startBtn.title = "Антикотопарк: угадай социотипы всех котов";
+  startBtn.className = "intro-music-btn";
+  startBtn.textContent = "🎮 Начать игру";
   startBtn.addEventListener("click", () => {
     playClick();
-    NavigationService.navigate("level10", () => startLevel10(root));
-  });
-
-  // ==== Кнопка «Классические уровни» (обычный режим, 1–100) ====
-  const levelsBtn = document.createElement("button");
-  levelsBtn.className = "intro-music-btn";
-  levelsBtn.textContent = "🗺️ Классические уровни (1–100)";
-  levelsBtn.addEventListener("click", () => {
-    playClick();
     NavigationService.navigate("levelSelect", () => showLevelSelect(root));
-  });
-
-  // ==== Кнопка «Анти-режим» (старый режим угадывания социотипов) ====
-  const antiBtn = document.createElement("button");
-  antiBtn.className = "intro-music-btn";
-  antiBtn.textContent = "🕵️ Анти-режим (классический)";
-  antiBtn.addEventListener("click", () => {
-    playClick();
-    NavigationService.navigate("antiGame", () => showAntiGameScreen(root));
   });
 
   // ==== Кнопка «Правила» ====
@@ -304,8 +281,6 @@ export function showIntroScreen(root) {
   const controls = document.createElement("div");
   controls.className = "intro-controls";
   controls.appendChild(startBtn);
-  controls.appendChild(levelsBtn);
-  controls.appendChild(antiBtn);
   controls.appendChild(rulesBtn);
   controls.appendChild(settingsBtn);
   controls.appendChild(themeBtn);
@@ -319,38 +294,6 @@ export function showIntroScreen(root) {
   hero.appendChild(controls);
 
   overlay.appendChild(hero);
-
-  // ==== Dev-кнопка: быстрый запуск уровней 11–21 ====
-  const devBtn = document.createElement("button");
-  devBtn.className = "dev-levels-btn";
-  devBtn.textContent = "🔧 Dev: уровни 11–21";
-  devBtn.title = "Открыть панель быстрого запуска уровней 11–21";
-  devBtn.addEventListener("click", () => {
-    playClick();
-    devPanel.hidden = !devPanel.hidden;
-  });
-  overlay.appendChild(devBtn);
-
-  const devPanel = document.createElement("div");
-  devPanel.className = "dev-levels-panel";
-  devPanel.hidden = true;
-  devPanel.innerHTML = `<div class="dev-levels-title">Уровни 11–21 (Антикотопарк)</div>`;
-  for (let id = 11; id <= 21; id++) {
-    const b = document.createElement("button");
-    b.className = "dev-level-btn";
-    b.textContent = `Уровень ${id}`;
-    b.title = LEVELS[id]?.title || "";
-    b.addEventListener("click", () => {
-      playClick();
-      if (getLevel(id)?.mode === "anti") {
-        NavigationService.navigate("game", () => startAntiLevel(root, id));
-      } else {
-        NavigationService.navigate("game", () => showGameScreen(root, id));
-      }
-    });
-    devPanel.appendChild(b);
-  }
-  overlay.appendChild(devPanel);
 
   root.appendChild(overlay);
 

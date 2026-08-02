@@ -440,3 +440,97 @@
     font-size: 10px;
   }
 }
+
+/* ============================================================
+ * Надписи под котами: читаемость на всех темах.
+ * Все цвета/фон/обводка/тени задаются через переменные темы.
+ * ============================================================ */
+:root {
+  --cat-label-bg: var(--button-bg, rgba(255, 255, 255, 0.88));
+  --cat-label-text: var(--button-text, var(--text-color, #222));
+  --cat-label-border: var(--primary-color, rgba(0, 0, 0, 0.35));
+  --cat-label-shadow: rgba(0, 0, 0, 0.45);
+  --cat-label-negative: #ff5c5c;
+  --cat-label-neutral: var(--cat-label-text);
+  --cat-label-positive: #32c96a;
+  --cat-type-unknown-text: #ffb02e;
+  --cat-type-unknown-bg: rgba(255, 176, 46, 0.18);
+  --cat-type-known-text: #32c96a;
+  --cat-type-known-bg: rgba(50, 201, 106, 0.18);
+}
+
+.cell .label,
+.cell .cat-type-label {
+  display: inline-block;
+  max-width: calc(var(--cell-w, 90px) - 8px);
+  margin-top: 4px;
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: clamp(10px, 1.7vw, 13px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--cat-label-text);
+  background: var(--cat-label-bg);
+  border: 1px solid var(--cat-label-border);
+  border-radius: 8px;
+  text-shadow:
+    0 1px 2px var(--cat-label-shadow),
+    0 0 6px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 2px 7px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  position: relative;
+  z-index: 7;
+  pointer-events: none;
+}
+
+/* Цвета по настроению кота */
+.cell[data-mood="-6"] .label,
+.cell[data-mood="-5"] .label,
+.cell[data-mood="-4"] .label,
+.cell[data-mood="-3"] .label,
+.cell[data-mood="-2"] .label,
+.cell[data-mood="-1"] .label {
+  color: var(--cat-label-negative);
+}
+
+.cell[data-mood="0"] .label {
+  color: var(--cat-label-neutral);
+}
+
+.cell[data-mood="1"] .label,
+.cell[data-mood="2"] .label,
+.cell[data-mood="3"] .label,
+.cell[data-mood="4"] .label,
+.cell[data-mood="5"] .label,
+.cell[data-mood="6"] .label {
+  color: var(--cat-label-positive);
+}
+
+/* Социотип: неизвестный / известный */
+.cell .cat-type-label.unknown {
+  color: var(--cat-type-unknown-text);
+  background: var(--cat-type-unknown-bg);
+  border-color: var(--cat-type-unknown-text);
+}
+
+.cell .cat-type-label.known {
+  color: var(--cat-type-known-text);
+  background: var(--cat-type-known-bg);
+  border-color: var(--cat-type-known-text);
+}
+
+/* Мобильная адаптация надписей */
+@media (max-width: 575.98px) {
+  .cell .label,
+  .cell .cat-type-label {
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    max-width: calc(var(--cell-w, 90px) - 10px);
+  }
+}

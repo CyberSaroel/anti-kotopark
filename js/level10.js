@@ -108,13 +108,29 @@ export async function startAntiLevel(root, levelId) {
   bar.appendChild(topRow);
   root.appendChild(bar);
 
-  // Статистика
-  const stats = document.createElement("div");
-  stats.id = "stats";
-  stats.className = "stats level10-stats";
-  root.appendChild(stats);
+  // ===== Вёрстка экрана: слева социотипы, по центру поле с котами, справа статистика =====
+  const stage = document.createElement("div");
+  stage.className = "game-stage anti-game-stage";
 
-  // Игровое поле
+  // Левая панель — выбор социотипа (существующие стили анти-сайдбара)
+  const sidebar = document.createElement("div");
+  sidebar.className = "anti-sidebar";
+
+  const sidebarTitle = document.createElement("div");
+  sidebarTitle.className = "anti-sidebar-title";
+  sidebarTitle.textContent = "Выберите социотип";
+  sidebar.appendChild(sidebarTitle);
+
+  const selectedCatInfo = document.createElement("div");
+  selectedCatInfo.className = "anti-selected-cat-info";
+  selectedCatInfo.textContent = "Кликните на кота с ?";
+  sidebar.appendChild(selectedCatInfo);
+
+  const typeButtonsContainer = document.createElement("div");
+  typeButtonsContainer.className = "anti-type-buttons";
+  sidebar.appendChild(typeButtonsContainer);
+
+  // Игровое поле (по центру)
   const boardArea = document.createElement("div");
   boardArea.className = "board-area";
   const boardWrap = document.createElement("div");
@@ -123,18 +139,22 @@ export async function startAntiLevel(root, levelId) {
   boardEl.id = "board";
   boardWrap.appendChild(boardEl);
   boardArea.appendChild(boardWrap);
-  root.appendChild(boardArea);
 
-  // Меню социотипов (столбик)
-  const socioMenu = document.createElement("div");
-  socioMenu.className = "socio-menu";
-  socioMenu.hidden = true;
-  root.appendChild(socioMenu);
+  // Статистика (справа)
+  const stats = document.createElement("div");
+  stats.id = "stats";
+  stats.className = "stats level10-stats";
+
+  stage.appendChild(sidebar);
+  stage.appendChild(boardArea);
+  stage.appendChild(stats);
+  root.appendChild(stage);
 
   // --- Состояние выбора кота ---
   let catState = "idle"; // idle | selected | choosing
   let selectedCatEl = null;
   let selectedCatRC = null; // {r, c} выбранного кота
+  let currentCatIndex = null; // индекс выбранного кота
 
   // --- Рендер ---
   function render() {
@@ -166,6 +186,7 @@ export async function startAntiLevel(root, levelId) {
     if (catState === "idle") {
       catState = "selected";
       selectedCatRC = { r, c };
+      currentCatIndex = catIndex;
       selectedCatEl = findCatCell(r, c);
       if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
     } else if (catState === "selected") {
@@ -177,6 +198,7 @@ export async function startAntiLevel(root, levelId) {
       if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
       selectedCatEl = null;
       selectedCatRC = null;
+      currentCatIndex = null;
     }
   }
 
@@ -185,30 +207,35 @@ export async function startAntiLevel(root, levelId) {
     return boardEl.querySelectorAll(".cell")[idx] || null;
   }
 
+  // Кнопки социотипов в сайдбаре (существующие стили анти-тайп-кнопок)
+  function createTypeButtons() {
+    typeButtonsContainer.innerHTML = "";
+    TYPES.forEach(type => {
+      const btn = document.createElement("button");
+      btn.className = "anti-type-btn";
+      btn.textContent = getTypeDisplayName(type);
+      btn.addEventListener("click", () => {
+        if (catState !== "choosing" || currentCatIndex === null) return;
+        audioManager.initAudioContext();
+        audioManager.playSoundEffect("assets/sounds/click.mp3");
+        handleGuess(currentCatIndex, type);
+      });
+      typeButtonsContainer.appendChild(btn);
+    });
+  }
+
+  createTypeButtons();
+
   function hideSocioMenu() {
-    socioMenu.hidden = true;
-    socioMenu.innerHTML = "";
+    selectedCatInfo.textContent = "Кликните на кота с ?";
+    selectedCatInfo.classList.remove("active");
+    typeButtonsContainer.classList.remove("active");
   }
 
   function showSocioMenu(catIndex) {
-    socioMenu.innerHTML = "";
-    socioMenu.hidden = false;
-    const heading = document.createElement("div");
-    heading.className = "socio-menu-title";
-    heading.textContent = "Выберите социотип";
-    socioMenu.appendChild(heading);
-
-    TYPES.forEach(type => {
-      const btn = document.createElement("button");
-      btn.className = "socio-type-btn";
-      btn.textContent = getTypeDisplayName(type);
-      btn.addEventListener("click", () => {
-        audioManager.initAudioContext();
-        audioManager.playSoundEffect("assets/sounds/click.mp3");
-        handleGuess(catIndex, type);
-      });
-      socioMenu.appendChild(btn);
-    });
+    selectedCatInfo.textContent = `Кот #${catIndex + 1}: выберите тип`;
+    selectedCatInfo.classList.add("active");
+    typeButtonsContainer.classList.add("active");
   }
 
   // ==== Обработка выбора социотипа ====
@@ -233,6 +260,7 @@ export async function startAntiLevel(root, levelId) {
         if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
         selectedCatEl = null;
         selectedCatRC = null;
+        currentCatIndex = null;
         render();
         checkImpeachment("Ошибки типирования сверх лимита");
         return;
@@ -243,6 +271,7 @@ export async function startAntiLevel(root, levelId) {
     if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
     selectedCatEl = null;
     selectedCatRC = null;
+    currentCatIndex = null;
     render();
     checkWin();
   }

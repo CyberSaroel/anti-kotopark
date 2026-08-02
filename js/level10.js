@@ -5,6 +5,7 @@ import { consumeBonusErrors, addBonusErrors } from "./storage.js";
 import { audioManager } from "./core/audioManager.js";
 import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard } from "./core/boardLayout.js";
+import { fetchLevel } from "./levels/levelLoader.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -13,6 +14,10 @@ import { stopBoardLayoutListener, refitBoard } from "./core/boardLayout.js";
  * Ошибка не показывает правильный ответ, только красная вспышка + счётчик.
  * Импичмент: время (120 с), ходы (60), ошибки (3 + бонус за королей).
  * Победа: все типы угаданы. Бонус за королей (настроение >= +6) в конце.
+ *
+ * Начиная с v5 функция обобщена: уровни 10–21 «Антикотопарка» используют
+ * одну и ту же логику (startAntiLevel / startLevel10). Константы режима
+ * одинаковы для всех анти-уровней.
  */
 
 const START_TIME = 120;           // секунд
@@ -28,16 +33,39 @@ let levelActive = false;
 let timerId = null;
 
 /**
- * Запустить уровень 10.
- * @param {HTMLElement} root — контейнер #app
+ * Загрузить конфигурацию анти-уровня.
+ * Уровень 10 использует встроенный хардкод (совпадает с прежним геймплеем),
+ * уровни 11–21 — из json/levels/levelNNN.json.
+ * @param {number} levelId
+ * @returns {Promise<object>}
  */
-export function startLevel10(root) {
+async function loadAntiLevel(levelId) {
+  if (levelId === LEVEL10_ID) {
+    return makeLevel();
+  }
+  return fetchLevel(levelId);
+}
+
+/**
+ * Запустить анти-уровень («Антикотопарк»).
+ * @param {HTMLElement} root — контейнер #app
+ * @param {number} levelId — номер уровня (10–21)
+ */
+export async function startAntiLevel(root, levelId) {
   if (levelActive) return;
   levelActive = true;
 
   const bonus = consumeBonusErrors();
   const errorsRemaining = START_ERRORS + bonus;
-  const level = makeLevel();
+
+  let level;
+  try {
+    level = await loadAntiLevel(levelId);
+  } catch (e) {
+    levelActive = false;
+    alert(e.message);
+    return;
+  }
 
   const game = new AntiGame(level);
 
@@ -62,7 +90,7 @@ export function startLevel10(root) {
 
   const title = document.createElement("span");
   title.className = "topbar-title";
-  title.textContent = "Антикотопарк — уровень 10";
+  title.textContent = `Антикотопарк — уровень ${levelId}`;
 
   const leaveBtn = document.createElement("button");
   leaveBtn.className = "topbar-leave";
@@ -260,7 +288,7 @@ export function startLevel10(root) {
     impeached = true;
     cleanupLevel();
     showResultOverlay("Импичмент", reason, [
-      { label: "Заново", fn: () => startLevel10(root) },
+      { label: "Заново", fn: () => startAntiLevel(root, levelId) },
       { label: "В меню", fn: showMenu }
     ]);
   }
@@ -278,7 +306,7 @@ export function startLevel10(root) {
       }
       if (kings > 0) addBonusErrors(kings);
       showResultOverlay("Победа!", "Все социотипы угаданы!", [
-        { label: "Заново", fn: () => startLevel10(root) },
+        { label: "Заново", fn: () => startAntiLevel(root, levelId) },
         { label: "В меню", fn: showMenu }
       ], `Ошибки: ${errorsMade} | Короли: ${kings} | Бонус: +${kings} ошибок на след. уровень`);
     }
@@ -356,6 +384,14 @@ export function startLevel10(root) {
   render();
   // Одноразовый бонус за довольных котов с самого старта
   checkHappyBonus();
+}
+
+/**
+ * Обратно совместимая обёртка: запуск уровня 10 «Антикотопарк».
+ * @param {HTMLElement} root — контейнер #app
+ */
+export function startLevel10(root) {
+  return startAntiLevel(root, LEVEL10_ID);
 }
 
 /** Конфигурация уровня 10 (совпадает с anti-test). */

@@ -3,8 +3,8 @@ import { showSettingsScreen } from "./settingsScreen.js";
 import { showGameScreen } from "./gameScreen.js";
 import { showLevelSelect } from "./levelSelect.js";
 import { showAntiGameScreen } from "./antiGameScreen.js";
-import { LEVELS, LEVEL_IDS } from "../levels/levelRegistry.js";
-import { startLevel10 } from "../level10.js";
+import { LEVELS, LEVEL_IDS, getLevel } from "../levels/levelRegistry.js";
+import { startLevel10, startAntiLevel } from "../level10.js";
 import { toggleTheme, getTheme } from "../theme.js";
 import { audioManager, isMusicEnabled, setMusicEnabled, isSfxEnabled, setSfxEnabled, getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume } from "../core/audioManager.js";
 import NavigationService from "../core/navigation.js";
@@ -334,7 +334,7 @@ export function showIntroScreen(root) {
   const devPanel = document.createElement("div");
   devPanel.className = "dev-levels-panel";
   devPanel.hidden = true;
-  devPanel.innerHTML = `<div class="dev-levels-title">Уровни 11–21 (заготовки)</div>`;
+  devPanel.innerHTML = `<div class="dev-levels-title">Уровни 11–21 (Антикотопарк)</div>`;
   for (let id = 11; id <= 21; id++) {
     const b = document.createElement("button");
     b.className = "dev-level-btn";
@@ -342,7 +342,11 @@ export function showIntroScreen(root) {
     b.title = LEVELS[id]?.title || "";
     b.addEventListener("click", () => {
       playClick();
-      NavigationService.navigate("game", () => showGameScreen(root, id));
+      if (getLevel(id)?.mode === "anti") {
+        NavigationService.navigate("game", () => startAntiLevel(root, id));
+      } else {
+        NavigationService.navigate("game", () => showGameScreen(root, id));
+      }
     });
     devPanel.appendChild(b);
   }

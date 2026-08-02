@@ -1,6 +1,8 @@
 import { fetchManifest } from "../levels/levelLoader.js";
 import { isCompleted } from "../levels/levelProgress.js";
 import { getBestMoveCount } from "../levels/levelRecords.js";
+import { getLevel } from "../levels/levelRegistry.js";
+import { startAntiLevel } from "../level10.js";
 import { showGameScreen } from "./gameScreen.js";
 import { showSkinSelect } from "./skinSelect.js";
 import { showSettingsScreen } from "./settingsScreen.js";
@@ -113,7 +115,11 @@ export async function showLevelSelect(root) {
     btn.title = lvl.name || ("Уровень " + lvl.id);
     btn.addEventListener("click", () => {
       audioManager.playSoundEffect("assets/sounds/click.mp3");
-      NavigationService.navigate("game", () => showGameScreen(root, lvl.id));
+      if (getLevel(lvl.id)?.mode === "anti") {
+        NavigationService.navigate("game", () => startAntiLevel(root, lvl.id));
+      } else {
+        NavigationService.navigate("game", () => showGameScreen(root, lvl.id));
+      }
     });
     grid.appendChild(btn);
   }

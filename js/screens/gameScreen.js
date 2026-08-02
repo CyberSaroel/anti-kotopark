@@ -1,6 +1,8 @@
 import { Game } from "../core/game.js";
 import { renderBoard } from "../core/renderer.js";
 import { fetchLevel } from "../levels/levelLoader.js";
+import { getLevel } from "../levels/levelRegistry.js";
+import { startAntiLevel } from "../level10.js";
 import { markCompleted } from "../levels/levelProgress.js";
 import { saveLevelRecord, saveLevelTimeRecord, saveLevelKingsRecord, getBestKings } from "../levels/levelRecords.js";
 import { LevelTimer, LevelCountdown, formatTime, LEVEL_REMAINING_MOVES_INITIAL } from "../core/levelTimer.js";
@@ -25,6 +27,17 @@ import { addTotalMoves, addTotalTime } from "../core/gameStats.js";
 
 function isCompactUI() {
   return window.matchMedia("(max-width: 768px)").matches;
+}
+
+/**
+ * Запустить уровень с учётом режима:
+ * mode: "anti" (10–21) → startAntiLevel, иначе классика.
+ */
+export function launchLevel(root, levelId) {
+  if (getLevel(levelId)?.mode === "anti") {
+    return startAntiLevel(root, levelId);
+  }
+  return showGameScreen(root, levelId);
 }
 
 export async function showGameScreen(root, levelId) {
@@ -160,7 +173,7 @@ export async function showGameScreen(root, levelId) {
   prevBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
-    leaveLevel(() => NavigationService.navigate("game", () => showGameScreen(root, levelId - 1), { replace: true }));
+    leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId - 1), { replace: true }));
   });
 
   const nextBtn = document.createElement("button");
@@ -170,7 +183,7 @@ export async function showGameScreen(root, levelId) {
   nextBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
-    leaveLevel(() => NavigationService.navigate("game", () => showGameScreen(root, levelId + 1), { replace: true }));
+    leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId + 1), { replace: true }));
   });
 
   const leave = document.createElement("button");
@@ -289,7 +302,7 @@ export async function showGameScreen(root, levelId) {
     msg.textContent = "";
     showImpeachmentScreen(root, {
       onRetry: () => {
-        leaveLevel(() => showGameScreen(root, levelId));
+        leaveLevel(() => launchLevel(root, levelId));
       },
       onMenu: () => {
         leaveLevel(() => NavigationService.backTo("levelSelect"));
@@ -583,7 +596,7 @@ export async function showGameScreen(root, levelId) {
         rocketsTotal: getRockets(),
         rocketsGained: kingsDelta,
         onNext: () => {
-          leaveLevel(() => NavigationService.navigate("game", () => showGameScreen(root, level.id + 1), { replace: true }));
+          leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, level.id + 1), { replace: true }));
         },
         onMenu: () => {
           leaveLevel(() => NavigationService.backTo("levelSelect"));

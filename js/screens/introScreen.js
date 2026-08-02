@@ -31,8 +31,10 @@ export function showIntroScreen(root) {
   }
 
   // ==== Кнопка «Начать игру» → выбор уровней ====
+  // Класс intro-start-btn — к нему привязаны золотой ободок и анимация
+  // startBtnPulse (меню/темы), восстановлено как в предыдущих версиях.
   const startBtn = document.createElement("button");
-  startBtn.className = "intro-music-btn";
+  startBtn.className = "intro-start-btn";
   startBtn.textContent = "🎮 Начать игру";
   startBtn.addEventListener("click", () => {
     playClick();

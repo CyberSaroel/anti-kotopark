@@ -1,5 +1,5 @@
 /* Anti-Kotopark game screen styles */
-/* Трёхколоночная вёрстка: слева социотипы, по центру поле с котами, справа статистика */
+/* Вёрстка: по центру поле с котами, справа статистика */
 .anti-game-stage {
   display: flex;
   flex-direction: row;
@@ -30,49 +30,7 @@
   width: auto;
 }
 
-/* Left sidebar for sociotype selection */
-.anti-sidebar {
-  width: 200px;
-  background: var(--cell-bg);
-  border: 2px solid var(--cell-border);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.anti-sidebar-title {
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  color: var(--button-text);
-  border-bottom: 2px solid var(--cell-border);
-  padding-bottom: 8px;
-}
-
-.anti-selected-cat-info {
-  font-size: 14px;
-  text-align: center;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-}
-
-.anti-type-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
+/* Кнопки социотипов (переиспользуем существующие анти-тайп-кнопки) */
 .anti-type-btn {
   padding: 8px 12px;
   font-size: 12px;
@@ -94,12 +52,95 @@
   transform: scale(0.98);
 }
 
-/* Активная плашка выбора кота */
-.anti-selected-cat-info.active {
-  background: rgba(255, 152, 0, 0.2);
-  border: 2px solid rgba(255, 152, 0, 0.7);
-  color: #ffb02e;
+/* ===== Модальное окно выбора социотипа ===== */
+.socio-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.socio-modal[hidden] {
+  display: none;
+}
+
+.socio-modal-card {
+  background: linear-gradient(135deg, rgba(94, 22, 56, 0.97) 0%, rgba(42, 10, 20, 0.99) 100%);
+  border: 2px solid var(--gilt, #d49a3c);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 154, 60, 0.25);
+  width: 100%;
+  max-width: 420px;
+  max-height: min(80vh, 560px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.socio-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(212, 154, 60, 0.4);
+  flex-shrink: 0;
+}
+
+.socio-modal-title {
+  font-size: 16px;
   font-weight: bold;
+  color: var(--gilt-highlight, #f3d27a);
+  text-align: center;
+  flex: 1;
+}
+
+.socio-modal-close {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  background: transparent;
+  color: var(--gilt-highlight, #f3d27a);
+  border: 1px solid rgba(212, 154, 60, 0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.socio-modal-close:hover {
+  background: rgba(212, 154, 60, 0.2);
+  transform: rotate(90deg);
+}
+
+/* Прокручиваемый список типов */
+.socio-modal-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+.socio-modal-type-btn {
+  text-align: center;
+  font-size: 14px;
+  padding: 10px 14px;
 }
 
 /* Highlight for type-selected cat */
@@ -158,7 +199,7 @@
   background: var(--button-hover);
 }
 
-/* Mobile responsive: сайдбар с типами сверху, поле по центру, статистика внизу */
+/* Mobile responsive: поле по центру, статистика внизу, модалка на весь экран */
 @media (max-width: 768px) {
   .anti-game-stage {
     flex-direction: column;
@@ -167,31 +208,35 @@
     gap: 10px;
   }
   
-  .anti-sidebar {
-    width: 100%;
-    max-width: 360px;
+  .board-area {
     order: 1;
   }
   
-  .anti-type-buttons {
-    max-height: 200px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-  }
-  
-  .anti-type-btn {
-    flex: 1 1 calc(50% - 6px);
-    max-width: 150px;
-    text-align: center;
-  }
-  
-  .board-area {
-    order: 2;
-  }
-  
   .anti-game-stage .stats {
-    order: 3;
+    order: 2;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .socio-modal {
+    padding: 10px;
+    align-items: center;
+  }
+  
+  .socio-modal-card {
+    max-width: 100%;
+    max-height: min(85vh, 600px);
+  }
+  
+  /* На телефонах список типов — в две колонки, чтобы не вылезал за экран */
+  .socio-modal-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 12px;
+  }
+  
+  .socio-modal-type-btn {
+    font-size: 13px;
+    padding: 9px 8px;
   }
 }

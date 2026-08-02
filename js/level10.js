@@ -108,27 +108,9 @@ export async function startAntiLevel(root, levelId) {
   bar.appendChild(topRow);
   root.appendChild(bar);
 
-  // ===== Вёрстка экрана: слева социотипы, по центру поле с котами, справа статистика =====
+  // ===== Вёрстка экрана: по центру поле с котами, справа статистика =====
   const stage = document.createElement("div");
   stage.className = "game-stage anti-game-stage";
-
-  // Левая панель — выбор социотипа (существующие стили анти-сайдбара)
-  const sidebar = document.createElement("div");
-  sidebar.className = "anti-sidebar";
-
-  const sidebarTitle = document.createElement("div");
-  sidebarTitle.className = "anti-sidebar-title";
-  sidebarTitle.textContent = "Выберите социотип";
-  sidebar.appendChild(sidebarTitle);
-
-  const selectedCatInfo = document.createElement("div");
-  selectedCatInfo.className = "anti-selected-cat-info";
-  selectedCatInfo.textContent = "Кликните на кота с ?";
-  sidebar.appendChild(selectedCatInfo);
-
-  const typeButtonsContainer = document.createElement("div");
-  typeButtonsContainer.className = "anti-type-buttons";
-  sidebar.appendChild(typeButtonsContainer);
 
   // Игровое поле (по центру)
   const boardArea = document.createElement("div");
@@ -145,10 +127,57 @@ export async function startAntiLevel(root, levelId) {
   stats.id = "stats";
   stats.className = "stats level10-stats";
 
-  stage.appendChild(sidebar);
   stage.appendChild(boardArea);
   stage.appendChild(stats);
   root.appendChild(stage);
+
+  // Модальное окно выбора социотипа (вместо постоянного левого сайдбара)
+  const socioModal = document.createElement("div");
+  socioModal.className = "socio-modal";
+  socioModal.hidden = true;
+
+  const socioModalCard = document.createElement("div");
+  socioModalCard.className = "socio-modal-card";
+
+  const socioModalHeader = document.createElement("div");
+  socioModalHeader.className = "socio-modal-header";
+
+  const socioModalTitle = document.createElement("div");
+  socioModalTitle.className = "socio-modal-title";
+  socioModalTitle.textContent = "Выберите социотип";
+
+  const socioModalClose = document.createElement("button");
+  socioModalClose.className = "socio-modal-close";
+  socioModalClose.textContent = "✕";
+  socioModalClose.setAttribute("aria-label", "Закрыть");
+  socioModalClose.addEventListener("click", () => {
+    audioManager.initAudioContext();
+    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    resetCatSelection();
+    hideSocioMenu();
+  });
+
+  socioModalHeader.appendChild(socioModalTitle);
+  socioModalHeader.appendChild(socioModalClose);
+
+  const socioModalList = document.createElement("div");
+  socioModalList.className = "socio-modal-list";
+
+  socioModalCard.appendChild(socioModalHeader);
+  socioModalCard.appendChild(socioModalList);
+  socioModal.appendChild(socioModalCard);
+
+  // Клик по затемнению фона закрывает окно
+  socioModal.addEventListener("click", (e) => {
+    if (e.target === socioModal) {
+      audioManager.initAudioContext();
+      audioManager.playSoundEffect("assets/sounds/click.mp3");
+      resetCatSelection();
+      hideSocioMenu();
+    }
+  });
+
+  root.appendChild(socioModal);
 
   // --- Состояние выбора кота ---
   let catState = "idle"; // idle | selected | choosing
@@ -207,36 +236,52 @@ export async function startAntiLevel(root, levelId) {
     return boardEl.querySelectorAll(".cell")[idx] || null;
   }
 
-  // Кнопки социотипов в сайдбаре (существующие стили анти-тайп-кнопок)
+  // Кнопки социотипов в модальном окне (существующие стили анти-тайп-кнопок)
   function createTypeButtons() {
-    typeButtonsContainer.innerHTML = "";
+    socioModalList.innerHTML = "";
     TYPES.forEach(type => {
       const btn = document.createElement("button");
-      btn.className = "anti-type-btn";
+      btn.className = "anti-type-btn socio-modal-type-btn";
       btn.textContent = getTypeDisplayName(type);
       btn.addEventListener("click", () => {
-        if (catState !== "choosing" || currentCatIndex === null) return;
+        if (currentCatIndex === null) return;
         audioManager.initAudioContext();
         audioManager.playSoundEffect("assets/sounds/click.mp3");
-        handleGuess(currentCatIndex, type);
+        const catIdx = currentCatIndex;
+        hideSocioMenu();
+        handleGuess(catIdx, type);
       });
-      typeButtonsContainer.appendChild(btn);
+      socioModalList.appendChild(btn);
     });
   }
 
-  createTypeButtons();
+  function resetCatSelection() {
+    if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
+    selectedCatEl = null;
+    selectedCatRC = null;
+    currentCatIndex = null;
+    catState = "idle";
+  }
 
   function hideSocioMenu() {
-    selectedCatInfo.textContent = "Кликните на кота с ?";
-    selectedCatInfo.classList.remove("active");
-    typeButtonsContainer.classList.remove("active");
+    socioModal.hidden = true;
   }
 
   function showSocioMenu(catIndex) {
-    selectedCatInfo.textContent = `Кот #${catIndex + 1}: выберите тип`;
-    selectedCatInfo.classList.add("active");
-    typeButtonsContainer.classList.add("active");
+    currentCatIndex = catIndex;
+    createTypeButtons();
+    socioModal.hidden = false;
   }
+
+  // Закрытие модального окна по Escape
+  const onModalKeyDown = (e) => {
+    if (e.key === "Escape" && !socioModal.hidden) {
+      audioManager.initAudioContext();
+      resetCatSelection();
+      hideSocioMenu();
+    }
+  };
+  document.addEventListener("keydown", onModalKeyDown);
 
   // ==== Обработка выбора социотипа ====
   function handleGuess(catIndex, guessedType) {
@@ -400,6 +445,7 @@ export async function startAntiLevel(root, levelId) {
     levelActive = false;
     if (timerId) { clearInterval(timerId); timerId = null; }
     stopBoardLayoutListener();
+    document.removeEventListener("keydown", onModalKeyDown);
   }
 
   function showMenu() {

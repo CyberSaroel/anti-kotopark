@@ -443,20 +443,21 @@
 
 /* ============================================================
  * Надписи под котами: читаемость на всех темах.
- * Все цвета/фон/обводка/тени задаются через переменные темы.
+ * Цвет ТЕКСТА зафиксирован тёмным (#222) и НЕ зависит от темы,
+ * чтобы подписи были контрастными на светлом фоне-плашке.
  * ============================================================ */
 :root {
-  --cat-label-bg: var(--button-bg, rgba(255, 255, 255, 0.88));
-  --cat-label-text: var(--button-text, var(--text-color, #222));
-  --cat-label-border: var(--primary-color, rgba(0, 0, 0, 0.35));
+  --cat-label-bg: rgba(255, 255, 255, 0.92);
+  --cat-label-text: #222;                     /* фиксированный тёмный, не меняется по теме */
+  --cat-label-border: rgba(0, 0, 0, 0.35);
   --cat-label-shadow: rgba(0, 0, 0, 0.45);
-  --cat-label-negative: #ff5c5c;
-  --cat-label-neutral: var(--cat-label-text);
-  --cat-label-positive: #32c96a;
-  --cat-type-unknown-text: #ffb02e;
-  --cat-type-unknown-bg: rgba(255, 176, 46, 0.18);
-  --cat-type-known-text: #32c96a;
-  --cat-type-known-bg: rgba(50, 201, 106, 0.18);
+  --cat-label-negative: #8b0000;              /* тёмно-красный */
+  --cat-label-neutral: #222;                  /* тёмный */
+  --cat-label-positive: #1b5e20;              /* тёмно-зелёный */
+  --cat-type-unknown-text: #7a4a00;           /* тёмно-янтарный */
+  --cat-type-unknown-bg: rgba(255, 176, 46, 0.22);
+  --cat-type-known-text: #1b5e20;             /* тёмно-зелёный */
+  --cat-type-known-bg: rgba(50, 201, 106, 0.2);
 }
 
 .cell .label,

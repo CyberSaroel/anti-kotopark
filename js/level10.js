@@ -269,6 +269,7 @@ export async function startAntiLevel(root, levelId) {
 
   function showSocioMenu(catIndex) {
     currentCatIndex = catIndex;
+    socioModalTitle.textContent = `Выберите социотип — кот №${catIndex + 1}`;
     createTypeButtons();
     socioModal.hidden = false;
   }

@@ -56,14 +56,15 @@
 .socio-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  /* Полупрозрачный фон: поле остаётся видно, окно не перекрывает всю игру */
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 16px;
+  padding: 12px;
   box-sizing: border-box;
 }
 
@@ -74,11 +75,13 @@
 .socio-modal-card {
   background: linear-gradient(135deg, rgba(94, 22, 56, 0.97) 0%, rgba(42, 10, 20, 0.99) 100%);
   border: 2px solid var(--gilt, #d49a3c);
-  border-radius: 18px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 154, 60, 0.25);
-  width: 100%;
-  max-width: 420px;
-  max-height: min(80vh, 560px);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 16px rgba(212, 154, 60, 0.2);
+  /* Компактное окно: ~70% ширины (60–80%), по центру, не на весь экран */
+  width: 72%;
+  max-width: 460px;
+  min-width: 260px;
+  max-height: min(70vh, 520px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -219,13 +222,16 @@
   }
   
   .socio-modal {
-    padding: 10px;
+    padding: 12px;
     align-items: center;
   }
   
+  /* На телефоне окно тоже компактное: 60–80% ширины, не на весь экран */
   .socio-modal-card {
-    max-width: 100%;
-    max-height: min(85vh, 600px);
+    width: 78%;
+    max-width: 460px;
+    min-width: 0;
+    max-height: min(78vh, 520px);
   }
   
   /* На телефонах список типов — в две колонки, чтобы не вылезал за экран */

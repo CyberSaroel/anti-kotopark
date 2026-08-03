@@ -112,6 +112,10 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
           const typeName = game.getGuessedType(catIndex);
           typeLabel.textContent = getTypeDisplayName(typeName);
           typeLabel.classList.add("known");
+          // Bootstrap-утилиты (vendor): переносим длинные имена социотипов
+          // по словам и внутри слов, чтобы текст не обрезался на узких экранах
+          typeLabel.classList.add("text-wrap", "text-break");
+          fitTypeLabel(typeLabel);
         } else {
           typeLabel.textContent = "?";
           typeLabel.classList.add("unknown");

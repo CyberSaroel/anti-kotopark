@@ -577,24 +577,24 @@ export function startLevel10(root) {
   return startAntiLevel(root, LEVEL10_ID);
 }
 
-/** Конфигурация уровня 10 (совпадает с anti-test). */
+/** Конфигурация уровня 10 (поле 8x8, 10 котов). */
 function makeLevel() {
   return {
     id: "level10",
-    rows: 6,
-    cols: 6,
+    rows: 8,
+    cols: 8,
     cats: [
-      { r: 0, c: 0, type: "Дон Кихот" },
-      { r: 0, c: 2, type: "Гюго" },
-      { r: 0, c: 4, type: "Максим" },
-      { r: 1, c: 1, type: "Жуков" },
-      { r: 1, c: 3, type: "Есенин" },
-      { r: 2, c: 0, type: "Наполеон" },
-      { r: 2, c: 2, type: "Бальзак" },
-      { r: 2, c: 4, type: "Драйзер" },
-      { r: 3, c: 1, type: "Штирлиц" },
-      { r: 3, c: 3, type: "Гексли" }
+      { r: 0, c: 1, type: "Дон Кихот" },
+      { r: 0, c: 3, type: "Гюго" },
+      { r: 0, c: 5, type: "Максим" },
+      { r: 2, c: 1, type: "Жуков" },
+      { r: 2, c: 3, type: "Есенин" },
+      { r: 2, c: 5, type: "Наполеон" },
+      { r: 4, c: 1, type: "Бальзак" },
+      { r: 4, c: 3, type: "Драйзер" },
+      { r: 4, c: 5, type: "Штирлиц" },
+      { r: 6, c: 1, type: "Гексли" }
     ],
-    water: []
+    water: [[0, 7], [7, 0], [7, 7], [0, 0]]
   };
 }

@@ -295,13 +295,6 @@ export async function startAntiLevel(root, levelId) {
       });
       socioModalList.appendChild(btn);
     });
-    // Обе колонки одной ширины — по самому длинному названию (короткие центрируются)
-    const btns = socioModalList.querySelectorAll(".socio-modal-type-btn");
-    let maxW = 0;
-    btns.forEach(b => { maxW = Math.max(maxW, b.scrollWidth); });
-    if (maxW > 0) {
-      btns.forEach(b => { b.style.width = `${maxW}px`; });
-    }
   }
 
   function resetCatSelection() {
@@ -313,44 +306,75 @@ export async function startAntiLevel(root, levelId) {
   }
 
   function hideSocioMenu() {
-    socioModal.hidden = true;
+    // Уже скрыто или анимация закрытия уже запущена — повторно не запускаем
+    if (socioModal.hidden || socioModalCard.classList.contains("closing")) return;
+    socioModalCard.classList.add("closing");
+    let finished = false;
+    const finalize = () => {
+      if (finished) return;
+      finished = true;
+      socioModalCard.classList.remove("closing");
+      socioModal.hidden = true;
+    };
+    socioModalCard.addEventListener("animationend", finalize, { once: true });
+    // Страховка: если событие animationend не сработало (неактивная вкладка и т.п.)
+    setTimeout(finalize, 350);
   }
+
+  // Центрирование модального окна строго по центру игрового поля (доски).
+  // Позиция пересчитывается при каждом открытии и при изменении размеров
+  // экрана/поля/масштабировании. Окно не выходит за границы видимой области —
+  // при необходимости позиция корректируется.
+  function positionSocioModal() {
+    const boardRect = boardEl.getBoundingClientRect();
+    const modalRect = socioModal.getBoundingClientRect();
+    const pad = 8;
+
+    // Центр игрового поля
+    let left = boardRect.left + boardRect.width / 2 - modalRect.width / 2;
+    let top = boardRect.top + boardRect.height / 2 - modalRect.height / 2;
+
+    // Коррекция: окно не должно выходить за видимую область экрана
+    left = Math.min(Math.max(pad, left), Math.max(pad, window.innerWidth - modalRect.width - pad));
+    top = Math.min(Math.max(pad, top), Math.max(pad, window.innerHeight - modalRect.height - pad));
+
+    socioModal.style.left = `${left}px`;
+    socioModal.style.top = `${top}px`;
+    socioModal.style.transform = "none";
+  }
+
+  // Динамическое позиционирование: пересчёт по центру поля при изменении
+  // размеров окна браузера, разрешения экрана и масштабировании страницы,
+  // пока окно открыто. rAF — чтобы координаты доски уже были пересчитаны.
+  const onViewportResize = () => {
+    if (socioModal.hidden) return;
+    requestAnimationFrame(positionSocioModal);
+  };
+  window.addEventListener("resize", onViewportResize);
+  window.visualViewport?.addEventListener("resize", onViewportResize);
 
   function showSocioMenu(catIndex) {
     currentCatIndex = catIndex;
     socioModalTitle.textContent = `Выберите социотип — кот №${catIndex + 1}`;
     createTypeButtons();
+    // Перезапуск анимации появления, если окно закрывалось анимацией
+    socioModalCard.classList.remove("closing");
     socioModal.hidden = false;
+    socioModalCard.style.animation = "none";
+    void socioModalCard.offsetWidth; // принудительный reflow для перезапуска
+    socioModalCard.style.animation = "";
 
-    // --- Позиционирование рядом с котом (подстройка под экран) ---
+    // --- Позиционирование по центру игрового поля ---
     // Скрываем окно до вычисления координат, чтобы оно не мелькало в углу
     socioModal.style.visibility = "hidden";
 
     requestAnimationFrame(() => {
-      if (socioModal.hidden || !selectedCatEl) {
+      if (socioModal.hidden) {
         socioModal.style.visibility = "";
         return;
       }
-      const cellRect = selectedCatEl.getBoundingClientRect();
-      const modalRect = socioModal.getBoundingClientRect();
-      const margin = 8;
-      const pad = 8;
-
-      // Вертикаль: сначала под котом, если не влезает — над котом
-      let top = cellRect.bottom + margin;
-      if (top + modalRect.height > window.innerHeight - pad) {
-        top = Math.max(pad, cellRect.top - modalRect.height - margin);
-      }
-      top = Math.min(Math.max(pad, top), window.innerHeight - modalRect.height - pad);
-
-      // Горизонталь: по центру кота, с подстраиванием под экран
-      let left = cellRect.left + cellRect.width / 2 - modalRect.width / 2;
-      left = Math.min(Math.max(pad, left), window.innerWidth - modalRect.width - pad);
-
+      positionSocioModal();
       socioModal.style.visibility = "";
-      socioModal.style.left = `${left}px`;
-      socioModal.style.top = `${top}px`;
-      socioModal.style.transform = "none";
     });
   }
 
@@ -528,6 +552,8 @@ export async function startAntiLevel(root, levelId) {
     stopBoardLayoutListener();
     document.removeEventListener("keydown", onModalKeyDown);
     document.removeEventListener("pointerdown", onDocPointerDown);
+    window.removeEventListener("resize", onViewportResize);
+    window.visualViewport?.removeEventListener("resize", onViewportResize);
   }
 
   function showMenu() {

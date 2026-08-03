@@ -85,6 +85,37 @@
   overflow: hidden;
   pointer-events: auto;
   box-sizing: border-box;
+  /* Плавное появление: затухание + лёгкое увеличение 0.9 → 1 за 300 мс */
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: socio-modal-in 300ms ease-out;
+}
+
+/* Закрытие: плавное затухание + уменьшение 1 → 0.9 за 300 мс */
+.socio-modal-card.closing {
+  animation: socio-modal-out 300ms ease-in forwards;
+}
+
+@keyframes socio-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes socio-modal-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
 }
 
 .socio-modal-header {
@@ -132,26 +163,30 @@
   transform: rotate(90deg);
 }
 
-/* Сетка типов: 2 колонки по 8, одинаковая ширина по самому длинному названию */
+/* Сетка типов: 4 столбца × 4 строки (по 4 социотипа в каждом столбце) */
 .socio-modal-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, auto));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   padding: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
-  justify-content: center;
+  width: min(460px, calc(100vw - 16px));
+  box-sizing: border-box;
 }
 
-/* Все кнопки одной ширины: сетка выравнивает по самой широкой */
+/* Все кнопки одной ширины (ячейки сетки 1fr), текст по центру,
+   длинные имена аккуратно переносятся внутри ячейки */
 .socio-modal-list .socio-modal-type-btn {
   text-align: center;
   font-size: 13px;
-  padding: 8px 10px;
-  /* Короткие названия центрируются, ширина колонок — по самой длинной кнопке */
+  padding: 8px 4px;
   justify-self: stretch;
-  white-space: nowrap;
+  align-self: stretch;
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 /* Highlight for type-selected cat */
@@ -242,13 +277,14 @@
     max-height: min(78vh, 520px);
   }
   
-  /* На телефонах список типов — в две колонки по 8, ширина по самой длинной кнопке */
+  /* На телефонах список типов перестраивается: 2 колонки × 8 строк */
   .socio-modal-list {
-    grid-template-columns: repeat(2, minmax(0, auto));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
     padding: 10px;
+    width: min(320px, calc(100vw - 12px));
   }
-  
+
   .socio-modal-list .socio-modal-type-btn {
     font-size: 12px;
     padding: 8px 8px;

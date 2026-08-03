@@ -562,7 +562,8 @@ button {
   }
 
   .theme-btn,
-  .victory-sound-btn {
+  .victory-sound-btn,
+  .records-btn {
     padding: 8px 16px;
     font-size: 14px;
   }

@@ -274,9 +274,10 @@ button:hover {
   color: rgba(244, 230, 176, 0.7);
 }
 
-/* ===== Кнопки меню уровня (тема, звук победы) в книжном стиле ===== */
+/* ===== Кнопки меню уровня (тема, звук победы, рекорды) в книжном стиле ===== */
 .theme-btn,
-.victory-sound-btn {
+.victory-sound-btn,
+.records-btn {
   background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
   border: 1px solid rgba(212, 154, 60, 0.55);
   color: var(--parchment);
@@ -287,7 +288,8 @@ button:hover {
 }
 
 .theme-btn:hover,
-.victory-sound-btn:hover {
+.victory-sound-btn:hover,
+.records-btn:hover {
   background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
   filter: brightness(1.08);
   box-shadow:

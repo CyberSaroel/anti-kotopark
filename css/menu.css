@@ -17,7 +17,8 @@
 .skin-btn:hover { background: #5b4cc4; }
 
 .menu-buttons { display: flex; justify-content: center; gap: 10px; margin: 10px auto; }
-.theme-btn { padding: 10px 20px; font-size: 16px; background: #e67e22; color: white; border: none; border-radius: 8px; cursor: pointer; }
+.theme-btn,
+.records-btn { padding: 10px 20px; font-size: 16px; background: #e67e22; color: white; border: none; border-radius: 8px; cursor: pointer; }
 .theme-btn:hover { background: #d35400; }
 
 .victory-sound-btn { padding: 10px 20px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; }
@@ -181,7 +182,6 @@
 }
 
 .settings-option input[type="radio"] {
-  width: 18px;
   height: 18px;
   cursor: pointer;
   accent-color: var(--primary-color);

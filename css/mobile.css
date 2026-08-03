@@ -482,6 +482,11 @@ button {
     word-break: break-word;
   }
 
+  /* Небольшие отступы между счётчиками статистики на мобильных */
+  .stats .stat-item + .stat-item {
+    margin-top: 6px;
+  }
+
   /* Reduce spacing in victory sound page */
   .victory-sound-page {
     gap: 6px;

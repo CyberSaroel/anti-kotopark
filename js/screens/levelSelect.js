@@ -2,7 +2,7 @@ import { fetchManifest } from "../levels/levelLoader.js";
 import { isCompleted } from "../levels/levelProgress.js";
 import { getBestMoveCount } from "../levels/levelRecords.js";
 import { getLevel } from "../levels/levelRegistry.js";
-import { startAntiLevel } from "../level10.js";
+import { startAntiLevel } from "../game.js";
 import { showGameScreen } from "./gameScreen.js";
 import { showSkinSelect } from "./skinSelect.js";
 import { showSettingsScreen } from "./settingsScreen.js";

@@ -2,7 +2,7 @@ import { Game } from "../core/game.js";
 import { renderBoard } from "../core/renderer.js";
 import { fetchLevel } from "../levels/levelLoader.js";
 import { getLevel } from "../levels/levelRegistry.js";
-import { startAntiLevel } from "../level10.js";
+import { startAntiLevel } from "../game.js";
 import { markCompleted } from "../levels/levelProgress.js";
 import { saveLevelRecord, saveLevelTimeRecord, saveLevelKingsRecord, getBestKings } from "../levels/levelRecords.js";
 import { LevelTimer, LevelCountdown, formatTime, LEVEL_REMAINING_MOVES_INITIAL } from "../core/levelTimer.js";

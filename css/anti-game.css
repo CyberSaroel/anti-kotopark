@@ -87,10 +87,40 @@
   overflow: hidden;
   pointer-events: auto;
   box-sizing: border-box;
+  position: relative;
   /* Плавное появление: затухание + лёгкое увеличение 0.9 → 1 за 300 мс */
   transform-origin: center;
   will-change: transform, opacity;
   animation: socio-modal-in 300ms ease-out;
+}
+
+/* Изображения декорации в модальном окне социотипов */
+.socio-modal-decoration-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  background-image: url("../assets/socio-modal/left.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top left;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.socio-modal-decoration-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  background-image: url("../assets/socio-modal/right.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: top right;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Закрытие: плавное затухание + уменьшение 1 → 0.9 за 300 мс */

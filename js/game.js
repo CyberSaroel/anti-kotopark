@@ -139,6 +139,15 @@ export async function startAntiLevel(root, levelId) {
   const socioModalCard = document.createElement("div");
   socioModalCard.className = "socio-modal-card";
 
+  // Декоративные изображения в модальном окне
+  const socioModalDecorationLeft = document.createElement("div");
+  socioModalDecorationLeft.className = "socio-modal-decoration-left";
+  socioModalCard.appendChild(socioModalDecorationLeft);
+
+  const socioModalDecorationRight = document.createElement("div");
+  socioModalDecorationRight.className = "socio-modal-decoration-right";
+  socioModalCard.appendChild(socioModalDecorationRight);
+
   const socioModalHeader = document.createElement("div");
   socioModalHeader.className = "socio-modal-header";
 

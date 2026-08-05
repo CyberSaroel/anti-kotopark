@@ -20,6 +20,7 @@
   width: auto;
   min-width: 180px;
   flex: 0 0 auto;
+  color: #fff;
 }
 
 /* Панель статистики анти-уровня: компактная колонка */
@@ -112,7 +113,7 @@
 .socio-modal-decoration-right {
   position: absolute;
   top: 0;
-  right: 52px;
+  right: 57px;
   width: 60px;
   height: 60px;
   background-image: url("../assets/socio-modal/right.png");
@@ -219,6 +220,7 @@
   white-space: normal;
   overflow-wrap: break-word;
   line-height: 1.2;
+  color: #fff;
 }
 
 /* Highlight for type-selected cat */

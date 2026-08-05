@@ -112,7 +112,7 @@
 .socio-modal-decoration-right {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 52px;
   width: 60px;
   height: 60px;
   background-image: url("../assets/socio-modal/right.png");

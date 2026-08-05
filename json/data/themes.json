@@ -145,7 +145,7 @@
     },
     {
       "id": "royal-book",
-      "name": "Королевский котопарк",
+      "name": "Соционические коты: Антикотопарк",
       "description": "Кожаный переплёт, золото и пергамент — книжная тема",
       "cssFile": "assets/themes/royal-book/theme.css",
       "preview": {
@@ -153,18 +153,7 @@
         "primary": "#d49a3c",
         "cell": "#5e1638"
       }
-    },
-    {
-      "id": "anti-kotopark",
-      "name": "Соционические коты: Антикотопарк",
-      "description": "Тёмно-красная тема для анти-уровней",
-      "cssFile": "assets/themes/anti-kotopark/theme.css",
-      "preview": {
-        "background": "#f0e6d2",
-        "primary": "#d49a3c",
-        "cell": "#310d1b"
-      }
     }
   ],
-  "defaultTheme": "anti-kotopark"
+  "defaultTheme": "royal-book"
 }

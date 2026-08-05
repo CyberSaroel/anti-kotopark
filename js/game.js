@@ -266,14 +266,10 @@ export async function startAntiLevel(root, levelId) {
     audioManager.playSoundEffect("assets/sounds/click.mp3");
     if (won || impeached) return;
 
-    // Меню открыто: повторный тап по тому же коту закрывает его
+    // Меню открыто: повторный тап по тому же коту закрывает его, но оставляет кот выделенным
     if (catState === "choosing" && currentCatIndex === catIndex) {
-      catState = "idle";
+      catState = "selected";
       hideSocioMenu();
-      if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
-      selectedCatEl = null;
-      selectedCatRC = null;
-      currentCatIndex = null;
       return;
     }
 

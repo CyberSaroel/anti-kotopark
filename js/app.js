@@ -1,5 +1,6 @@
 import { showIntroScreen } from "./screens/introScreen.js";
 import { applyTheme } from "./theme.js";
+import { restoreSelectedTheme } from "./screens/themeSelect.js";
 import NavigationService from "./core/navigation.js";
 import { VERSION, saveVersion } from "./core/version.js";
 
@@ -7,6 +8,10 @@ const root = document.getElementById("app");
 
 // Apply book theme (dark/light via data-theme) on load
 applyTheme();
+
+// Restore previously selected decoration theme (CSS file) after page
+// reload or browser restart, if one was saved
+restoreSelectedTheme();
 
 // Save current version
 saveVersion();

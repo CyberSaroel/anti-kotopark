@@ -17,6 +17,23 @@ export function setSelectedTheme(themeId) {
   applyTheme(themeId);
 }
 
+/**
+ * Восстановить выбранную ранее тему оформления при загрузке страницы.
+ * Применяется только если тема была выбрана (значение сохранено в
+ * localStorage, которое переживает обновление страницы и закрытие браузера).
+ * Иначе остаётся стандартная тема из index.html.
+ */
+export async function restoreSelectedTheme() {
+  let saved = null;
+  try {
+    saved = localStorage.getItem(THEME_KEY);
+  } catch {
+    return;
+  }
+  if (!saved) return;
+  await applyTheme(getSelectedTheme());
+}
+
 export async function applyTheme(themeId) {
   try {
     const res = await fetch("json/data/themes.json");

@@ -94,29 +94,59 @@ body {
 }
 
 button {
-  background: #310d1b;
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
   color: var(--button-text);
-  border-color: var(--cell-border);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 2px solid #1a080d;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 button:hover {
-  background: #4a1830;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: linear-gradient(180deg, #5a2240 0%, #4a1830 50%, #310d1b 100%);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 button:active {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, #250a12 0%, #310d1b 50%, #4a1830 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 .level-btn {
-  background: #310d1b;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
+  border: 2px solid #1a080d;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .level-btn:hover {
-  background: #4a1830;
-  box-shadow: 0 5px 7px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: linear-gradient(180deg, #5a2240 0%, #4a1830 50%, #310d1b 100%);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.level-btn:active {
+  background: linear-gradient(180deg, #250a12 0%, #310d1b 50%, #4a1830 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 .level-btn.done {
@@ -126,34 +156,64 @@ button:active {
 
 /* ===== Кожаная главная кнопка «Играть» с золотой рамкой ===== */
 .intro-start-btn {
-  background: #310d1b;
-  border: 2px solid var(--gilt);
+  background: linear-gradient(180deg, #5a2240 0%, #310d1b 50%, #1a080d 100%);
+  border: 3px solid var(--gilt);
+  border-radius: 12px;
   box-shadow:
-    0 6px 12px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15),
-    0 0 12px rgba(212, 154, 60, 0.35);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    0 8px 16px rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(212, 154, 60, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .intro-start-btn:hover {
-  filter: brightness(1.08);
+  background: linear-gradient(180deg, #6a2c50 0%, #4a1830 50%, #250a12 100%);
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 0 25px rgba(212, 154, 60, 0.5);
+  transform: translateY(-2px);
+}
+
+.intro-start-btn:active {
+  background: linear-gradient(180deg, #1a080d 0%, #310d1b 50%, #5a2240 100%);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    0 0 15px rgba(212, 154, 60, 0.3);
+  transform: translateY(1px);
 }
 
 /* ===== Тиснение на вторичных кнопках меню ===== */
 .intro-music-btn {
-  background: #310d1b;
-  border: 1px solid rgba(212, 154, 60, 0.55);
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
+  border: 2px solid rgba(212, 154, 60, 0.6);
   color: var(--parchment);
   box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.1);
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .intro-music-btn:hover {
-  background: #4a1830;
+  background: linear-gradient(180deg, #5a2240 0%, #4a1830 50%, #310d1b 100%);
   box-shadow:
-    0 6px 10px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15);
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.intro-music-btn:active {
+  background: linear-gradient(180deg, #250a12 0%, #310d1b 50%, #4a1830 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 /* ===== Карточки в пергаментно-книжном стиле ===== */
@@ -201,17 +261,33 @@ button:active {
 
 /* ===== Кнопки победы / импичмента ===== */
 .win-btn {
-  background: #310d1b;
-  border-color: var(--cell-border);
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
+  border: 2px solid #1a080d;
   color: var(--button-text);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .win-btn:hover {
-  background: #4a1830;
+  background: linear-gradient(180deg, #5a2240 0%, #4a1830 50%, #310d1b 100%);
   border-color: #4a1830;
   color: var(--ink);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.win-btn:active {
+  background: linear-gradient(180deg, #250a12 0%, #310d1b 50%, #4a1830 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 /* ===== Кнопки меню (выбор темы, скины, звук победы) в книжном стиле ===== */
@@ -220,13 +296,14 @@ button:active {
 .victory-sound-select-btn,
 .settings-btn,
 .back-btn {
-  background: #310d1b;
-  border: 1px solid rgba(212, 154, 60, 0.55);
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
+  border: 2px solid rgba(212, 154, 60, 0.6);
   color: var(--parchment);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.1);
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .skin-btn:hover,
@@ -234,12 +311,25 @@ button:active {
 .victory-sound-select-btn:hover:not(:disabled),
 .settings-btn:hover,
 .back-btn:hover {
-  background: #4a1830;
-  filter: brightness(1.08);
+  background: linear-gradient(180deg, #5a2240 0%, #4a1830 50%, #310d1b 100%);
   box-shadow:
-    0 6px 10px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
     0 0 10px rgba(212, 154, 60, 0.45);
+}
+
+.skin-btn:active,
+.theme-select-btn:active:not(:disabled),
+.victory-sound-select-btn:active:not(:disabled),
+.settings-btn:active,
+.back-btn:active {
+  background: linear-gradient(180deg, #250a12 0%, #310d1b 50%, #4a1830 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 .skin-btn:disabled,
@@ -295,24 +385,36 @@ button:active {
 .theme-btn,
 .victory-sound-btn,
 .records-btn {
-  background: #310d1b;
-  border: 1px solid rgba(212, 154, 60, 0.55);
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
+  border: 2px solid rgba(212, 154, 60, 0.6);
   color: var(--parchment);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.1);
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .theme-btn:hover,
 .victory-sound-btn:hover,
 .records-btn:hover {
-  background: #4a1830;
-  filter: brightness(1.08);
+  background: linear-gradient(180deg, #5a2240 0%, #4a1830 50%, #310d1b 100%);
   box-shadow:
-    0 6px 10px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
     0 0 10px rgba(212, 154, 60, 0.45);
+}
+
+.theme-btn:active,
+.victory-sound-btn:active,
+.records-btn:active {
+  background: linear-gradient(180deg, #250a12 0%, #310d1b 50%, #4a1830 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 /* ===== Номера ходов в кнопках уровня ===== */
@@ -322,15 +424,31 @@ button:active {
 
 /* ===== Кнопки «назад» и прочие вспомогательные ===== */
 .victory-sound-preview-btn {
-  background: #250a12;
-  border: 1px solid rgba(212, 154, 60, 0.45);
+  background: linear-gradient(180deg, #3a0f1a 0%, #250a12 50%, #1a080d 100%);
+  border: 2px solid rgba(212, 154, 60, 0.5);
   color: var(--parchment);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .victory-sound-preview-btn:hover {
-  background: #310d1b;
-  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: linear-gradient(180deg, #4a1830 0%, #310d1b 50%, #250a12 100%);
+  box-shadow:
+    0 5px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.victory-sound-preview-btn:active {
+  background: linear-gradient(180deg, #1a080d 0%, #250a12 50%, #310d1b 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(1px);
 }
 
 /* ===== Лейблы громкости в меню (пергаментный текст) ===== */

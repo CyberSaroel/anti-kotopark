@@ -3,9 +3,9 @@
 @media (max-width: 768px) {
   #level-grid { grid-template-columns: repeat(5, 100px); max-width: 550px; }
 }
-.level-btn { width: 100px; height: 56px; font-size: 16px; border-radius: 10px; border: 1px solid #889; background: #fff; position: relative; padding: 5px; }
-.level-btn:hover { background: #dde; }
-.level-btn.done { background: #d7f5d7; border-color: #3a3; }
+.level-btn { width: 100px; height: 56px; font-size: 16px; border-radius: 10px; border: 1px solid #889; background: #310d1b; position: relative; padding: 5px; color: white; box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.level-btn:hover { background: #4a1830; box-shadow: 0 5px 7px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
+.level-btn.done { background: #2d4a3e; border-color: #3a3; }
 .level-btn.done::after { content: "✓"; position: absolute; top: 2px; right: 5px; font-size: 11px; color: #2a7; }
 
 .level-btn-content { display: flex; align-items: center; justify-content: center; gap: 5px; height: 100%; }
@@ -13,16 +13,16 @@
 .level-trophy { font-size: 16px; }
 .level-moves { font-size: 14px; color: #666; }
 
-.skin-btn { margin: 10px auto; display: block; padding: 10px 20px; font-size: 16px; background: #6c5ce7; color: white; border: none; border-radius: 8px; cursor: pointer; }
-.skin-btn:hover { background: #5b4cc4; }
+.skin-btn { margin: 10px auto; display: block; padding: 10px 20px; font-size: 16px; background: #310d1b; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.skin-btn:hover { background: #4a1830; box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 
 .menu-buttons { display: flex; justify-content: center; gap: 10px; margin: 10px auto; }
 .theme-btn,
-.records-btn { padding: 10px 20px; font-size: 16px; background: #e67e22; color: white; border: none; border-radius: 8px; cursor: pointer; }
-.theme-btn:hover { background: #d35400; }
+.records-btn { padding: 10px 20px; font-size: 16px; background: #310d1b; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.theme-btn:hover { background: #4a1830; box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 
-.victory-sound-btn { padding: 10px 20px; font-size: 16px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; }
-.victory-sound-btn:hover { background: #1e8449; }
+.victory-sound-btn { padding: 10px 20px; font-size: 16px; background: #310d1b; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.victory-sound-btn:hover { background: #4a1830; box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 
 .victory-sound-page {
   min-height: calc(100vh - 120px);
@@ -60,10 +60,10 @@
 }
 
 .victory-sound-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
+  background: #220f13;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(212, 154, 60, 0.35);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border-radius: 16px;
   padding: 18px 15px;
@@ -92,8 +92,8 @@
 .victory-sound-actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; width: 100%; }
 .victory-sound-preview-btn,
 .victory-sound-select-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-.victory-sound-preview-btn { background: #3498db; color: white; }
-.victory-sound-preview-btn:hover { background: #2980b9; }
+.victory-sound-preview-btn { background: #250a12; color: white; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.victory-sound-preview-btn:hover { background: #310d1b; box-shadow: 0 5px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 .victory-sound-select-btn { background: var(--primary-color); color: var(--button-text); }
 .victory-sound-select-btn:hover:not(:disabled) { background: var(--primary-hover); }
 .victory-sound-select-btn:disabled { background: #ccc; cursor: not-allowed; }
@@ -105,8 +105,8 @@
 .skin-preview { width: 80px; height: 80px; object-fit: contain; margin: 0 auto 10px; display: block; }
 .skin-name { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #333; }
 .skin-desc { font-size: 13px; color: #666; margin-bottom: 12px; min-height: 40px; }
-.skin-select-btn { padding: 8px 16px; background: #6c5ce7; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-.skin-select-btn:hover:not(:disabled) { background: #5b4cc4; }
+.skin-select-btn { padding: 8px 16px; background: #310d1b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.skin-select-btn:hover:not(:disabled) { background: #4a1830; box-shadow: 0 5px 7px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 .skin-select-btn:disabled { background: #ccc; cursor: not-allowed; }
 
 /* Settings page styles */
@@ -158,14 +158,16 @@
 .settings-btn {
   padding: 10px 20px;
   font-size: 16px;
-  background: var(--primary-color);
+  background: #310d1b;
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .settings-btn:hover {
-  background: var(--primary-hover);
+  background: #4a1830;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .settings-option {
@@ -195,8 +197,8 @@
   text-align: left;
 }
 
-.back-btn { margin: 20px auto; display: block; padding: 10px 20px; font-size: 16px; background: var(--primary-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; }
-.back-btn:hover { background: var(--primary-hover); }
+.back-btn { margin: 20px auto; display: block; padding: 10px 20px; font-size: 16px; background: #310d1b; color: #fff; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.back-btn:hover { background: #4a1830; box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 
 #theme-grid { display: grid; grid-template-columns: repeat(auto-fill, 200px); gap: 20px; justify-content: center; max-width: 800px; margin: 20px auto; }
 .theme-card { background: white; border: 2px solid #ddd; border-radius: 12px; padding: 15px; text-align: center; transition: all 0.3s; }
@@ -205,8 +207,8 @@
 .theme-preview { width: 100%; height: 60px; border-radius: 8px; margin: 0 auto 10px; display: block; }
 .theme-name { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #333; }
 .theme-desc { font-size: 13px; color: #666; margin-bottom: 12px; min-height: 40px; }
-.theme-select-btn { padding: 8px 16px; background: #e67e22; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-.theme-select-btn:hover:not(:disabled) { background: #d35400; }
+.theme-select-btn { padding: 8px 16px; background: #310d1b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.theme-select-btn:hover:not(:disabled) { background: #4a1830; box-shadow: 0 5px 7px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 .theme-select-btn:disabled { background: #ccc; cursor: not-allowed; }
 
 /* Rules screen styles */

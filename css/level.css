@@ -80,17 +80,19 @@
 .socio-type-btn {
   padding: 7px 10px;
   font-size: 13px;
-  background: var(--button-bg, #5e1638);
+  background: #310d1b;
   color: var(--button-text, #f4e6b0);
   border: 1px solid rgba(212, 154, 60, 0.45);
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .socio-type-btn:hover {
+  background: #4a1830;
   transform: translateY(-2px);
-  box-shadow: 0 0 10px rgba(212, 154, 60, 0.5);
+  box-shadow: 0 5px 7px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 10px rgba(212, 154, 60, 0.5);
 }
 
 /* Всплывающий бонус */

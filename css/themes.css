@@ -94,21 +94,29 @@ body {
 }
 
 button {
-  background: var(--button-bg);
+  background: #310d1b;
   color: var(--button-text);
   border-color: var(--cell-border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 button:hover {
-  background: var(--button-hover);
+  background: #4a1830;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .level-btn {
-  background: var(--level-btn-bg);
+  background: #310d1b;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .level-btn:hover {
-  background: var(--button-hover);
+  background: #4a1830;
+  box-shadow: 0 5px 7px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .level-btn.done {
@@ -118,11 +126,11 @@ button:hover {
 
 /* ===== Кожаная главная кнопка «Играть» с золотой рамкой ===== */
 .intro-start-btn {
-  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 55%, var(--leather-bot) 100%);
+  background: #310d1b;
   border: 2px solid var(--gilt);
   box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(244, 230, 176, 0.25),
+    0 6px 12px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
     0 0 12px rgba(212, 154, 60, 0.35);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
@@ -133,16 +141,19 @@ button:hover {
 
 /* ===== Тиснение на вторичных кнопках меню ===== */
 .intro-music-btn {
-  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
+  background: #310d1b;
   border: 1px solid rgba(212, 154, 60, 0.55);
   color: var(--parchment);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(244, 230, 176, 0.18);
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1);
 }
 
 .intro-music-btn:hover {
-  filter: brightness(1.08);
+  background: #4a1830;
+  box-shadow:
+    0 6px 10px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* ===== Карточки в пергаментно-книжном стиле ===== */
@@ -170,13 +181,13 @@ button:hover {
 
 /* ===== Таблицы рекордов ===== */
 .records-table {
-  background: var(--button-bg);
+  background: #220f13;
   border: 1px solid var(--cell-border);
   color: var(--parchment);
 }
 
 .records-table th {
-  background: var(--leather);
+  background: #220f13;
   color: var(--parchment);
 }
 
@@ -184,17 +195,23 @@ button:hover {
   border-bottom-color: rgba(212, 154, 60, 0.25);
 }
 
+.records-table td[colspan] {
+  background: #310d1b;
+}
+
 /* ===== Кнопки победы / импичмента ===== */
 .win-btn {
-  background: var(--button-bg);
+  background: #310d1b;
   border-color: var(--cell-border);
   color: var(--button-text);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .win-btn:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: #4a1830;
+  border-color: #4a1830;
   color: var(--ink);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* ===== Кнопки меню (выбор темы, скины, звук победы) в книжном стиле ===== */
@@ -203,13 +220,13 @@ button:hover {
 .victory-sound-select-btn,
 .settings-btn,
 .back-btn {
-  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
+  background: #310d1b;
   border: 1px solid rgba(212, 154, 60, 0.55);
   color: var(--parchment);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(244, 230, 176, 0.18);
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1);
 }
 
 .skin-btn:hover,
@@ -217,11 +234,11 @@ button:hover {
 .victory-sound-select-btn:hover:not(:disabled),
 .settings-btn:hover,
 .back-btn:hover {
-  background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
+  background: #4a1830;
   filter: brightness(1.08);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(244, 230, 176, 0.18),
+    0 6px 10px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
     0 0 10px rgba(212, 154, 60, 0.45);
 }
 
@@ -238,7 +255,7 @@ button:hover {
 
 /* ===== Стат-панели HUD в книжном стиле ===== */
 .stat-item {
-  background: var(--level-btn-bg);
+  background: #310d1b;
   border: 1px solid rgba(212, 154, 60, 0.45);
   color: var(--parchment);
   box-shadow: inset 0 1px 0 rgba(244, 230, 176, 0.12);
@@ -278,23 +295,23 @@ button:hover {
 .theme-btn,
 .victory-sound-btn,
 .records-btn {
-  background: linear-gradient(180deg, var(--leather-top) 0%, var(--leather) 60%, var(--leather-bot) 100%);
+  background: #310d1b;
   border: 1px solid rgba(212, 154, 60, 0.55);
   color: var(--parchment);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(244, 230, 176, 0.18);
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1);
 }
 
 .theme-btn:hover,
 .victory-sound-btn:hover,
 .records-btn:hover {
-  background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
+  background: #4a1830;
   filter: brightness(1.08);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(244, 230, 176, 0.18),
+    0 6px 10px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
     0 0 10px rgba(212, 154, 60, 0.45);
 }
 
@@ -305,13 +322,15 @@ button:hover {
 
 /* ===== Кнопки «назад» и прочие вспомогательные ===== */
 .victory-sound-preview-btn {
-  background: linear-gradient(180deg, var(--leather) 0%, var(--leather-bot) 100%);
+  background: #250a12;
   border: 1px solid rgba(212, 154, 60, 0.45);
   color: var(--parchment);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .victory-sound-preview-btn:hover {
-  filter: brightness(1.1);
+  background: #310d1b;
+  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* ===== Лейблы громкости в меню (пергаментный текст) ===== */

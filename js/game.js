@@ -226,10 +226,11 @@ export async function startAntiLevel(root, levelId) {
           // для него не вызывается (меню выбора социотипа не открывается),
           // поэтому рамку выбранного кота показывает перерисовка: первое
           // нажатие выделяет кота — игрок может начать передвижение,
-          // второе нажатие на того же кота снимает выделение.
+          // второе нажатие на того же кота открывает меню (если тип неизвестен).
           const catIndex = game.getCatIndex(r, c);
           if (catIndex !== null && game.isTypeKnown(catIndex)) {
-            if (catState !== "idle") resetCatSelection();
+            // Не сбрасываем выделение для кота с известным типом,
+            // чтобы рамка сохранялась после хода
             render();
           }
           // Для кота с неизвестным типом перерисовка не нужна: рамку и меню
@@ -267,8 +268,8 @@ export async function startAntiLevel(root, levelId) {
       return;
     }
 
-    // Второе нажатие по тому же коту: открыть меню социотипов
-    if (catState === "selected" && currentCatIndex === catIndex) {
+    // Кот уже выбран рамкой: открыть меню социотипов
+    if (currentCatIndex === catIndex) {
       catState = "choosing";
       showSocioMenu(catIndex);
       return;

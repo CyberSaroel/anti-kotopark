@@ -288,6 +288,9 @@ export async function startAntiLevel(root, levelId) {
     if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
     selectedCatEl = findCatCell(r, c);
     if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
+    // Устанавливаем game.selected для отображения доступных ходов
+    game.selected = { r, c };
+    render();
   }
 
   function findCatCell(r, c) {
@@ -320,6 +323,7 @@ export async function startAntiLevel(root, levelId) {
     selectedCatRC = null;
     currentCatIndex = null;
     catState = "idle";
+    game.selected = null;
   }
 
   function hideSocioMenu() {

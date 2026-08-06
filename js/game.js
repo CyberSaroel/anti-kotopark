@@ -15,7 +15,7 @@ import { fetchLevel } from "./levels/levelLoader.js";
  * Импичмент: время (120 с), ходы (60), ошибки (3 + бонус за королей).
  * Победа: все типы угаданы. Бонус за королей (настроение >= +6) в конце.
  *
- * Начиная с v5 функция обобщена: уровни 10–21 «Антикотопарка» используют
+ * Начиная с v5 функция обобщена: уровни 10–31 «Антикотопарка» используют
  * одну и ту же логику (startAntiLevel / startLevel10). Константы режима
  * одинаковы для всех анти-уровней.
  */
@@ -35,7 +35,7 @@ let timerId = null;
 /**
  * Загрузить конфигурацию анти-уровня.
  * Уровень 10 использует встроенный хардкод (совпадает с прежним геймплеем),
- * уровни 11–21 — из json/levels/levelNNN.json.
+ * уровни 11–31 — из json/levels/levelNNN.json.
  * @param {number} levelId
  * @returns {Promise<object>}
  */
@@ -49,7 +49,7 @@ async function loadAntiLevel(levelId) {
 /**
  * Запустить анти-уровень («Антикотопарк»).
  * @param {HTMLElement} root — контейнер #app
- * @param {number} levelId — номер уровня (10–21)
+ * @param {number} levelId — номер уровня (10–31)
  */
 export async function startAntiLevel(root, levelId) {
   if (levelActive) return;

@@ -3,9 +3,9 @@
  *
  * - Уровень 10 — «Антикотопарк» (главный, запускается кнопкой «Начать игру»).
  * - Уровни 1–9 НЕ существуют (выключены).
- * - Уровни 11–21 — «Антикотопарк»: используют ту же логику, что уровень 10,
+ * - Уровни 11–31 — «Антикотопарк»: используют ту же логику, что уровень 10,
  *   конфигурация загружается из json/levels/levelNNN.json.
- * - Уровни 22–100 — доступны в классическом режиме.
+ * - Уровни 32–100 — доступны в классическом режиме.
  */
 
 export const LEVELS = {
@@ -22,10 +22,20 @@ export const LEVELS = {
   19: { id: 19, title: "Уровень 19", enabled: true, mode: "anti" },
   20: { id: 20, title: "Уровень 20", enabled: true, mode: "anti" },
   21: { id: 21, title: "Уровень 21", enabled: true, mode: "anti" },
+  22: { id: 22, title: "Уровень 22", enabled: true, mode: "anti" },
+  23: { id: 23, title: "Уровень 23", enabled: true, mode: "anti" },
+  24: { id: 24, title: "Уровень 24", enabled: true, mode: "anti" },
+  25: { id: 25, title: "Уровень 25", enabled: true, mode: "anti" },
+  26: { id: 26, title: "Уровень 26", enabled: true, mode: "anti" },
+  27: { id: 27, title: "Уровень 27", enabled: true, mode: "anti" },
+  28: { id: 28, title: "Уровень 28", enabled: true, mode: "anti" },
+  29: { id: 29, title: "Уровень 29", enabled: true, mode: "anti" },
+  30: { id: 30, title: "Уровень 30", enabled: true, mode: "anti" },
+  31: { id: 31, title: "Уровень 31", enabled: true, mode: "anti" },
 };
 
-// Уровни 22–100 — классический режим (JSON уже есть)
-for (let id = 22; id <= 100; id++) {
+// Уровни 32–100 — классический режим (JSON уже есть)
+for (let id = 32; id <= 100; id++) {
   LEVELS[id] = { id, title: `Уровень ${id}`, enabled: true, mode: "classic" };
 }
 

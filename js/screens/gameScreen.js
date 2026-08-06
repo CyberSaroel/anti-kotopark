@@ -31,7 +31,7 @@ function isCompactUI() {
 
 /**
  * Запустить уровень с учётом режима:
- * mode: "anti" (10–21) → startAntiLevel, иначе классика.
+ * mode: "anti" (10–31) → startAntiLevel, иначе классика.
  */
 export function launchLevel(root, levelId) {
   if (getLevel(levelId)?.mode === "anti") {

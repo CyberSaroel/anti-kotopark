@@ -59,6 +59,7 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
     for (let c = 0; c < board.cols; c++) {
       const cell = document.createElement("div");
       cell.className = "cell";
+      let catIndex = null;
 
       if (board.isWater(r, c)) cell.classList.add("water");
       else if (board.isEmpty(r, c)) cell.classList.add("empty");
@@ -73,7 +74,7 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
         cell.dataset.mood = String(mood);
         
         const catNum = game.getCatNumber(r, c);
-        const catIndex = game.getCatIndex(r, c);
+        catIndex = game.getCatIndex(r, c);
 
         // Клик/тап по коту или его подписи открывает меню социотипов.
         // На сенсорных экранах после touchend браузер шлёт эмуляционный click,
@@ -161,7 +162,13 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
       }
 
       const rr = r, cc = c;
-      bindCellInteraction(cell, () => onCell(rr, cc));
+      // Кот с неизвестным типом (подпись "?"): клик/тап полностью обрабатывает
+      // onCatClick (первый тап — выбор, второй — меню). onCell вызывать нельзя:
+      // clickCell получит повторный клик по только что выбранному коту и сбросит
+      // game.selected, из-за чего такого кота невозможно передвинуть.
+      if (catIndex === null || game.isTypeKnown(catIndex)) {
+        bindCellInteraction(cell, () => onCell(rr, cc));
+      }
       container.appendChild(cell);
       if (typeLabel) fitTypeLabel(typeLabel);
     }

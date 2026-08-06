@@ -210,9 +210,13 @@ export async function startAntiLevel(root, levelId) {
       if (!socioModal.hidden) return;
       // Клик, который только что закрыл окно, не должен двигать кота
       if (suppressNextBoardClick) return;
-      // Клик по пустой клетке при выбранном коте (1-е нажатие) снимает выбор
-      if (catState === "selected" && !game.board.isCat(r, c)) {
+      // Клик по пустой клетке при выбранном коте снимает выбор, НО только если
+      // это не доступный ход выбранного кота — иначе дальше clickCell
+      // передвинет кота. Раньше resetCatSelection() обнулял game.selected даже
+      // на доступном ходе, и кот с неизвестным типом ("?") не мог сделать ход.
+      if (catState === "selected" && !game.board.isCat(r, c) && !game.isTarget(r, c)) {
         resetCatSelection();
+        render();
       }
       audioManager.initAudioContext();
       const result = game.clickCell(r, c);
@@ -220,6 +224,8 @@ export async function startAntiLevel(root, levelId) {
         if (result.moved) {
           movesRemaining--;
           audioManager.playSoundEffect("assets/sounds/move.mp3");
+          // Рамка выбора следует за котом на новую позицию
+          selectedCatRC = { r, c };
           render();
           if (movesRemaining <= 0) {
             checkImpeachment("Ходы закончились");

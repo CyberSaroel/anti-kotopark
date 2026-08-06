@@ -63,7 +63,7 @@ export function showIntroScreen(root) {
   const themeBtn = document.createElement("button");
   themeBtn.className = "intro-music-btn";
   const themeIcon = document.createElement("span");
-  themeIcon.textContent = "🎨";
+  themeIcon.textContent = "🌕";
   const themeText = document.createElement("span");
   const updateThemeLabel = () => {
     themeText.textContent = getTheme() === "dark" ? " Тема: Королевский (тёмная)" : " Тема: Королевский (светлая)";

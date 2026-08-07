@@ -231,12 +231,14 @@ export async function startAntiLevel(root, levelId) {
         resetCatSelection();
         render();
       }
-      // Кот с уже известным социотипом: повторное нажатие на него (он уже
-      // выделен рамкой выбора) ничего не делает — не сбрасываем выделение
-      // и не перерисовываем. Первое нажатие по-прежнему выделяет кота,
-      // чтобы игрок мог начать передвижение.
+      // Клик по коту с известным социотипом (для неизвестных onCell не
+      // вызывается — их обрабатывает onCatClick). Если это уже выбранный
+      // кот — повторное нажатие ничего не делает. Если это другой кот —
+      // выбор переключается на него (выделение идёт за нажатым котом).
       const tappedCatIndex = game.getCatIndex(r, c);
-      if (tappedCatIndex !== null && game.isTypeKnown(tappedCatIndex) && game.isSelected(r, c)) {
+      if (tappedCatIndex !== null) {
+        if (game.isSelected(r, c)) return;
+        selectCat(tappedCatIndex, r, c);
         return;
       }
       audioManager.initAudioContext();
@@ -286,6 +288,22 @@ export async function startAntiLevel(root, levelId) {
     }
   }
 
+  // Выбрать кота: установить рамку, доступные ходы и состояние выбора.
+  // Используется и для котов с известным типом (клик в onCell), и для
+  // котов с неизвестным типом (первое нажатие в onCatClick).
+  function selectCat(catIndex, r, c) {
+    if (catState === "choosing") hideSocioMenu();
+    catState = "selected";
+    selectedCatRC = { r, c };
+    currentCatIndex = catIndex;
+    if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
+    selectedCatEl = findCatCell(r, c);
+    if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
+    // Устанавливаем game.selected для отображения доступных ходов
+    game.selected = { r, c };
+    render();
+  }
+
   // Логика выбора: первое нажатие выбирает кота, второе по тому же — открывает меню.
   // Нажатие на нового кота считается первым (выбор переключается на него).
   function onCatClick(catIndex, r, c) {
@@ -308,16 +326,7 @@ export async function startAntiLevel(root, levelId) {
     }
 
     // Новый кот (или первое нажатие): выбираем его; меню другого кота закрываем
-    if (catState === "choosing") hideSocioMenu();
-    catState = "selected";
-    selectedCatRC = { r, c };
-    currentCatIndex = catIndex;
-    if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
-    selectedCatEl = findCatCell(r, c);
-    if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
-    // Устанавливаем game.selected для отображения доступных ходов
-    game.selected = { r, c };
-    render();
+    selectCat(catIndex, r, c);
   }
 
   function findCatCell(r, c) {

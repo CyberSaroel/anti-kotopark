@@ -18,7 +18,7 @@ export async function showLevelSelect(root) {
   mountFloatingAudioControls(document.body);
 
   const h = document.createElement("h1");
-  h.textContent = "Соционические коты";
+  h.textContent = "Соционические коты: Антикотопарк";
   root.appendChild(h);
 
   const p = document.createElement("p");
@@ -85,7 +85,7 @@ export async function showLevelSelect(root) {
     return;
   }
 
-  // Уровни 1–9 отключены; доступны только уровни 10–31
+  // Уровни 1–9 отключены; доступны только уровни 10–51
   const lockedIds = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
   for (const lvl of manifest.levels) {

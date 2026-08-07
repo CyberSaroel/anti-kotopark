@@ -1,4 +1,4 @@
-const VERSION = "0.11.4"; // это число будет менять tools/bumpVersion.js
+const VERSION = "0.12.0"; // это число будет менять tools/bumpVersion.js
 const CACHE = "royal-socio-cats-" + VERSION;
 
 // Ставим новую версию воркера сразу, не ждём закрытия вкладок

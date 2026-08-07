@@ -464,10 +464,10 @@
   --cat-label-negative: #8b0000;              /* тёмно-красный */
   --cat-label-neutral: #222;                  /* тёмный */
   --cat-label-positive: #1b5e20;              /* тёмно-зелёный */
-  --cat-type-unknown-text: #7a4a00;           /* тёмно-янтарный */
-  --cat-type-unknown-bg: rgba(255, 176, 46, 0.22);
-  --cat-type-known-text: #1b5e20;             /* тёмно-зелёный */
-  --cat-type-known-bg: rgba(50, 201, 106, 0.2);
+  --cat-type-unknown-text: #ffffff;            /* белый */
+  --cat-type-unknown-bg: rgba(0, 0, 0, 0.55);  /* тёмная плашка для контраста */
+  --cat-type-known-text: #ffffff;              /* белый */
+  --cat-type-known-bg: rgba(0, 0, 0, 0.55);    /* тёмная плашка для контраста */
 }
 
 .cell .label,
@@ -561,17 +561,25 @@
   color: var(--cat-label-positive);
 }
 
-/* Социотип: неизвестный / известный */
+/* Социотип: неизвестный / известный.
+   Белый текст + тёмная плашка + тёмная тень букв —
+   подпись контрастна на любом фоне клетки и темы. Шрифт не меняется. */
 .cell .cat-type-label.unknown {
   color: var(--cat-type-unknown-text);
   background: var(--cat-type-unknown-bg);
-  border-color: var(--cat-type-unknown-text);
+  border-color: rgba(255, 255, 255, 0.4);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7);
 }
 
 .cell .cat-type-label.known {
   color: var(--cat-type-known-text);
   background: var(--cat-type-known-bg);
-  border-color: var(--cat-type-known-text);
+  border-color: rgba(255, 255, 255, 0.4);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7);
 }
 
 /* Мобильная адаптация надписей */

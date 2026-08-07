@@ -231,6 +231,14 @@ export async function startAntiLevel(root, levelId) {
         resetCatSelection();
         render();
       }
+      // Кот с уже известным социотипом: повторное нажатие на него (он уже
+      // выделен рамкой выбора) ничего не делает — не сбрасываем выделение
+      // и не перерисовываем. Первое нажатие по-прежнему выделяет кота,
+      // чтобы игрок мог начать передвижение.
+      const tappedCatIndex = game.getCatIndex(r, c);
+      if (tappedCatIndex !== null && game.isTypeKnown(tappedCatIndex) && game.isSelected(r, c)) {
+        return;
+      }
       audioManager.initAudioContext();
       const result = game.clickCell(r, c);
       if (result.needRedraw) {

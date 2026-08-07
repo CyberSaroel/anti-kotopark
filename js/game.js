@@ -162,8 +162,7 @@ export async function startAntiLevel(root, levelId) {
   socioModalClose.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
-    resetCatSelection();
-    hideSocioMenu();
+    closeSocioMenuKeepSelection();
   });
 
   socioModalHeader.appendChild(socioModalTitle);
@@ -186,8 +185,7 @@ export async function startAntiLevel(root, levelId) {
     const cell = e.target.closest && e.target.closest(".cell");
     if (cell && cell.querySelector("img.cat")) return;
     audioManager.initAudioContext();
-    resetCatSelection();
-    hideSocioMenu();
+    closeSocioMenuKeepSelection();
     // Этот клик уже ушёл на поле — не даём ему передвинуть кота/выделить клетку
     suppressNextBoardClick = true;
     setTimeout(() => { suppressNextBoardClick = false; }, 50);
@@ -348,6 +346,14 @@ export async function startAntiLevel(root, levelId) {
     setTimeout(finalize, 350);
   }
 
+  // Закрыть меню социотипов, но оставить кота выделенным (рамка сохраняется).
+  // После закрытия окна выделенный кот сразу может передвинуться на соседнюю
+  // клетку — повторный выбор не нужен.
+  function closeSocioMenuKeepSelection() {
+    if (catState === "choosing") catState = "selected";
+    hideSocioMenu();
+  }
+
   // Центрирование модального окна строго по центру игрового поля (доски).
   // Позиция пересчитывается при каждом открытии и при изменении размеров
   // экрана/поля/масштабировании. Окно не выходит за границы видимой области —
@@ -409,8 +415,7 @@ export async function startAntiLevel(root, levelId) {
   const onModalKeyDown = (e) => {
     if (e.key === "Escape" && !socioModal.hidden) {
       audioManager.initAudioContext();
-      resetCatSelection();
-      hideSocioMenu();
+      closeSocioMenuKeepSelection();
     }
   };
   document.addEventListener("keydown", onModalKeyDown);

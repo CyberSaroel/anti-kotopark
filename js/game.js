@@ -186,9 +186,22 @@ export async function startAntiLevel(root, levelId) {
     if (cell && cell.querySelector("img.cat")) return;
     audioManager.initAudioContext();
     closeSocioMenuKeepSelection();
-    // Этот клик уже ушёл на поле — не даём ему передвинуть кота/выделить клетку
-    suppressNextBoardClick = true;
-    setTimeout(() => { suppressNextBoardClick = false; }, 50);
+    // Если клик пришёлся на доступную цель выбранного кота — не подавляем его:
+    // окно закрылось, а то же нажатие передвинет кота на эту клетку.
+    let isTargetClick = false;
+    if (cell && selectedCatRC && game.selected) {
+      const idx = Array.prototype.indexOf.call(cell.parentNode.children, cell);
+      const r = Math.floor(idx / game.board.cols);
+      const c = idx % game.board.cols;
+      if (game.isTarget(r, c)) isTargetClick = true;
+    }
+    if (isTargetClick) {
+      suppressNextBoardClick = false;
+    } else {
+      // Этот клик уже ушёл на поле — не даём ему передвинуть кота/выделить клетку
+      suppressNextBoardClick = true;
+      setTimeout(() => { suppressNextBoardClick = false; }, 50);
+    }
   };
   document.addEventListener("pointerdown", onDocPointerDown);
 
@@ -205,7 +218,9 @@ export async function startAntiLevel(root, levelId) {
     renderAntiBoard(boardEl, game, (r, c) => {
       // Пока открыто окно выбора социотипа, поле не реагирует на клики
       // (раньше это обеспечивало затемнение) — игровая логика не меняется.
-      if (!socioModal.hidden) return;
+      // Во время анимации ЗАКРЫТИЯ (closing) поле уже реагирует: клик по
+      // соседней клетке тут же передвинет выделенного кота.
+      if (!socioModal.hidden && !socioModalCard.classList.contains("closing")) return;
       // Клик, который только что закрыл окно, не должен двигать кота
       if (suppressNextBoardClick) return;
       // Клик по пустой клетке при выбранном коте снимает выбор, НО только если

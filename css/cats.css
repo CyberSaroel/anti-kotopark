@@ -465,9 +465,9 @@
   --cat-label-neutral: #222;                  /* тёмный */
   --cat-label-positive: #1b5e20;              /* тёмно-зелёный */
   --cat-type-unknown-text: #ffffff;            /* белый */
-  --cat-type-unknown-bg: rgba(0, 0, 0, 0.55);  /* тёмная плашка для контраста */
+  --cat-type-unknown-bg: #000000;              /* чёрная плашка для контраста */
   --cat-type-known-text: #ffffff;              /* белый */
-  --cat-type-known-bg: rgba(0, 0, 0, 0.55);    /* тёмная плашка для контраста */
+  --cat-type-known-bg: #000000;                /* чёрная плашка для контраста */
 }
 
 .cell .label,
@@ -476,7 +476,7 @@
   max-width: calc(var(--cell-w, 90px) - 8px);
   margin-top: 4px;
   padding: 3px 6px;
-  font-family: inherit;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(10px, 1.7vw, 13px);
   font-weight: 800;
   line-height: 1.15;

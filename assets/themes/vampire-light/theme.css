@@ -1,5 +1,4 @@
 /* Вампирская тема — Светлая (кроваво-красные акценты на светлом фоне) */
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
 
 :root {
   --bg-color: #F7EDED;
@@ -17,8 +16,8 @@
   --level-btn-bg: #FFFFFF;
   --level-btn-done-bg: #F5E0E0;
   --level-btn-done-border: #8B0000;
-  --gothic-serif: "Cinzel", "Times New Roman", serif;
-  --gothic-text: "Crimson Text", Georgia, serif;
+  --gothic-serif: Arial, Helvetica, sans-serif;
+  --gothic-text: Arial, Helvetica, sans-serif;
 }
 
 body {

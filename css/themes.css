@@ -5,8 +5,6 @@
  * Тёмную схему [data-theme="dark"] НЕ трогаем (сохранена как раньше).
  */
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&subset=cyrillic&display=swap");
-
 /* ===== Книжные цвета (общие) ===== */
 :root {
   --leather: #5e1638;
@@ -16,7 +14,7 @@
   --gilt-highlight: #f3d27a;
   --parchment: #f4e6b0;
   --ink: #2a0a14;
-  --font-book: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-book: Arial, Helvetica, sans-serif;
 }
 
 /* ==== Тёмная (по умолчанию) ==== */
@@ -55,13 +53,13 @@
   --text-color: #2a0a14;
 }
 
-/* ===== Применяем книжный шрифт ===== */
+/* ===== Применяем шрифт Arial ===== */
 body {
-  font-family: var(--font-book), Georgia, serif;
+  font-family: var(--font-book), Helvetica, sans-serif;
 }
 
 h1, h2, h3, .topbar-title, .intro-title, .win-stat-value {
-  font-family: var(--font-book), Georgia, serif;
+  font-family: var(--font-book), Helvetica, sans-serif;
 }
 
 /* ===== Общие книжные стили (работают в обеих схемах) ===== */

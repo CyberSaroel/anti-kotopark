@@ -1,6 +1,6 @@
 .cell { position: relative; }
 .cell img.cat { width: var(--cat-size); height: var(--cat-size); pointer-events: none; filter: drop-shadow(2px 6px 7px rgba(0, 0, 0, 0.5)); position: relative; z-index: 3; }
-.cell .label { margin-top: 2px; font-weight: bold; position: relative; z-index: 3; }
+.cell .label { margin-top: 2px; position: relative; z-index: 3; }
 
 /* Клетка с котом кликабельна (открывает меню социотипа) */
 .cell:has(> img.cat) {
@@ -26,7 +26,6 @@
 /* Anti-Kotopark: Sociotype label at bottom */
 .cell .cat-type-label {
   margin-top: 2px;
-  font-weight: bold;
   font-size: 11px;
   position: relative;
   z-index: 3;
@@ -478,7 +477,7 @@
   padding: 3px 6px;
   font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(10px, 1.7vw, 13px);
-  font-weight: 800;
+  font-weight: normal;
   line-height: 1.15;
   letter-spacing: 0.02em;
   text-align: center;

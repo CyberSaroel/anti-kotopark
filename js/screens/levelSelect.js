@@ -18,7 +18,7 @@ export async function showLevelSelect(root) {
   mountFloatingAudioControls(document.body);
 
   const h = document.createElement("h1");
-  h.textContent = "Соционические коты: Антикотопарк";
+  h.textContent = "Соционические коты: Анти Котопарк";
   root.appendChild(h);
 
   const p = document.createElement("p");

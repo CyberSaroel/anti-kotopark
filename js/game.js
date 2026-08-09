@@ -107,29 +107,87 @@ export async function startAntiLevel(root, levelId) {
   root.innerHTML = "";
   root.className = "game-screen anti-game-screen";
 
+  // Компактное отображение панели управления на мобильных (как в классическом режиме)
+  function isCompactUI() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+
+  // Переход между уровнями/в меню: сначала очистка текущего уровня, затем навигация.
+  // Используется существующая система навигации NavigationService.
+  function leaveLevel(navigate) {
+    cleanupLevel();
+    navigate();
+  }
+
   const bar = document.createElement("div");
   bar.className = "topbar";
 
   const topRow = document.createElement("div");
   topRow.className = "topbar-row";
 
+  // Индикатор текущего уровня
   const title = document.createElement("span");
   title.className = "topbar-title";
-  title.textContent = `Антикотопарк — уровень ${levelId}`;
+  title.textContent = `Уровень ${levelId}`;
 
+  const buttonsWrapper = document.createElement("div");
+  buttonsWrapper.className = "topbar-buttons";
+
+  const navButtons = document.createElement("div");
+  navButtons.className = "topbar-nav-buttons";
+
+  // ← Предыдущий: активен только для уровней 11–51 (уровни 1–9 отключены)
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "topbar-prev";
+  prevBtn.textContent = isCompactUI() ? "←" : "← Предыдущий";
+  prevBtn.disabled = levelId <= 10;
+  prevBtn.addEventListener("click", () => {
+    audioManager.initAudioContext();
+    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    leaveLevel(() => NavigationService.navigate("game", () => startAntiLevel(root, levelId - 1), { replace: true }));
+  });
+
+  // Следующий →: активен для уровней 10–50 (максимум анти-уровней — 51)
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "topbar-next";
+  nextBtn.textContent = isCompactUI() ? "→" : "Следующий →";
+  nextBtn.disabled = levelId >= 51;
+  nextBtn.addEventListener("click", () => {
+    audioManager.initAudioContext();
+    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    leaveLevel(() => NavigationService.navigate("game", () => startAntiLevel(root, levelId + 1), { replace: true }));
+  });
+
+  // Покинуть уровень: возврат на страницу выбора уровней (существующий экран)
   const leaveBtn = document.createElement("button");
   leaveBtn.className = "topbar-leave";
-  leaveBtn.textContent = "Меню";
+  leaveBtn.textContent = isCompactUI() ? "✕" : "Покинуть уровень";
   leaveBtn.addEventListener("click", () => {
-    cleanupLevel();
-    showMenu();
+    audioManager.initAudioContext();
+    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    leaveLevel(() => NavigationService.backTo("levelSelect"));
   });
+
+  if (isCompactUI()) {
+    // Мобильная раскладка: стрелки навигации + кнопка выхода
+    navButtons.appendChild(prevBtn);
+    navButtons.appendChild(nextBtn);
+    buttonsWrapper.appendChild(navButtons);
+    buttonsWrapper.appendChild(leaveBtn);
+
+    topRow.appendChild(title);
+    topRow.appendChild(buttonsWrapper);
+  } else {
+    // Десктопная раскладка: назад, уровень, вперёд, выход в одну строку
+    topRow.appendChild(prevBtn);
+    topRow.appendChild(title);
+    topRow.appendChild(nextBtn);
+    topRow.appendChild(leaveBtn);
+  }
 
   // Очистка при уходе с экрана (браузерная/аппаратная кнопка «Назад»)
   NavigationService.setOnLeave(cleanupLevel);
 
-  topRow.appendChild(title);
-  topRow.appendChild(leaveBtn);
   bar.appendChild(topRow);
   root.appendChild(bar);
 
@@ -833,8 +891,10 @@ export async function startAntiLevel(root, levelId) {
     window.visualViewport?.removeEventListener("resize", onViewportResize);
   }
 
+  // Возврат на экран выбора уровней (используется в оверлеях победы/импичмента
+  // и раньше была кнопкой «Меню»). Используется существующая навигация.
   function showMenu() {
-    import("./screens/introScreen.js").then(m => m.showIntroScreen(root));
+    leaveLevel(() => NavigationService.backTo("levelSelect"));
   }
 
   // Старт таймера по первому взаимодействию

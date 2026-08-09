@@ -6,6 +6,18 @@ import { audioManager } from "./core/audioManager.js";
 import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard } from "./core/boardLayout.js";
 import { fetchLevel } from "./levels/levelLoader.js";
+import { getBestKings } from "./levels/levelRecords.js";
+import {
+  onKingCreated,
+  onKingLost,
+  commitLevel,
+  resetLevel,
+  getKingsThisLevel,
+  getRockets,
+  spendRocket,
+  addTotalMoves,
+  addTotalTime
+} from "./core/royalStats.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -77,6 +89,19 @@ export async function startAntiLevel(root, levelId) {
   let won = false;
   let impeached = false;
   let timerStarted = false;
+
+  // ==== Дополнительные счётчики (адаптация royal-socio-cats) ====
+  // Сброс королей уровня (если предыдущий уровень не был завершён).
+  resetLevel();
+  let levelStartTime = Date.now();
+  let elapsedMs = 0;                 // ⏰ На уровне
+  let levelRemainingMs = START_TIME * 1000; // ⏱️ Время: осталось (новый счётчик)
+  let maxHappyCats = 0;              // ⭐ Макс. довольных
+  let maxHappyInitialized = false;
+  let previousKings = new Set();     // короли на прошлой отрисовке («клетка»)
+  let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
+  let levelCleaned = false;          // защита от двойного addTotalTime
+  let royalTimerId = null;           // таймер новых счётчиков (200 мс)
 
   // --- Отображение ---
   root.innerHTML = "";
@@ -246,6 +271,7 @@ export async function startAntiLevel(root, levelId) {
       if (result.needRedraw) {
         if (result.moved) {
           movesRemaining--;
+          addTotalMoves(1); // общий счётчик ходов (адаптация royal-socio-cats)
           audioManager.playSoundEffect("assets/sounds/move.mp3");
           // Рамка выбора следует за котом на новую позицию
           selectedCatRC = { r, c };
@@ -276,6 +302,7 @@ export async function startAntiLevel(root, levelId) {
         }
       }
     }, onCatClick);
+    updateKingTracking();
     updateStats();
     refitBoard();
     // После перерисовки восстановить рамку выбранного кота
@@ -461,6 +488,7 @@ export async function startAntiLevel(root, levelId) {
       audioManager.playSoundEffect("assets/sounds/victory/1.mp3");
       movesRemaining += MOVE_BONUS_HAPPY;
       timeRemaining += TIME_BONUS_HAPPY;
+      levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика
       showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
     } else {
       // Ошибка: НЕ показываем правильный ответ
@@ -520,6 +548,7 @@ export async function startAntiLevel(root, levelId) {
       happyBonusGranted = true;
       movesRemaining += happy;
       timeRemaining += happy * 2;
+      levelRemainingMs += happy * 2 * 1000; // синхронизация нового счётчика
       showFloatingBonus(`+${happy} 👣 +${happy * 2} ⏱`);
       updateStats();
     }
@@ -541,6 +570,14 @@ export async function startAntiLevel(root, levelId) {
     if (won || impeached) return;
     if (game.isWin()) {
       won = true;
+      // Фиксируем королей до очистки (для HUD)
+      kingsAtWin = getKingsThisLevel();
+      // Анти-фарм: в общий счёт королей/ракет идёт только прибавка над прошлым рекордом
+      const prevBestKings = getBestKings(levelId);
+      const kingsDelta = (prevBestKings === undefined)
+        ? kingsAtWin
+        : Math.max(0, kingsAtWin - prevBestKings);
+      commitLevel(kingsDelta);
       cleanupLevel();
       // Короли: настроение >= 6
       let kings = 0;
@@ -548,6 +585,7 @@ export async function startAntiLevel(root, levelId) {
         if (game.moodAt(cat.r, cat.c) >= KING_MOOD) kings++;
       }
       if (kings > 0) addBonusErrors(kings);
+      updateStats();
       showResultOverlay("Победа!", "Все социотипы угаданы!", [
         { label: "Заново", fn: () => startAntiLevel(root, levelId) },
         { label: "В меню", fn: showMenu }
@@ -579,28 +617,196 @@ export async function startAntiLevel(root, levelId) {
     root.appendChild(overlay);
   }
 
+  // ==== Отслеживание королей (адаптация royal-socio-cats: updateKingTracking) ====
+  function getCurrentKings() {
+    const kings = new Set();
+    for (const cat of game.board.allCats()) {
+      if (game.moodAt(cat.r, cat.c) >= KING_MOOD) {
+        kings.add(`${cat.r},${cat.c}`);
+      }
+    }
+    return kings;
+  }
+
+  function updateKingTracking() {
+    const currentKings = getCurrentKings();
+    const newKings = new Set();
+    // Новые короли
+    for (const key of currentKings) {
+      if (!previousKings.has(key)) {
+        onKingCreated();
+        newKings.add(key);
+      }
+    }
+    // Потерявшиеся короли
+    for (const key of previousKings) {
+      if (!currentKings.has(key)) {
+        onKingLost();
+      }
+    }
+    previousKings = currentKings;
+
+    // Золотая вспышка для новых королей (стили golden-flash уже есть в cats.css)
+    if (newKings.size > 0) {
+      const cells = boardEl.querySelectorAll(".cell");
+      for (const key of newKings) {
+        const [r, c] = key.split(",").map(Number);
+        const index = r * game.board.cols + c;
+        if (cells[index]) {
+          const flash = document.createElement("div");
+          flash.className = "golden-flash";
+          cells[index].appendChild(flash);
+          flash.addEventListener("animationend", () => {
+            if (flash.parentNode) flash.parentNode.removeChild(flash);
+          });
+        }
+      }
+    }
+    return newKings;
+  }
+
+  // Форматирование времени (адаптация formatTime из royal-socio-cats)
+  function formatTime(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+  }
+
   // ==== Обновление HUD ====
   function updateStats() {
     const seconds = Math.max(0, Math.ceil(timeRemaining));
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
     const ss = String(seconds % 60).padStart(2, "0");
+
+    // Довольные/недовольные/максимум довольных (из royal-socio-cats)
+    let happy = 0;
+    let unhappy = 0;
+    for (const cat of game.board.allCats()) {
+      if (game.moodAt(cat.r, cat.c) >= 1) happy++;
+      else unhappy++;
+    }
+    if (!maxHappyInitialized) {
+      maxHappyCats = happy;
+      maxHappyInitialized = true;
+    } else if (happy > maxHappyCats) {
+      maxHappyCats = happy;
+    }
+
+    const movesMade = game.getMoveCount();
+    const kingsCount = won ? kingsAtWin : getKingsThisLevel();
+    const rocketsCount = getRockets();
+    const canUseRocket = rocketsCount > 0 && !won && !impeached;
+    const rocketBtnClass = `rocket-btn ${!canUseRocket ? "rocket-btn-disabled" : ""}`;
+
     stats.innerHTML = `
-      <div class="stat-item">⏱ Время: ${mm}:${ss}</div>
-      <div class="stat-item">👣 Ходы: ${movesRemaining}</div>
+      <div class="stat-item">🎯 Ходы: осталось | сделано (${movesRemaining}/${movesMade})</div>
+      <div class="stat-item">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>
+      <div class="stat-item">⏰ На уровне: ${formatTime(elapsedMs)}</div>
+      <div class="stat-item">😊 Довольные: ${happy}</div>
+      <div class="stat-item">😾 Недовольные: ${unhappy}</div>
+      <div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>
+      <div class="stat-item">👑 Короли: ${kingsCount}</div>
+      <div class="stat-item">⏱ Время [AK]: ${mm}:${ss}</div>
+      <div class="stat-item"> Ходы [AK]: ${movesRemaining}</div>
       <div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>
       <div class="stat-item">😊 Угадано: ${game.getGuessedCount()}/${level.cats.length}</div>
+      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🚀 Ракеты: ${rocketsCount}</button>
     `;
+  }
+
+  // ==== Ракета (адаптация royal-socio-cats: useRocket + showRocketBoost) ====
+  function useRocket() {
+    if (won || impeached) return;
+    if (!spendRocket()) return;
+    audioManager.initAudioContext();
+    audioManager.playSoundEffect("assets/sounds/click.mp3");
+    startTimer();                // таймер счётчиков стартует и по клику на ракету
+    movesRemaining += 10;        // +10 ходов
+    levelRemainingMs += 20_000;  // +20 сек
+    timeRemaining += 20;         // синхронизация с существующим счётчиком AK
+    updateStats();
+    showRocketBoost();
+  }
+
+  function showRocketBoost() {
+    const items = Array.from(stats.querySelectorAll(".stat-item"));
+    const find = (word) => items.find((el) => el.textContent.includes(word));
+    const targets = [
+      { el: find("Ходы"), text: "+10 ходов" },
+      { el: find("Время"), text: "+20 сек" },
+      { el: find("Ракеты"), text: "-1 🚀" },
+    ];
+    for (const t of targets) {
+      if (!t.el) continue;
+      const rect = t.el.getBoundingClientRect();
+      const glow = document.createElement("div");
+      glow.className = "boost-glow";
+      glow.style.left = rect.left + "px";
+      glow.style.top = rect.top + "px";
+      glow.style.width = rect.width + "px";
+      glow.style.height = rect.height + "px";
+      document.body.appendChild(glow);
+      glow.addEventListener("animationend", () => glow.remove());
+      const float = document.createElement("div");
+      float.className = "boost-float";
+      float.textContent = t.text;
+      float.style.left = (rect.left + rect.width / 2) + "px";
+      float.style.top = rect.top + "px";
+      document.body.appendChild(float);
+      float.addEventListener("animationend", () => float.remove());
+    }
+    const rocket = document.createElement("div");
+    rocket.className = "rocket-fly-big";
+    rocket.textContent = "🚀";
+    boardArea.appendChild(rocket);
+    rocket.addEventListener("animationend", () => rocket.remove());
+    boardArea.classList.add("screen-shake");
+    boardArea.addEventListener("animationend", () => boardArea.classList.remove("screen-shake"), { once: true });
+  }
+
+  // Один слушатель на весь блок статистики — переживает перерисовку кнопки
+  // (updateStats перезаписывает innerHTML при каждом обновлении).
+  let lastRocketPointerTime = 0;
+  stats.addEventListener("pointerdown", (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest("#rocket-btn")) {
+      lastRocketPointerTime = Date.now();
+      useRocket();
+    }
+  });
+  stats.addEventListener("click", (e) => {
+    if (e.target.closest("#rocket-btn")) {
+      if (Date.now() - lastRocketPointerTime > 500) useRocket();
+    }
+  });
+
+  // ==== Таймер дополнительных счётчиков (⏰ На уровне, ⏱️ Время осталось) ====
+  function startRoyalTimer() {
+    if (royalTimerId !== null) return;
+    royalTimerId = setInterval(() => {
+      if (!levelActive || won || impeached) return;
+      elapsedMs = Date.now() - levelStartTime;
+      levelRemainingMs = Math.max(0, levelRemainingMs - 200);
+      updateStats();
+    }, 200);
   }
 
   // ==== Таймер ====
   function startTimer() {
     if (timerStarted) return;
     timerStarted = true;
+    startRoyalTimer();
     timerId = setInterval(() => {
       if (!levelActive || won || impeached) return;
       timeRemaining--;
       if (timeRemaining <= 0) {
         timeRemaining = 0;
+        levelRemainingMs = 0;
         updateStats();
         checkImpeachment("Время вышло");
         return;
@@ -613,6 +819,13 @@ export async function startAntiLevel(root, levelId) {
   function cleanupLevel() {
     levelActive = false;
     if (timerId) { clearInterval(timerId); timerId = null; }
+    if (royalTimerId !== null) { clearInterval(royalTimerId); royalTimerId = null; }
+    // Копим общее время игры (адаптация addTotalTime из royal-socio-cats)
+    if (!levelCleaned) {
+      levelCleaned = true;
+      elapsedMs = Date.now() - levelStartTime;
+      addTotalTime(elapsedMs);
+    }
     stopBoardLayoutListener();
     document.removeEventListener("keydown", onModalKeyDown);
     document.removeEventListener("pointerdown", onDocPointerDown);

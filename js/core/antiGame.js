@@ -14,11 +14,16 @@ export class AntiGame {
     // Track guessed sociotypes: map of cat index -> guessed type or null
     this.guessedTypes = new Map();
     
-    // One cat has known type (first cat in list)
+    // Cats with initially known types: first `knownCats` cats in the list.
+    // Default is 1 (level 10 behavior); levels 11-21 set knownCats: 5.
     this.knownCatIndex = 0;
-    const firstCat = level.cats[0];
-    if (firstCat) {
-      this.guessedTypes.set(0, firstCat.type);
+    const knownCats = level.knownCats || 1;
+    const knownCount = Math.min(knownCats, level.cats.length);
+    for (let i = 0; i < knownCount; i++) {
+      const cat = level.cats[i];
+      if (cat) {
+        this.guessedTypes.set(i, cat.type);
+      }
     }
     
     // Assign numbers to cats (1-10)

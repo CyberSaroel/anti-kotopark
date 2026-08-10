@@ -432,7 +432,6 @@ export async function startAntiLevel(root, levelId) {
       btn.addEventListener("click", () => {
         if (currentCatIndex === null) return;
         audioManager.initAudioContext();
-        audioManager.playSoundEffect("assets/sounds/click.mp3");
         const catIdx = currentCatIndex;
         hideSocioMenu();
         handleGuess(catIdx, type);
@@ -545,17 +544,17 @@ export async function startAntiLevel(root, levelId) {
     if (won || impeached) return;
     const result = game.makeGuess(catIndex, guessedType);
     if (result.correct) {
-      // Успех: довольный кот
-      audioManager.playSoundEffect("assets/sounds/victory/1.mp3");
+      // Успех: довольный кот — короткий "Дзинь!"
+      audioManager.playDing();
       movesRemaining += MOVE_BONUS_HAPPY;
       timeRemaining += TIME_BONUS_HAPPY;
       levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика
       showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
     } else {
-      // Ошибка: НЕ показываем правильный ответ
+      // Ошибка: НЕ показываем правильный ответ — низкий противный звук
       errorsMade++;
       currentErrorsRemaining--;
-      audioManager.playSoundEffect("assets/sounds/click.mp3");
+      audioManager.playLoseSound();
       flashCatRed();
       if (currentErrorsRemaining <= 0) {
         catState = "idle";

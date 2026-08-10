@@ -154,17 +154,18 @@ export async function showAntiGameScreen(root) {
       btn.addEventListener("click", () => {
         if (selectedCatIndex !== null) {
           audioManager.initAudioContext();
-          audioManager.playSoundEffect("assets/sounds/click.mp3");
           
           const result = game.makeGuess(selectedCatIndex, type);
           if (result.correct) {
-            // Correct guess
+            // Correct guess — короткий "Дзинь!"
+            audioManager.playDing();
             selectedCatInfo.textContent = `Кот #${selectedCatIndex + 1}: ${getTypeDisplayName(type)} ✓`;
             selectedCatInfo.style.color = "#4caf50";
             renderBoard();
             checkWin();
           } else {
-            // Wrong guess
+            // Wrong guess — низкий противный звук
+            audioManager.playLoseSound();
             selectedCatInfo.textContent = `Неверно! Это ${getTypeDisplayName(result.actualType)}`;
             selectedCatInfo.style.color = "#f44336";
           }

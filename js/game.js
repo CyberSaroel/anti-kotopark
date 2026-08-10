@@ -138,11 +138,12 @@ export async function startAntiLevel(root, levelId) {
   const navButtons = document.createElement("div");
   navButtons.className = "topbar-nav-buttons";
 
-  // ← Предыдущий: активен только для уровней 11–51 (уровни 1–9 отключены)
+  // ← Предыдущий: активен только для уровней 12–51
+  // (уровни 1–10 отключены, уровень 11 — первый доступный)
   const prevBtn = document.createElement("button");
   prevBtn.className = "topbar-prev";
   prevBtn.textContent = isCompactUI() ? "←" : "← Предыдущий";
-  prevBtn.disabled = levelId <= 10;
+  prevBtn.disabled = levelId <= 11;
   prevBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");

@@ -85,8 +85,8 @@ export async function showLevelSelect(root) {
     return;
   }
 
-  // Уровни 1–9 отключены; доступны только уровни 10–51
-  const lockedIds = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  // Уровни 1–10 отключены; доступны только уровни 11–51
+  const lockedIds = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
   for (const lvl of manifest.levels) {
     const btn = document.createElement("button");

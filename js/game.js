@@ -24,8 +24,9 @@ import {
  *
  * Геймплей: тап по коту (рамка) → меню социотипов → выбор.
  * Ошибка не показывает правильный ответ, только красная вспышка + счётчик.
- * Импичмент: время (120 с), ходы (60), ошибки (3 + бонус за королей).
- * Победа: все типы угаданы. Бонус за королей (настроение >= +6) в конце.
+ * Импичмент: время (120 с), ходы (60), ошибки (минимум 3; при рестарте не меньше 3).
+ * Победа: все коты довольны (зелёные, настроение >= +1).
+ * Бонус за королей (настроение >= +6): за каждые 3 короля +1 право на ошибку.
  *
  * Начиная с v5 функция обобщена: уровни 10–51 «Антикотопарка» используют
  * одну и ту же логику (startAntiLevel / startLevel10). Константы режима
@@ -68,7 +69,8 @@ export async function startAntiLevel(root, levelId) {
   levelActive = true;
 
   const bonus = consumeBonusErrors();
-  const errorsRemaining = START_ERRORS + bonus;
+  // Право на ошибку при старте/рестарте уровня всегда не меньше 3
+  const errorsRemaining = Math.max(3, START_ERRORS + bonus);
 
   let level;
   try {
@@ -642,12 +644,14 @@ export async function startAntiLevel(root, levelId) {
       for (const cat of game.board.allCats()) {
         if (game.moodAt(cat.r, cat.c) >= KING_MOOD) kings++;
       }
-      if (kings > 0) addBonusErrors(kings);
+      // Бонус за королей: за каждые 3 короля +1 право на ошибку
+      const bonusErrors = Math.floor(kings / 3);
+      if (bonusErrors > 0) addBonusErrors(bonusErrors);
       updateStats();
-      showResultOverlay("Победа!", "Все социотипы угаданы!", [
+      showResultOverlay("Победа!", "Все коты довольны!", [
         { label: "Заново", fn: () => startAntiLevel(root, levelId) },
         { label: "В меню", fn: showMenu }
-      ], `Ошибки: ${errorsMade} | Короли: ${kings} | Бонус: +${kings} ошибок на след. уровень`);
+      ], `Ошибки: ${errorsMade} | Короли: ${kings} | Бонус: +${bonusErrors} прав на ошибку (за каждые 3 короля)`);
     }
   }
 
@@ -769,10 +773,8 @@ export async function startAntiLevel(root, levelId) {
       <div class="stat-item">😾 Недовольные: ${unhappy}</div>
       <div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>
       <div class="stat-item">👑 Короли: ${kingsCount}</div>
-      <div class="stat-item">⏱ Время [AK]: ${mm}:${ss}</div>
-      <div class="stat-item"> Ходы [AK]: ${movesRemaining}</div>
       <div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>
-      <div class="stat-item">😊 Угадано: ${game.getGuessedCount()}/${level.cats.length}</div>
+      <div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>
       <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🚀 Ракеты: ${rocketsCount}</button>
     `;
   }

@@ -240,10 +240,14 @@ export async function showAntiGameScreen(root) {
         <div class="stat-value">${formatTime(elapsedMs)}</div>
       </div>
       <div class="stat-box">
-        <div class="stat-label">Угадано</div>
-        <div class="stat-value">${game.getGuessedCount()}/${level.cats.length}</div>
+        <div class="stat-label">Зелёные</div>
+        <div class="stat-value">${countHappy()}/${game.board.allCats().length}</div>
       </div>
     `;
+  }
+
+  function countHappy() {
+    return game.board.allCats().filter(({ r, c }) => game.moodAt(r, c) >= 1).length;
   }
 
   function checkWin() {
@@ -254,7 +258,7 @@ export async function showAntiGameScreen(root) {
       winOverlay.innerHTML = `
         <div class="win-content">
           <h2>Победа!</h2>
-          <p>Вы угадали все социотипы!</p>
+          <p>Все коты довольны!</p>
           <p>Ходов: ${game.getMoveCount()}</p>
           <p>Время: ${formatTime(elapsedMs)}</p>
           <button class="win-restart-btn">Играть снова</button>

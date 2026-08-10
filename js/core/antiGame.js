@@ -80,10 +80,10 @@ export class AntiGame {
     return { correct: isCorrect, actualType };
   }
 
-  // Check win condition: all cats have their types guessed correctly
+  // Check win condition: all cats are happy ("green", mood >= 1)
   isWin() {
-    for (let i = 0; i < this.level.cats.length; i++) {
-      if (!this.isTypeKnown(i)) return false;
+    for (const cat of this.board.allCats()) {
+      if (this.moodAt(cat.r, cat.c) < 1) return false;
     }
     return true;
   }

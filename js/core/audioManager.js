@@ -114,6 +114,27 @@ export class AudioManager {
     oscillator.stop(now + 0.5);
   }
 
+  // Звук правильного угадывания социотипа — весёлое восходящее арпеджио
+  playCorrectGuess() {
+    if (!isSfxEnabled() || !this.audioCtx) return;
+    const now = this.audioCtx.currentTime;
+    const notes = [1046.5, 1318.5, 1568]; // C6 → E6 → G6
+    notes.forEach((freq, i) => {
+      const oscillator = this.audioCtx.createOscillator();
+      const gainNode = this.audioCtx.createGain();
+      const t = now + i * 0.09;
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(freq, t);
+      const finalVolume = 0.25 * getSfxVolume();
+      gainNode.gain.setValueAtTime(finalVolume, t);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+      oscillator.start(t);
+      oscillator.stop(t + 0.4);
+    });
+  }
+
   // Звук поражения
   playLoseSound() {
     if (!isSfxEnabled() || !this.audioCtx) return;

@@ -544,8 +544,8 @@ export async function startAntiLevel(root, levelId) {
     if (won || impeached) return;
     const result = game.makeGuess(catIndex, guessedType);
     if (result.correct) {
-      // Успех: довольный кот — короткий "Дзинь!"
-      audioManager.playDing();
+      // Успех: правильное угадывание социотипа — весёлый звук
+      audioManager.playCorrectGuess();
       movesRemaining += MOVE_BONUS_HAPPY;
       timeRemaining += TIME_BONUS_HAPPY;
       levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика

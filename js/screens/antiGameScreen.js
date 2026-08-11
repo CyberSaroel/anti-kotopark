@@ -157,8 +157,8 @@ export async function showAntiGameScreen(root) {
           
           const result = game.makeGuess(selectedCatIndex, type);
           if (result.correct) {
-            // Correct guess — короткий "Дзинь!"
-            audioManager.playDing();
+            // Correct guess — весёлый звук правильного угадывания
+            audioManager.playCorrectGuess();
             selectedCatInfo.textContent = `Кот #${selectedCatIndex + 1}: ${getTypeDisplayName(type)} ✓`;
             selectedCatInfo.style.color = "#4caf50";
             renderBoard();

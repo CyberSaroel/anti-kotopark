@@ -1,8 +1,8 @@
 {
   "id": 52,
   "name": "Уровень 52",
-  "rows": 8,
-  "cols": 8,
+  "rows": 6,
+  "cols": 6,
   "water": [
     [
       2,
@@ -118,5 +118,5 @@
       "c": 1
     }
   ],
-  "knownCats": 1
+  "knownCats": 2
 }

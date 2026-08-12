@@ -150,11 +150,11 @@ export async function startAntiLevel(root, levelId) {
     leaveLevel(() => NavigationService.navigate("game", () => startAntiLevel(root, levelId - 1), { replace: true }));
   });
 
-  // Следующий →: активен для уровней 10–50 (максимум анти-уровней — 51)
+  // Следующий →: активен для уровней 10–60 (максимум анти-уровней — 61)
   const nextBtn = document.createElement("button");
   nextBtn.className = "topbar-next";
   nextBtn.textContent = isCompactUI() ? "→" : "Следующий →";
-  nextBtn.disabled = levelId >= 51;
+  nextBtn.disabled = levelId >= 61;
   nextBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");

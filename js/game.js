@@ -7,18 +7,18 @@ import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard } from "./core/boardLayout.js";
 import { fetchLevel } from "./levels/levelLoader.js";
 import { getBestKings } from "./levels/levelRecords.js";
- import {
-   onKingCreated,
-   onKingLost,
-   commitLevel,
-   resetLevel,
-   getKingsThisLevel,
-   getRockets,
-   spendRocket,
-   addTotalMoves,
-   addTotalTime
- } from "./core/royalStats.js";
- import { showStatBoost, findStatItem } from "./ui/statBoost.js";
+import {
+  onKingCreated,
+  onKingLost,
+  commitLevel,
+  resetLevel,
+  getKingsThisLevel,
+  getRockets,
+  spendRocket,
+  addTotalMoves,
+  addTotalTime
+} from "./core/royalStats.js";
+import { showStatBoost, findStatItem } from "./ui/statBoost.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -372,6 +372,7 @@ export async function startAntiLevel(root, levelId) {
         }
       }
     }, onCatClick);
+    updateMoodSoundTracking();   // звук "Дзинь!" при повышении mood любого кота
     updateKingTracking();
     updateStats();
     refitBoard();
@@ -832,9 +833,8 @@ export async function startAntiLevel(root, levelId) {
       maxHappyCats = happy;
       maxHappyInitialized = true;
     } else if (happy > maxHappyCats) {
-      // Переход кота в зелёное состояние (mood >= +1):
-      // проигрываем тот же "дзинь", что в royal-socio-cats, только в момент роста.
-      audioManager.playDing();
+      // Звук "Дзинь!" при повышении mood воспроизводит updateMoodSoundTracking()
+      // (по каждому коту, на всех переходах 0→1 … 5→6), поэтому здесь НЕ дублируем.
       maxHappyCats = happy;
     }
 

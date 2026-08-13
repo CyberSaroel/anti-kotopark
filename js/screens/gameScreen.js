@@ -291,6 +291,31 @@ export async function showGameScreen(root, levelId) {
   let maxHappyInitialized = false;
   let previousMoods = {};       // настроение котов на прошлой отрисовке (ключ — номер клетки)
   let previousCatCells = null;  // какие клетки были заняты котами на прошлой отрисовке
+  
+  // ==== Звук "Дзинь!" при повышении mood любого кота ====
+  // В royal-socio-cats playDing играет при росте счётчика довольных.
+  // Здесь играем ОДИН раз на каждый повышающийся шаг mood: 0→1, 1→2, … 5→6.
+  let moodSoundInitialized = false;
+  let previousMoodsSound = {};
+  function updateMoodSoundTracking() {
+    const curMoods = {};
+    game.board.allCats().forEach((cat, i) => {
+      curMoods[i] = calcMood(game.board, cat.r, cat.c);
+    });
+    if (!moodSoundInitialized) {
+      previousMoodsSound = curMoods;
+      moodSoundInitialized = true;
+      return;
+    }
+    for (const i of Object.keys(curMoods)) {
+      const prev = previousMoodsSound[i];
+      const cur = curMoods[i];
+      if (prev !== undefined && cur !== undefined && cur > prev) {
+        audioManager.playDing();
+      }
+    }
+    previousMoodsSound = curMoods;
+  }
 
   function handleImpeachment() {
     if (won || impeached) return;
@@ -473,10 +498,8 @@ export async function showGameScreen(root, levelId) {
       // Золотая анимация бонуса за рост максимума довольных (как у ракеты)
       showStatBoost(findStatItem(stats, "Ходы"), "+5", true);
       showStatBoost(findStatItem(stats, "Время"), "+10", true);
-      // "Дзинь!" за каждое увеличение максимума на 1
-      for (let i = 0; i < increase; i++) {
-        trackedSetTimeout(() => audioManager.playDing(), i * 150);
-      }
+      // Звук "Дзинь!" при повышении mood играет updateMoodSoundTracking()
+      // (один раз на каждый переход 0→1…5→6), поэтому здесь НЕ дублируем.
     }
 
     // Работа с однократными пиками на 30 и 20 секунд
@@ -543,6 +566,7 @@ export async function showGameScreen(root, levelId) {
   }
 
   async function draw() {
+    updateMoodSoundTracking();   // звук "Дзинь!" при повышении mood любого кота
     const newKings = updateKingTracking();
     await renderBoard(boardEl, game, onCell);
     

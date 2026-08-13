@@ -7,17 +7,18 @@ import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard } from "./core/boardLayout.js";
 import { fetchLevel } from "./levels/levelLoader.js";
 import { getBestKings } from "./levels/levelRecords.js";
-import {
-  onKingCreated,
-  onKingLost,
-  commitLevel,
-  resetLevel,
-  getKingsThisLevel,
-  getRockets,
-  spendRocket,
-  addTotalMoves,
-  addTotalTime
-} from "./core/royalStats.js";
+ import {
+   onKingCreated,
+   onKingLost,
+   commitLevel,
+   resetLevel,
+   getKingsThisLevel,
+   getRockets,
+   spendRocket,
+   addTotalMoves,
+   addTotalTime
+ } from "./core/royalStats.js";
+ import { showStatBoost, findStatItem } from "./ui/statBoost.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -102,7 +103,11 @@ export async function startAntiLevel(root, levelId) {
   let levelRemainingMs = START_TIME * 1000; // ⏱️ Время: осталось (новый счётчик)
   let maxHappyCats = 0;              // ⭐ Макс. довольных
   let maxHappyInitialized = false;
+  let lastHappyCount = null;         // предыдущее число довольных (для анимации счётчика)
+  let lastUnhappyCount = null;       // предыдущее число недовольных (для анимации счётчика)
   let previousKings = new Set();     // короли на прошлой отрисовке («клетка»)
+  let previousMoodsMap = {};         // предыдущее настроение каждого кота (ключ "r,c")
+  let moodsInitialized = false;      // первый проход — фиксируем стартовые настроения без звука
   let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
   let levelCleaned = false;          // защита от двойного addTotalTime
   let royalTimerId = null;           // таймер новых счётчиков (200 мс)
@@ -332,10 +337,12 @@ export async function startAntiLevel(root, levelId) {
       audioManager.initAudioContext();
       const result = game.clickCell(r, c);
       if (result.needRedraw) {
-        if (result.moved) {
-          movesRemaining--;
-          addTotalMoves(1); // общий счётчик ходов (адаптация royal-socio-cats)
-          audioManager.playSoundEffect("assets/sounds/move.mp3");
+       if (result.moved) {
+         movesRemaining--;
+         addTotalMoves(1); // общий счётчик ходов (адаптация royal-socio-cats)
+         // Красная вспышка штрафа на счётчике ходов (адаптация boost-glow/boost-float)
+         showStatBoost(findStatItem(stats, "Ходы"), "-1", false);
+         audioManager.playSoundEffect("assets/sounds/move.mp3");
           // Рамка выбора следует за котом на новую позицию
           selectedCatRC = { r, c };
           render();
@@ -551,8 +558,11 @@ export async function startAntiLevel(root, levelId) {
       movesRemaining += MOVE_BONUS_HAPPY;
       timeRemaining += TIME_BONUS_HAPPY;
       levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика
-      showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
-    } else {
+       showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
+       // Золотая анимация бонуса на счётчиках ходов и времени (как boost у ракеты)
+       showStatBoost(findStatItem(stats, "Ходы"), `+${MOVE_BONUS_HAPPY}`, true);
+       showStatBoost(findStatItem(stats, "Время"), `+${TIME_BONUS_HAPPY}`, true);
+     } else {
       // Ошибка: НЕ показываем правильный ответ — низкий противный звук.
       // За неправильное угадывание убавляются ходы и время (как в royal-socio-cats).
       errorsMade++;
@@ -562,8 +572,12 @@ export async function startAntiLevel(root, levelId) {
       levelRemainingMs = Math.max(0, levelRemainingMs - TIME_PENALTY_ERROR * 1000);
       audioManager.playLoseSound();
       flashCatRed();
-      showFloatingBonus(`-${MOVE_PENALTY_ERROR} 👣 -${TIME_PENALTY_ERROR} ⏱`);
-      if (currentErrorsRemaining <= 0) {
+       showFloatingBonus(`-${MOVE_PENALTY_ERROR} 👣 -${TIME_PENALTY_ERROR} ⏱`);
+       // Красная анимация штрафа на счётчиках ходов, времени и ошибок
+       showStatBoost(findStatItem(stats, "Ходы"), `-${MOVE_PENALTY_ERROR}`, false);
+       showStatBoost(findStatItem(stats, "Время"), `-${TIME_PENALTY_ERROR}`, false);
+       showStatBoost(findStatItem(stats, "Ошибки"), "-1", false);
+       if (currentErrorsRemaining <= 0) {
         catState = "idle";
         hideSocioMenu();
         if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
@@ -638,10 +652,13 @@ export async function startAntiLevel(root, levelId) {
       movesRemaining += happy;
       timeRemaining += happy * 2;
       levelRemainingMs += happy * 2 * 1000; // синхронизация нового счётчика
-      showFloatingBonus(`+${happy} 👣 +${happy * 2} ⏱`);
-      updateStats();
-    }
-  }
+       showFloatingBonus(`+${happy} 👣 +${happy * 2} ⏱`);
+       updateStats();
+       // Золотая анимация бонуса за довольных котов
+       showStatBoost(findStatItem(stats, "Ходы"), `+${happy}`, true);
+       showStatBoost(findStatItem(stats, "Время"), `+${happy * 2}`, true);
+     }
+   }
 
   // ==== Импичмент ====
   function checkImpeachment(reason) {
@@ -708,6 +725,33 @@ export async function startAntiLevel(root, levelId) {
     root.appendChild(overlay);
   }
 
+  // ==== Отслеживание изменения mood каждого кота ====
+  // Звук "Дзинь!" (audioManager.playDing) воспроизводится ОДИН раз в момент
+  // повышения mood любого кота: 0→1, 1→2, 2→3, 3→4, 4→5, 5→6.
+  // Первый проход (moodsInitialized=false) только фиксирует стартовые значения
+  // и звук НЕ играет — иначе "Дзинь!" звенел бы при каждом входе на уровень.
+  function updateMoodSoundTracking() {
+    const currentMoods = {};
+    for (const cat of game.board.allCats()) {
+      const key = `${cat.r},${cat.c}`;
+      currentMoods[key] = game.moodAt(cat.r, cat.c);
+    }
+    if (!moodsInitialized) {
+      previousMoodsMap = currentMoods;
+      moodsInitialized = true;
+      return;
+    }
+    // Для каждого кота: если mood вырос (строго), играем один "Дзинь!"
+    for (const key of Object.keys(currentMoods)) {
+      const prev = previousMoodsMap[key];
+      const cur = currentMoods[key];
+      if (prev !== undefined && cur > prev) {
+        audioManager.playDing();
+      }
+    }
+    previousMoodsMap = currentMoods;
+  }
+
   // ==== Отслеживание королей (адаптация royal-socio-cats: updateKingTracking) ====
   function getCurrentKings() {
     const kings = new Set();
@@ -737,7 +781,10 @@ export async function startAntiLevel(root, levelId) {
     }
     previousKings = currentKings;
 
-    // Золотая вспышка для новых королей (стили golden-flash уже есть в cats.css)
+    // Золотая вспышка на счётчике королей при появлении каждого короля
+    if (newKings.size > 0) {
+      showStatBoost(findStatItem(stats, "Короли"), `+${newKings.size}`, true);
+    }
     if (newKings.size > 0) {
       const cells = boardEl.querySelectorAll(".cell");
       for (const key of newKings) {
@@ -790,6 +837,16 @@ export async function startAntiLevel(root, levelId) {
       audioManager.playDing();
       maxHappyCats = happy;
     }
+
+    // Анимации на счётчиках довольных/недовольных при их изменении
+    if (lastHappyCount !== null && happy !== lastHappyCount) {
+      showStatBoost(findStatItem(stats, "Довольные"), `${happy - lastHappyCount > 0 ? "+" : ""}${happy - lastHappyCount}`, happy > lastHappyCount);
+    }
+    if (lastUnhappyCount !== null && unhappy !== lastUnhappyCount) {
+      showStatBoost(findStatItem(stats, "Недовольные"), `${unhappy - lastUnhappyCount > 0 ? "+" : ""}${unhappy - lastUnhappyCount}`, unhappy < lastUnhappyCount);
+    }
+    lastHappyCount = happy;
+    lastUnhappyCount = unhappy;
 
     const movesMade = game.getMoveCount();
     const kingsCount = won ? kingsAtWin : getKingsThisLevel();

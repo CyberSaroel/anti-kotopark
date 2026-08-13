@@ -24,6 +24,7 @@ import { mountFloatingAudioControls } from "../ui/floatingAudioControls.js";
 import { audioManager } from "../core/audioManager.js";
 import NavigationService from "../core/navigation.js";
 import { addTotalMoves, addTotalTime } from "../core/gameStats.js";
+import { showStatBoost, findStatItem } from "../ui/statBoost.js";
 
 function isCompactUI() {
   return window.matchMedia("(max-width: 768px)").matches;
@@ -329,6 +330,10 @@ export async function showGameScreen(root, levelId) {
       }
     }
     previousKings = currentKings;
+    // Золотая вспышка на счётчике королей при появлении каждого короля
+    if (newKings.size > 0) {
+      showStatBoost(findStatItem(stats, "Короли"), `+${newKings.size}`, true);
+    }
     return newKings;
   }
 
@@ -353,6 +358,8 @@ export async function showGameScreen(root, levelId) {
       if (result.moved) {
         remainingMoves--;
         addTotalMoves(1); // копим общее число ходов за всю игру
+        // Красная вспышка штрафа на счётчике ходов (адаптация boost-glow/boost-float)
+        showStatBoost(findStatItem(stats, "Ходы"), "-1", false);
         audioManager.playSoundEffect("assets/sounds/move.mp3");
         // Если ходов мало — тихий пик в другой (низкой) тональности
         if (remainingMoves <= 20) {
@@ -420,8 +427,25 @@ export async function showGameScreen(root, levelId) {
   }
 
   // Один слушатель на весь блок статистики — переживает перерисовку кнопки.
+  // pointerdown срабатывает мгновенно, даже если кнопка будет пересоздана
+  // таймером (updateStats вызывается каждые 200 мс и перезаписывает innerHTML).
+  // click — fallback для активации с клавиатуры (Enter/Space),
+  // не создаёт двойное срабатывание после pointerdown.
+  let lastRocketPointerTime = 0;
+  stats.addEventListener("pointerdown", (e) => {
+    // Только основная кнопка мыши / касание.
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest("#rocket-btn")) {
+      lastRocketPointerTime = Date.now();
+      useRocket();
+    }
+  });
   stats.addEventListener("click", (e) => {
-    if (e.target.closest("#rocket-btn")) useRocket();
+    if (e.target.closest("#rocket-btn")) {
+      // Повторный click в течение 500 мс после pointerdown игнорируем,
+      // чтобы не потратить ракету дважды за одно нажатие (как в royal-socio-cats).
+      if (Date.now() - lastRocketPointerTime > 500) useRocket();
+    }
   });
 
   function updateStats() {
@@ -446,6 +470,9 @@ export async function showGameScreen(root, levelId) {
       remainingMs = countdown.remainingMs;
       remainingMoves += 5;
       maxHappyCats = happy;
+      // Золотая анимация бонуса за рост максимума довольных (как у ракеты)
+      showStatBoost(findStatItem(stats, "Ходы"), "+5", true);
+      showStatBoost(findStatItem(stats, "Время"), "+10", true);
       // "Дзинь!" за каждое увеличение максимума на 1
       for (let i = 0; i < increase; i++) {
         trackedSetTimeout(() => audioManager.playDing(), i * 150);

@@ -38,6 +38,8 @@ const START_MOVES = 60;           // ходов
 const START_ERRORS = 3;           // лимит ошибок
 const MOVE_BONUS_HAPPY = 10;      // +ходов за довольного кота
 const TIME_BONUS_HAPPY = 20;      // +секунд за довольного кота
+const MOVE_PENALTY_ERROR = 5;     // −ходов за неправильное угадывание
+const TIME_PENALTY_ERROR = 10;    // −секунд за неправильное угадывание
 const KING_MOOD = 6;              // король: настроение >= 6
 
 export const LEVEL10_ID = 10;
@@ -551,11 +553,16 @@ export async function startAntiLevel(root, levelId) {
       levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика
       showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
     } else {
-      // Ошибка: НЕ показываем правильный ответ — низкий противный звук
+      // Ошибка: НЕ показываем правильный ответ — низкий противный звук.
+      // За неправильное угадывание убавляются ходы и время (как в royal-socio-cats).
       errorsMade++;
       currentErrorsRemaining--;
+      movesRemaining = Math.max(0, movesRemaining - MOVE_PENALTY_ERROR);
+      timeRemaining = Math.max(0, timeRemaining - TIME_PENALTY_ERROR);
+      levelRemainingMs = Math.max(0, levelRemainingMs - TIME_PENALTY_ERROR * 1000);
       audioManager.playLoseSound();
       flashCatRed();
+      showFloatingBonus(`-${MOVE_PENALTY_ERROR} 👣 -${TIME_PENALTY_ERROR} ⏱`);
       if (currentErrorsRemaining <= 0) {
         catState = "idle";
         hideSocioMenu();
@@ -565,6 +572,28 @@ export async function startAntiLevel(root, levelId) {
         currentCatIndex = null;
         render();
         checkImpeachment("Ошибки типирования сверх лимита");
+        return;
+      }
+      if (timeRemaining <= 0) {
+        catState = "idle";
+        hideSocioMenu();
+        if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
+        selectedCatEl = null;
+        selectedCatRC = null;
+        currentCatIndex = null;
+        render();
+        checkImpeachment("Время вышло");
+        return;
+      }
+      if (movesRemaining <= 0) {
+        catState = "idle";
+        hideSocioMenu();
+        if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
+        selectedCatEl = null;
+        selectedCatRC = null;
+        currentCatIndex = null;
+        render();
+        checkImpeachment("Ходы закончились");
         return;
       }
     }
@@ -756,6 +785,9 @@ export async function startAntiLevel(root, levelId) {
       maxHappyCats = happy;
       maxHappyInitialized = true;
     } else if (happy > maxHappyCats) {
+      // Переход кота в зелёное состояние (mood >= +1):
+      // проигрываем тот же "дзинь", что в royal-socio-cats, только в момент роста.
+      audioManager.playDing();
       maxHappyCats = happy;
     }
 

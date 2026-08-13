@@ -163,7 +163,8 @@ export async function startAntiLevel(root, levelId) {
   const nextBtn = document.createElement("button");
   nextBtn.className = "topbar-next";
   nextBtn.textContent = isCompactUI() ? "→" : "Следующий →";
-  nextBtn.disabled = levelId >= 61;
+  // 61 — последний анти перед классическим блоком 62–71; 81 — последний анти-уровень
+  nextBtn.disabled = levelId >= 81 || levelId === 61;
   nextBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");

@@ -19,6 +19,7 @@ import {
   addTotalTime
 } from "./core/royalStats.js";
 import { showStatBoost, findStatItem } from "./ui/statBoost.js";
+import { launchLevel } from "./screens/gameScreen.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -156,7 +157,7 @@ export async function startAntiLevel(root, levelId) {
   prevBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
-    leaveLevel(() => NavigationService.navigate("game", () => startAntiLevel(root, levelId - 1), { replace: true }));
+    leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId - 1), { replace: true }));
   });
 
   // Следующий →: активен для уровней 10–60 (максимум анти-уровней — 61)
@@ -164,11 +165,11 @@ export async function startAntiLevel(root, levelId) {
   nextBtn.className = "topbar-next";
   nextBtn.textContent = isCompactUI() ? "→" : "Следующий →";
   // 61 — последний анти перед классическим блоком 62–71; 81 — последний анти-уровень
-  nextBtn.disabled = levelId >= 81 || levelId === 61;
+  nextBtn.disabled = levelId >= 100;
   nextBtn.addEventListener("click", () => {
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
-    leaveLevel(() => NavigationService.navigate("game", () => startAntiLevel(root, levelId + 1), { replace: true }));
+    leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId + 1), { replace: true }));
   });
 
   // Покинуть уровень: возврат на страницу выбора уровней (существующий экран)

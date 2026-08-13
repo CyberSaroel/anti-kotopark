@@ -108,6 +108,8 @@ export async function startAntiLevel(root, levelId) {
   let previousKings = new Set();     // короли на прошлой отрисовке («клетка»)
   let previousMoodsMap = {};         // предыдущее настроение каждого кота (ключ "r,c")
   let moodsInitialized = false;      // первый проход — фиксируем стартовые настроения без звука
+  let prevAntiCatCells = null;       // клетки с котами на прошлой отрисовке (Set индексов)
+  let prevAntiMoods = {};            // настроение котов на прошлой отрисовке (индекс → mood)
   let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
   let levelCleaned = false;          // защита от двойного addTotalTime
   let royalTimerId = null;           // таймер новых счётчиков (200 мс)
@@ -373,6 +375,37 @@ export async function startAntiLevel(root, levelId) {
       }
     }, onCatClick);
     updateMoodSoundTracking();   // звук "Дзинь!" при повышении mood любого кота
+
+    // === Анимация превращения котов (адаптация royal-socio-cats) ===
+    // После пересчёта соседства и настроения сравниваем с прошлой отрисовкой:
+    // - кот «приземлился» на новую клетку  → cat-land;
+    // - настроение любого кота ИЗМЕНИЛОСЬ (вверх или вниз) → mood-change.
+    // CSS-классы cat-land/mood-change уже есть в css/cats.css.
+    const antiAnimCells = boardEl.querySelectorAll(".cell");
+    const antiCurMoods = {};
+    const antiCurCatCells = new Set();
+    antiAnimCells.forEach((cell, index) => {
+      if (cell.dataset.mood === undefined) return;
+      antiCurCatCells.add(index);
+      antiCurMoods[index] = cell.dataset.mood;
+    });
+    antiAnimCells.forEach((cell, index) => {
+      if (cell.dataset.mood === undefined) return;
+      const catImg = cell.querySelector(".cat");
+      if (!catImg) return;
+      const arrived = prevAntiCatCells && !prevAntiCatCells.has(index);
+      const moodChanged = prevAntiMoods[index] !== undefined && prevAntiMoods[index] !== antiCurMoods[index];
+      if (arrived) {
+        catImg.classList.add("cat-land");
+        catImg.addEventListener("animationend", () => catImg.classList.remove("cat-land"), { once: true });
+      } else if (moodChanged) {
+        catImg.classList.add("mood-change");
+        catImg.addEventListener("animationend", () => catImg.classList.remove("mood-change"), { once: true });
+      }
+    });
+    prevAntiMoods = antiCurMoods;
+    prevAntiCatCells = antiCurCatCells;
+
     updateKingTracking();
     updateStats();
     refitBoard();

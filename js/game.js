@@ -868,9 +868,17 @@ export async function startAntiLevel(root, levelId) {
       maxHappyCats = happy;
       maxHappyInitialized = true;
     } else if (happy > maxHappyCats) {
+      // СТАРЫЕ ПРАВИЛА (royal-socio-cats): за каждое увеличение максимума
+      // довольных котов начисляются +10 секунд времени и +5 ходов.
+      timeRemaining += 10;
+      levelRemainingMs += 10 * 1000; // синхронизация счётчика "Время: осталось"
+      movesRemaining += 5;
+      maxHappyCats = happy;
+      // Красивая анимация бонуса на счётчиках ходов и времени
+      showStatBoost(findStatItem(stats, "Ходы"), "+5", true);
+      showStatBoost(findStatItem(stats, "Время"), "+10", true);
       // Звук "Дзинь!" при повышении mood воспроизводит updateMoodSoundTracking()
       // (по каждому коту, на всех переходах 0→1 … 5→6), поэтому здесь НЕ дублируем.
-      maxHappyCats = happy;
     }
 
     // Анимации на счётчиках довольных/недовольных при их изменении
@@ -1023,9 +1031,12 @@ export async function startAntiLevel(root, levelId) {
     leaveLevel(() => NavigationService.backTo("levelSelect"));
   }
 
-  // Старт таймера по первому взаимодействию
-  boardEl.addEventListener("click", startTimer, { once: true });
-  boardEl.addEventListener("touchstart", startTimer, { once: true });
+  // Таймер стартует сразу при входе на уровень (по правилам royal-socio-cats:
+  // startTimer() вызывается сразу, время идёт всегда). Раньше таймер стартовал
+  // только по клику на поле, но обработчики кликов по котам в antiRenderer.js
+  // делают stopPropagation() — и если игра начиналась с клика по коту (что
+  // типично для неизвестных котов "?"), таймер не запускался вовсе.
+  startTimer();
 
   render();
   // Одноразовый бонус за довольных котов с самого старта

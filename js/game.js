@@ -107,8 +107,6 @@ export async function startAntiLevel(root, levelId) {
   let lastHappyCount = null;         // предыдущее число довольных (для анимации счётчика)
   let lastUnhappyCount = null;       // предыдущее число недовольных (для анимации счётчика)
   let previousKings = new Set();     // короли на прошлой отрисовке («клетка»)
-  let previousMoodsMap = {};         // предыдущее настроение каждого кота (ключ "r,c")
-  let moodsInitialized = false;      // первый проход — фиксируем стартовые настроения без звука
   let prevAntiCatCells = null;       // клетки с котами на прошлой отрисовке (Set индексов)
   let prevAntiMoods = {};            // настроение котов на прошлой отрисовке (индекс → mood)
   let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
@@ -376,7 +374,6 @@ export async function startAntiLevel(root, levelId) {
         }
       }
     }, onCatClick);
-    updateMoodSoundTracking();   // звук "Дзинь!" при повышении mood любого кота
 
     // === Анимация превращения котов (адаптация royal-socio-cats) ===
     // После пересчёта соседства и настроения сравниваем с прошлой отрисовкой:
@@ -761,33 +758,6 @@ export async function startAntiLevel(root, levelId) {
     root.appendChild(overlay);
   }
 
-  // ==== Отслеживание изменения mood каждого кота ====
-  // Звук "Дзинь!" (audioManager.playDing) воспроизводится ОДИН раз в момент
-  // повышения mood любого кота: 0→1, 1→2, 2→3, 3→4, 4→5, 5→6.
-  // Первый проход (moodsInitialized=false) только фиксирует стартовые значения
-  // и звук НЕ играет — иначе "Дзинь!" звенел бы при каждом входе на уровень.
-  function updateMoodSoundTracking() {
-    const currentMoods = {};
-    for (const cat of game.board.allCats()) {
-      const key = `${cat.r},${cat.c}`;
-      currentMoods[key] = game.moodAt(cat.r, cat.c);
-    }
-    if (!moodsInitialized) {
-      previousMoodsMap = currentMoods;
-      moodsInitialized = true;
-      return;
-    }
-    // Для каждого кота: если mood вырос (строго), играем один "Дзинь!"
-    for (const key of Object.keys(currentMoods)) {
-      const prev = previousMoodsMap[key];
-      const cur = currentMoods[key];
-      if (prev !== undefined && cur > prev) {
-        audioManager.playDing();
-      }
-    }
-    previousMoodsMap = currentMoods;
-  }
-
   // ==== Отслеживание королей (адаптация royal-socio-cats: updateKingTracking) ====
   function getCurrentKings() {
     const kings = new Set();
@@ -868,6 +838,7 @@ export async function startAntiLevel(root, levelId) {
       maxHappyCats = happy;
       maxHappyInitialized = true;
     } else if (happy > maxHappyCats) {
+      const increase = happy - maxHappyCats; // на сколько вырос максимум
       // СТАРЫЕ ПРАВИЛА (royal-socio-cats): за каждое увеличение максимума
       // довольных котов начисляются +10 секунд времени и +5 ходов.
       timeRemaining += 10;
@@ -877,8 +848,14 @@ export async function startAntiLevel(root, levelId) {
       // Красивая анимация бонуса на счётчиках ходов и времени
       showStatBoost(findStatItem(stats, "Ходы"), "+5", true);
       showStatBoost(findStatItem(stats, "Время"), "+10", true);
-      // Звук "Дзинь!" при повышении mood воспроизводит updateMoodSoundTracking()
-      // (по каждому коту, на всех переходах 0→1 … 5→6), поэтому здесь НЕ дублируем.
+      // Звук "Дзинь!" — за каждое увеличение максимума довольных на 1,
+      // как в royal-socio-cats (не за изменение mood отдельных котов).
+      for (let i = 0; i < increase; i++) {
+        const delay = i * 150;
+        setTimeout(() => {
+          if (levelActive && !won && !impeached) audioManager.playDing();
+        }, delay);
+      }
     }
 
     // Анимации на счётчиках довольных/недовольных при их изменении

@@ -267,6 +267,7 @@ button:hover { background: var(--button-hover); }
     font-size: 10px;
     padding: 4px 6px;
     min-height: 28px;
+    border-width: 2px;
   }
 }
 @media (min-width: 576px) and (max-width: 767.98px) { /* sm */
@@ -274,6 +275,7 @@ button:hover { background: var(--button-hover); }
     font-size: 11px;
     padding: 5px 7px;
     min-height: 30px;
+    border-width: 2px;
   }
 }
 @media (min-width: 768px) and (max-width: 991.98px) { /* md */
@@ -281,6 +283,7 @@ button:hover { background: var(--button-hover); }
     font-size: 12px;
     padding: 6px 8px;
     min-height: 32px;
+    border-width: 2px;
   }
 }
 @media (min-width: 992px) and (max-width: 1199.98px) { /* lg */
@@ -288,6 +291,7 @@ button:hover { background: var(--button-hover); }
     font-size: 13px;
     padding: 7px 9px;
     min-height: 34px;
+    border-width: 3px;
   }
 }
 @media (min-width: 1200px) { /* xl */
@@ -295,17 +299,21 @@ button:hover { background: var(--button-hover); }
     font-size: 14px;
     padding: 8px 12px;
     min-height: 36px;
+    border-width: 3px;
   }
 }
 
 .stat-item {
   background: #310d1b;
   padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #889;
+  border-radius: 12px;
+  border: 3px solid #889;
   text-align: left;
   font-size: 13px;
   line-height: 1.3;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
 }
 
 .win-stats {

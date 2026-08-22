@@ -11,17 +11,17 @@ export function setTheme(name) {
 
 export function getTheme() {
   const saved = getSavedTheme();
-  return saved === "light" ? "light" : "dark";
+  return saved || "anti-kotopark";
 }
 
 export function applyTheme() {
   setTheme(getTheme());
 }
 
-/** Переключить между тёмной и светлой, вернуть новое имя. */
+/** Переключить между темами, вернуть новое имя. */
 export function toggleTheme() {
   const cur = getTheme();
-  const next = cur === "dark" ? "light" : "dark";
+  const next = cur === "anti-kotopark" ? "dark" : "anti-kotopark";
   setTheme(next);
   return next;
 }

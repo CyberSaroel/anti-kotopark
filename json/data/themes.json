@@ -1,6 +1,17 @@
 {
   "themes": [
     {
+      "id": "anti-kotopark",
+      "name": "Соционические коты: Антикотопарк",
+      "description": "Кожаный переплёт, золото и пергамент — книжная тема",
+      "cssFile": "assets/themes/anti-kotopark/theme.css",
+      "preview": {
+        "background": "#f1e6d2",
+        "primary": "#d49a3c",
+        "cell": "#3d1130"
+      }
+    },
+    {
       "id": "neon-light",
       "name": "Неоновая (светлая)",
       "description": "Яркая неоновая тема на светлом фоне",
@@ -142,18 +153,7 @@
         "primary": "#5F4B8B",
         "cell": "#FFFFFF"
       }
-    },
-    {
-      "id": "royal-book",
-      "name": "Соционические коты: Антикотопарк",
-      "description": "Кожаный переплёт, золото и пергамент — книжная тема",
-      "cssFile": "assets/themes/royal-book/theme.css",
-      "preview": {
-        "background": "#0a0a14",
-        "primary": "#d49a3c",
-        "cell": "#5e1638"
-      }
     }
   ],
-  "defaultTheme": "royal-book"
+  "defaultTheme": "anti-kotopark"
 }

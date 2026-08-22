@@ -77,9 +77,9 @@ export function setSfxOn(on) {
 
 export function getSavedTheme() {
   try {
-    return localStorage.getItem(LS_THEME) || "dark";
+    return localStorage.getItem(LS_THEME) || "anti-kotopark";
   } catch {
-    return "dark";
+    return "anti-kotopark";
   }
 }
 

@@ -5,11 +5,12 @@ const THEME_KEY = "socio-cats:selectedTheme";
 
 export function getSelectedTheme() {
   try {
-    const saved = localStorage.getItem(THEME_KEY) || "royal-book";
+    const saved = localStorage.getItem(THEME_KEY) || "anti-kotopark";
     if (saved === "brutal") return "vampire";
+    if (saved === "royal-book") return "anti-kotopark";
     return saved;
   }
-  catch { return "royal-book"; }
+  catch { return "anti-kotopark"; }
 }
 
 export function setSelectedTheme(themeId) {

@@ -1,4 +1,4 @@
-export const VERSION = "0.23.0";
+export const VERSION = "0.25.0";
 
 const STORAGE_KEY = "socio-cats:version";
 

@@ -260,12 +260,15 @@ export async function showGameScreen(root, levelId) {
       } else {
         stats.style.position = "absolute";
         const stageRect = stage.getBoundingClientRect();
-        const boardRect = boardWrap.getBoundingClientRect();
-        const left = Math.round(boardRect.right - stageRect.left + 12);
-        const centerY = boardRect.top - stageRect.top + boardRect.height / 2;
+        const boardWrapRect = boardWrap.getBoundingClientRect();
+        // Ориентируемся на саму сетку поля (#board учитывает margin 12px у поля).
+        const boardRect = boardEl.getBoundingClientRect();
+        const left = Math.round(boardWrapRect.right - stageRect.left + 12);
+        // Верхний край блока счётчиков точно совпадает с верхним краем игрового поля.
+        const top = Math.round(boardRect.top - stageRect.top);
         stats.style.left = left + "px";
-        stats.style.top = centerY + "px";
-        stats.style.transform = "translateY(-50%)";
+        stats.style.top = top + "px";
+        stats.style.transform = "";
         stats.style.right = "";
       }
     } catch (e) {

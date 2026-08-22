@@ -296,8 +296,11 @@ export async function showAntiGameScreen(root) {
         stats.style.position = "absolute";
         const stageRect = stage.getBoundingClientRect();
         const boardRect = boardWrap.getBoundingClientRect();
+        const boardElRect = boardEl.getBoundingClientRect();
         stats.style.left = (boardRect.right - stageRect.left + 16) + "px";
-        stats.style.top = "12px";
+        // Верхний край счётчиков точно совпадает с верхним краем игрового поля.
+        const top = Math.round(boardElRect.top - stageRect.top);
+        stats.style.top = top + "px";
       }
     } catch (e) {
       // Ignore positioning errors

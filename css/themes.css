@@ -344,8 +344,7 @@ button:active {
 /* ===== Стат-панели HUD в книжном стиле ===== */
 .stat-item {
   background: #310d1b;
-  border: 3px solid rgba(212, 154, 60, 0.45);
-  border-radius: 12px;
+  border-color: rgba(212, 154, 60, 0.45);
   color: var(--parchment);
   box-shadow: inset 0 1px 0 rgba(244, 230, 176, 0.12);
 }

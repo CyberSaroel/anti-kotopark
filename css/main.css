@@ -261,37 +261,42 @@ button:hover { background: var(--button-hover); }
   min-height: 24px;
 }
 
-/* Responsive styles for stat items - all breakpoints */
+/* Responsive styles for stat items - all breakpoints.
+   Размеры синхронизированы с кнопкой «Ракета» (.rocket-btn): тот же внешний контур. */
 @media (min-width: 320px) and (max-width: 575.98px) { /* xs */
   .game-stage .stats .stat-item {
     font-size: 10px;
     padding: 4px 6px;
     min-height: 28px;
     border-width: 2px;
+    border-radius: 8px;
   }
 }
 @media (min-width: 576px) and (max-width: 767.98px) { /* sm */
   .game-stage .stats .stat-item {
     font-size: 11px;
-    padding: 5px 7px;
-    min-height: 30px;
+    padding: 6px 8px;
+    min-height: 32px;
     border-width: 2px;
+    border-radius: 8px;
   }
 }
 @media (min-width: 768px) and (max-width: 991.98px) { /* md */
   .game-stage .stats .stat-item {
-    font-size: 12px;
-    padding: 6px 8px;
-    min-height: 32px;
-    border-width: 2px;
+    font-size: 14px;
+    padding: 8px 12px;
+    min-height: 36px;
+    border-width: 3px;
+    border-radius: 12px;
   }
 }
 @media (min-width: 992px) and (max-width: 1199.98px) { /* lg */
   .game-stage .stats .stat-item {
-    font-size: 13px;
-    padding: 7px 9px;
-    min-height: 34px;
+    font-size: 14px;
+    padding: 8px 12px;
+    min-height: 36px;
     border-width: 3px;
+    border-radius: 12px;
   }
 }
 @media (min-width: 1200px) { /* xl */
@@ -300,6 +305,7 @@ button:hover { background: var(--button-hover); }
     padding: 8px 12px;
     min-height: 36px;
     border-width: 3px;
+    border-radius: 12px;
   }
 }
 
@@ -309,11 +315,12 @@ button:hover { background: var(--button-hover); }
   border-radius: 12px;
   border: 3px solid #889;
   text-align: left;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
   min-height: 36px;
   display: flex;
   align-items: center;
+  box-sizing: border-box;
 }
 
 .win-stats {

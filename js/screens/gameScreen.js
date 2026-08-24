@@ -376,7 +376,7 @@ export async function showGameScreen(root, levelId) {
   let rocketBtnDisabled = false;
   let kingsThisLevelAtWin = 0;
 
-  // Нажатие ракеты. Слушатель ниже вешаем ОДИН раз на блок статистики,
+  // Нажатие рыбки. Слушатель ниже вешаем ОДИН раз на блок статистики,
   // поэтому кнопка срабатывает с первого раза, даже когда счётчики перерисовываются.
   function useRocket() {
     if (won || impeached || rocketBtnDisabled) return;
@@ -389,7 +389,7 @@ export async function showGameScreen(root, levelId) {
     rocketBtnDisabled = true;
     trackedSetTimeout(() => { rocketBtnDisabled = false; updateStats(); }, 500);
     updateStats();       // сперва обновляем цифры
-    showRocketBoost();   // потом показываем поверх: куда прибавилось + полёт ракеты
+    showRocketBoost();   // потом показываем поверх: куда прибавилось + полёт рыбки
   }
 
   // Показываем, КУДА прибавились цифры (надпись + подсветка над счётчиком) и запускаем ракету.
@@ -399,7 +399,7 @@ export async function showGameScreen(root, levelId) {
     const targets = [
       { el: find("Ходы"),   text: "+10 ходов" },
       { el: find("Время"),  text: "+20 сек" },
-      { el: find("Ракеты"), text: "-1 🚀" },
+      { el: find("Рыбки"), text: "-1 🐠" },
     ];
     for (const t of targets) {
       if (!t.el) continue;
@@ -422,7 +422,7 @@ export async function showGameScreen(root, levelId) {
     }
     const rocket = document.createElement("div");
     rocket.className = "rocket-fly-big";
-    rocket.textContent = "🚀";
+    rocket.textContent = "�";
     boardArea.appendChild(rocket);
     rocket.addEventListener("animationend", () => rocket.remove());
     boardArea.classList.add("screen-shake");
@@ -473,7 +473,7 @@ export async function showGameScreen(root, levelId) {
       remainingMs = countdown.remainingMs;
       remainingMoves += 5;
       maxHappyCats = happy;
-      // Золотая анимация бонуса за рост максимума довольных (как у ракеты)
+      // Золотая анимация бонуса за рост максимума довольных (как у рыбки)
       showStatBoost(findStatItem(stats, "Ходы"), "+5", true);
       showStatBoost(findStatItem(stats, "Время"), "+10", true);
       // Звук "Дзинь!" — за каждое увеличение максимума довольных на 1,
@@ -528,7 +528,7 @@ export async function showGameScreen(root, levelId) {
           <div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="stat-item">🎯 Ходы: ${remainingMovesHtml}|${movesMade}</div></div>
           <div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div></div>
           <div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="stat-item">👑 Короли: ${kingsCount}</div></div>
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2"><button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}>🚀 Ракеты: ${rocketsCount}</button></div>
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2"><button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}>🐠 Рыбки: ${rocketsCount}</button></div>
         </div>
       </div>
     ` : `
@@ -539,9 +539,9 @@ export async function showGameScreen(root, levelId) {
       <div class="stat-item">😾 Недовольные: ${unhappy}</div>
       <div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>
       <div class="stat-item">👑 Короли: ${kingsCount}</div>
-      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}>🚀 Ракеты: ${rocketsCount}</button>
+      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}>🐠 Рыбки: ${rocketsCount}</button>
     `;
-    // Кнопку ракеты теперь обрабатывает useRocket (делегированный слушатель выше).
+    // Кнопку рыбки теперь обрабатывает useRocket (делегированный слушатель выше).
     refitBoard();
     positionStats();
   }

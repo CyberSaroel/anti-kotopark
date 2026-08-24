@@ -592,7 +592,7 @@ export async function startAntiLevel(root, levelId) {
       timeRemaining += TIME_BONUS_HAPPY;
       levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика
        showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
-       // Золотая анимация бонуса на счётчиках ходов и времени (как boost у ракеты)
+       // Золотая анимация бонуса на счётчиках ходов и времени (как boost у рыбок)
        showStatBoost(findStatItem(stats, "Ходы"), `+${MOVE_BONUS_HAPPY}`, true);
        showStatBoost(findStatItem(stats, "Время"), `+${TIME_BONUS_HAPPY}`, true);
      } else {
@@ -884,7 +884,7 @@ export async function startAntiLevel(root, levelId) {
       <div class="stat-item">👑 Короли: ${kingsCount}</div>
       <div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>
       <div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>
-      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🚀 Ракеты: ${rocketsCount}</button>
+      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🐠 Рыбки: ${rocketsCount}</button>
     `;
   }
 
@@ -908,7 +908,7 @@ export async function startAntiLevel(root, levelId) {
     const targets = [
       { el: find("Ходы"), text: "+10 ходов" },
       { el: find("Время"), text: "+20 сек" },
-      { el: find("Ракеты"), text: "-1 🚀" },
+      { el: find("Рыбки"), text: "-1 🐠" },
     ];
     for (const t of targets) {
       if (!t.el) continue;
@@ -931,7 +931,7 @@ export async function startAntiLevel(root, levelId) {
     }
     const rocket = document.createElement("div");
     rocket.className = "rocket-fly-big";
-    rocket.textContent = "🚀";
+    rocket.textContent = "🐠";
     boardArea.appendChild(rocket);
     rocket.addEventListener("animationend", () => rocket.remove());
     boardArea.classList.add("screen-shake");

@@ -105,6 +105,13 @@ export function addRockets(n) {
   return rockets;
 }
 
+/** Установить точное число ракет (сброс рыбок при выходе с уровня). */
+export function setRockets(n) {
+  rockets = n;
+  saveToStorage();
+  return rockets;
+}
+
 /** Общее число ходов за всю игру. */
 export function addTotalMoves(n) {
   totalMoves += n;

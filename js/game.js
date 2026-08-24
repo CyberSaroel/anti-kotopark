@@ -16,6 +16,7 @@ import {
   getRockets,
   spendRocket,
   addRockets,
+  setRockets,
   addTotalMoves,
   addTotalTime
 } from "./core/royalStats.js";
@@ -100,6 +101,10 @@ export async function startAntiLevel(root, levelId) {
   // ==== Дополнительные счётчики (адаптация royal-socio-cats) ====
   // Сброс королей уровня (если предыдущий уровень не был завершён).
   resetLevel();
+  // Рыбки (ракеты) — пер-уровневая валюта теста: при старте уровня их всегда 0.
+  // Накопить рыбки можно только кнопкой «Добавить 5 рыбок» (тестовая);
+  // при выходе с уровня или переходе на другой уровень они сбрасываются в 0.
+  setRockets(0);
   let levelStartTime = Date.now();
   let elapsedMs = 0;                 // ⏰ На уровне
   let levelRemainingMs = START_TIME * 1000; // ⏱️ Время: осталось (новый счётчик)
@@ -1042,6 +1047,9 @@ export async function startAntiLevel(root, levelId) {
     document.removeEventListener("pointerdown", onDocPointerDown);
     window.removeEventListener("resize", onViewportResize);
     window.visualViewport?.removeEventListener("resize", onViewportResize);
+    // Сброс рыбок при выходе с уровня / переходе на другой уровень
+    // (включая победу и импичмент): следующий уровень всегда стартует с 0.
+    setRockets(0);
   }
 
   // Возврат на экран выбора уровней (используется в оверлеях победы/импичмента

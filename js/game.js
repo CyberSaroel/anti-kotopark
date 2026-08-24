@@ -812,6 +812,16 @@ export async function startAntiLevel(root, levelId) {
         }
       }
     }
+
+    // ==== Механика: +рыбки за королей ====
+    // Каждый новый король (настроение >= 6) сразу даёт +1 рыбку на текущем
+    // уровне. Рыбки тратятся кнопкой «🐠 Рыбки» (+10 ходов / +20 сек).
+    if (newKings.size > 0) {
+      addRockets(newKings.size);
+      updateStats();
+      showStatBoost(stats.querySelector("#rocket-btn"), `+${newKings.size}`, true);
+      showFloatingBonus(`+${newKings.size} 🐠 за королей`);
+    }
     return newKings;
   }
 

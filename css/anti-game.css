@@ -324,3 +324,21 @@
     padding: 8px 8px;
   }
 }
+
+/* ==== Тестовые кнопки для заказчика ====
+   «Открыть типы всех котов» и «Добавить 5 рыбок» —
+   визуально отличаются от боевой кнопки рыбок (пунктирная рамка). */
+.test-tool-btn {
+  border: 2px dashed #d49a3c !important;
+  background: linear-gradient(135deg, rgba(94, 22, 56, 0.9) 0%, rgba(42, 10, 20, 0.95) 100%) !important;
+  font-size: 13px !important;
+  min-height: 32px !important;
+}
+
+.test-tool-btn:hover {
+  background: #4a1830 !important;
+}
+
+.test-tool-btn:active {
+  transform: scale(0.98);
+}

@@ -15,6 +15,7 @@ import {
   getKingsThisLevel,
   getRockets,
   spendRocket,
+  addRockets,
   addTotalMoves,
   addTotalTime
 } from "./core/royalStats.js";
@@ -885,6 +886,9 @@ export async function startAntiLevel(root, levelId) {
       <div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>
       <div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>
       <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🐠 Рыбки: ${rocketsCount}</button>
+      <!-- Тестовые кнопки для заказчика -->
+      <button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>
+      <button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button">🐠 Добавить 5 рыбок</button>
     `;
   }
 
@@ -938,17 +942,55 @@ export async function startAntiLevel(root, levelId) {
     boardArea.addEventListener("animationend", () => boardArea.classList.remove("screen-shake"), { once: true });
   }
 
+  // ==== Тестовые кнопки для заказчика ====
+  // «Открыть типы всех котов»: показать социотип каждого кота на поле.
+  function revealAllTypesTest() {
+    game.revealAllTypes();
+    render();
+    showFloatingBonus("🧠 Типы всех котов открыты");
+  }
+
+  // «Добавить 5 рыбок»: +5 к балансу рыбок (ракет).
+  function addTestFish() {
+    addRockets(5);
+    updateStats();
+    showStatBoost(stats.querySelector("#test-add-fish-btn"), "+5", true);
+    showFloatingBonus("+5 🐠");
+  }
+
   // Один слушатель на весь блок статистики — переживает перерисовку кнопки
   // (updateStats перезаписывает innerHTML при каждом обновлении).
   let lastRocketPointerTime = 0;
+  let lastTestBtnPointerTime = 0;
   stats.addEventListener("pointerdown", (e) => {
     if (e.button !== undefined && e.button !== 0) return;
+    // Тестовые кнопки: действие срабатывает сразу по pointerdown
+    if (e.target.closest("#test-reveal-btn")) {
+      lastTestBtnPointerTime = Date.now();
+      revealAllTypesTest();
+      return;
+    }
+    if (e.target.closest("#test-add-fish-btn")) {
+      lastTestBtnPointerTime = Date.now();
+      addTestFish();
+      return;
+    }
     if (e.target.closest("#rocket-btn")) {
       lastRocketPointerTime = Date.now();
       useRocket();
     }
   });
   stats.addEventListener("click", (e) => {
+    // Тестовые кнопки: повторный click после pointerdown игнорируем,
+    // чтобы действие не сработало дважды за одно нажатие.
+    if (e.target.closest("#test-reveal-btn")) {
+      if (Date.now() - lastTestBtnPointerTime > 500) revealAllTypesTest();
+      return;
+    }
+    if (e.target.closest("#test-add-fish-btn")) {
+      if (Date.now() - lastTestBtnPointerTime > 500) addTestFish();
+      return;
+    }
     if (e.target.closest("#rocket-btn")) {
       if (Date.now() - lastRocketPointerTime > 500) useRocket();
     }

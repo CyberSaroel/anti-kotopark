@@ -98,6 +98,13 @@ export function spendRocket() {
   return false;
 }
 
+/** Добавить ракеты (рыбки) — тестовая кнопка для заказчика. */
+export function addRockets(n) {
+  rockets += n;
+  saveToStorage();
+  return rockets;
+}
+
 /** Общее число ходов за всю игру. */
 export function addTotalMoves(n) {
   totalMoves += n;

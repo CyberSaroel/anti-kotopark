@@ -97,6 +97,15 @@ export class AntiGame {
     return count;
   }
 
+  // Открыть типы всех котов (тестовая кнопка для заказчика).
+  // Все коты на поле помечаются «угаданными» — их социотипы показываются.
+  revealAllTypes() {
+    for (let i = 0; i < this.level.cats.length; i++) {
+      const cat = this.level.cats[i];
+      if (cat) this.guessedTypes.set(i, cat.type);
+    }
+  }
+
   // Handle cell click
   clickCell(r, c) {
     if (this.selected) {

@@ -39,6 +39,7 @@ console.log(`Updated js/core/version.js to version ${newVersion}`);
 // Update index.html
 let indexContent = fs.readFileSync(indexFile, 'utf8');
 indexContent = indexContent.replace(/js\/app\.js\?v=[^"]*"/, `js/app.js?v=${newVersion}"`);
+indexContent = indexContent.replace(/href="([^"]+\.css)(?:\?v=[^"]*)?"/g, `href="$1?v=${newVersion}"`);
 fs.writeFileSync(indexFile, indexContent, 'utf8');
 console.log(`Updated index.html to version ${newVersion}`);
 

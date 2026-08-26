@@ -949,22 +949,47 @@ export async function startAntiLevel(root, levelId) {
     const rocketsCount = getRockets();
     const canUseRocket = rocketsCount > 0 && !won && !impeached;
     const rocketBtnClass = `rocket-btn ${!canUseRocket ? "rocket-btn-disabled" : ""}`;
+    const rocketBtnHtml = `<button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🐠 Рыбки: ${rocketsCount}</button>`;
+    const testRevealBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`;
+    const testAddFishBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button">🐠 Добавить 5 рыбок</button>`;
 
-    stats.innerHTML = `
-      <div class="stat-item">🎯 Ходы: осталось | сделано (${movesRemaining}/${movesMade})</div>
-      <div class="stat-item">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>
-      <div class="stat-item">⏰ На уровне: ${formatTime(elapsedMs)}</div>
-      <div class="stat-item">😊 Довольные: ${happy}</div>
-      <div class="stat-item">😾 Недовольные: ${unhappy}</div>
-      <div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>
-      <div class="stat-item">👑 Короли: ${kingsCount}</div>
-      <div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>
-      <div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>
-      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🐠 Рыбки: ${rocketsCount}</button>
-      <!-- Тестовые кнопки для заказчика -->
-      <button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>
-      <button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button">🐠 Добавить 5 рыбок</button>
-    `;
+    const statItemsHtml = [
+      `<div class="stat-item">🎯 Ходы: осталось | сделано (${movesRemaining}/${movesMade})</div>`,
+      `<div class="stat-item">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>`,
+      `<div class="stat-item">⏰ На уровне: ${formatTime(elapsedMs)}</div>`,
+      `<div class="stat-item">😊 Довольные: ${happy}</div>`,
+      `<div class="stat-item">😾 Недовольные: ${unhappy}</div>`,
+      `<div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>`,
+      `<div class="stat-item">👑 Короли: ${kingsCount}</div>`,
+      `<div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>`,
+      `<div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>`
+    ];
+
+    if (isCompactUI()) {
+      // Мобильная версия: Bootstrap-сетка из vendor/bootstrap/bootstrap-grid.min.css.
+      // Счётчики и кнопка «Рыбки» — по два в ряд (.row > .col-6), тестовые кнопки
+      // заказчика занимают всю ширину (col-12), чтобы текст не обрезался.
+      stats.innerHTML = `
+        <div class="container-fluid px-0">
+          <div class="row g-2">
+            ${statItemsHtml.map(h => `<div class="col-6">${h}</div>`).join("")}
+            <div class="col-6">${rocketBtnHtml}</div>
+            <div class="col-12">${testRevealBtnHtml}</div>
+            <div class="col-12">${testAddFishBtnHtml}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      stats.innerHTML = `
+        ${statItemsHtml.join("")}
+        ${rocketBtnHtml}
+        <!-- Тестовые кнопки для заказчика -->
+        ${testRevealBtnHtml}
+        ${testAddFishBtnHtml}
+      `;
+    }
+    // После перерисовки (в т.ч. смены мобиль/десктоп) счётчики позиционируются
+    schedulePositionStats();
   }
 
   // ==== Ракета (адаптация royal-socio-cats: useRocket + showRocketBoost) ====

@@ -4,7 +4,7 @@ import { TYPES, getTypeDisplayName } from "./socionics/types.js";
 import { consumeBonusErrors, addBonusErrors } from "./storage.js";
 import { audioManager } from "./core/audioManager.js";
 import NavigationService from "./core/navigation.js";
-import { stopBoardLayoutListener, refitBoard } from "./core/boardLayout.js";
+import { stopBoardLayoutListener, refitBoard, getStatsContentWidth } from "./core/boardLayout.js";
 import { fetchLevel } from "./levels/levelLoader.js";
 import { getBestKings } from "./levels/levelRecords.js";
 import {
@@ -414,6 +414,8 @@ export async function startAntiLevel(root, levelId) {
     updateKingTracking();
     updateStats();
     refitBoard();
+    // Позиция счётчиков пересчитывается после того, как поле построено
+    schedulePositionStats();
     // После перерисовки восстановить рамку выбранного кота
     if ((catState === "selected" || catState === "choosing") && selectedCatRC) {
       const el = findCatCell(selectedCatRC.r, selectedCatRC.c);
@@ -422,6 +424,54 @@ export async function startAntiLevel(root, levelId) {
         selectedCatEl = el;
       }
     }
+  }
+
+  // Позиционирование счётчиков: игровое поле остаётся строго по центру экрана,
+  // статистика — справа от поля с тем же отступом 20px, что был раньше
+  // (flex gap в .anti-game-stage), верх счётчиков — по верху поля.
+  function positionStats() {
+    try {
+      if (isCompactUI()) {
+        stats.style.position = "";
+        stats.style.left = "";
+        stats.style.top = "";
+        stats.style.right = "";
+        stats.style.transform = "";
+        return;
+      }
+      stats.style.position = "absolute";
+      const stageRect = stage.getBoundingClientRect();
+      const boardRect = boardEl.getBoundingClientRect();
+      if (boardRect.width === 0) {
+        // Поле ещё строится (renderAntiBoard асинхронный: клетки появляются
+        // после await загрузки скинов) — пробуем на следующем кадре.
+        requestAnimationFrame(() => {
+          if (levelActive) positionStats();
+        });
+        return;
+      }
+      const left = Math.round(boardRect.right - stageRect.left + 20);
+      const top = Math.round(boardRect.top - stageRect.top);
+      // Страховка: не даём счётчикам уйти за правый край экрана.
+      // Ширину берём по реальному контенту (может отличаться от offsetWidth,
+      // если счётчики временно стоят у края).
+      const statsW = getStatsContentWidth() || stats.offsetWidth;
+      const maxLeft = window.innerWidth - statsW - 12;
+      stats.style.left = Math.max(12, Math.min(left, maxLeft)) + "px";
+      stats.style.top = top + "px";
+      stats.style.right = "";
+      stats.style.transform = "";
+    } catch (e) {
+      // Позиционирование не критично для игры
+    }
+  }
+
+  // Пересчёт позиции счётчиков после отрисовки поля: renderAntiBoard асинхронный
+  // (клетки строятся после await загрузки скинов), поэтому ждём кадр.
+  function schedulePositionStats() {
+    requestAnimationFrame(() => {
+      if (levelActive) positionStats();
+    });
   }
 
   // Выбрать кота: установить рамку, доступные ходы и состояние выбора.
@@ -552,6 +602,16 @@ export async function startAntiLevel(root, levelId) {
   };
   window.addEventListener("resize", onViewportResize);
   window.visualViewport?.addEventListener("resize", onViewportResize);
+
+  // Пересчёт позиции счётчиков при изменении размеров окна/масштабировании:
+  // поле пересобирается под новый размер, счётчики остаются справа от него.
+  const statsResizeListener = () => {
+    refitBoard();
+    schedulePositionStats();
+  };
+  window.addEventListener("resize", statsResizeListener);
+  window.visualViewport?.addEventListener("resize", statsResizeListener);
+  window.visualViewport?.addEventListener("scroll", statsResizeListener);
 
   function showSocioMenu(catIndex) {
     currentCatIndex = catIndex;
@@ -1057,6 +1117,9 @@ export async function startAntiLevel(root, levelId) {
     document.removeEventListener("pointerdown", onDocPointerDown);
     window.removeEventListener("resize", onViewportResize);
     window.visualViewport?.removeEventListener("resize", onViewportResize);
+    window.removeEventListener("resize", statsResizeListener);
+    window.visualViewport?.removeEventListener("resize", statsResizeListener);
+    window.visualViewport?.removeEventListener("scroll", statsResizeListener);
     // Сброс рыбок при выходе с уровня / переходе на другой уровень
     // (включая победу и импичмент): следующий уровень всегда стартует с 0.
     setRockets(0);

@@ -953,8 +953,13 @@ export async function startAntiLevel(root, levelId) {
     const testRevealBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`;
     const testAddFishBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button">🐠 Добавить 5 рыбок</button>`;
 
+    // На мобильной версии текст короче — счётчики идут по два в ряд, места мало.
+    const movesStatHtml = isCompactUI()
+      ? `<div class="stat-item">🎯 Ходы: (${movesRemaining}/${movesMade})</div>`
+      : `<div class="stat-item">🎯 Ходы: осталось | сделано (${movesRemaining}/${movesMade})</div>`;
+
     const statItemsHtml = [
-      `<div class="stat-item">🎯 Ходы: осталось | сделано (${movesRemaining}/${movesMade})</div>`,
+      movesStatHtml,
       `<div class="stat-item">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>`,
       `<div class="stat-item">⏰ На уровне: ${formatTime(elapsedMs)}</div>`,
       `<div class="stat-item">😊 Довольные: ${happy}</div>`,

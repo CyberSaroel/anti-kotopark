@@ -1,5 +1,5 @@
 const VERSION = "0.28.0"; // это число будет менять tools/bumpVersion.js
-const CACHE = "royal-socio-cats-" + VERSION;
+const CACHE = "anti-kotopark-" + VERSION;
 
 // Ставим новую версию воркера сразу, не ждём закрытия вкладок
 self.addEventListener("install", () => {
@@ -19,13 +19,29 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
-  const url = new URL(req.url);
+
+  let url;
+  try {
+    url = new URL(req.url);
+  } catch (e) {
+    return;
+  }
+  // Не перехватываем запросы расширений и прочих схем (chrome-extension:// и т.п.)
+  if (url.protocol !== "http:" && url.protocol !== "https:") return;
   const isCode = req.mode === "navigate" || /\.(html|js|css|json)$/i.test(url.pathname);
   event.respondWith((async () => {
     try {
       const fresh = await fetch(req, isCode ? { cache: "no-cache" } : {});
-      const cache = await caches.open(CACHE);
-      cache.put(req, fresh.clone());
+      // Кэширование — best effort: не ломаем ответ, если кэш не смог сохранить
+      // (частичные ответы 206 Range, непрозрачные/кросс-доменные и т.п.).
+      if (fresh.ok && fresh.status !== 206) {
+        try {
+          const cache = await caches.open(CACHE);
+          await cache.put(req, fresh.clone());
+        } catch (e) {
+          // Игнорируем ошибки кэша
+        }
+      }
       return fresh;
     } catch (e) {
       const cached = await caches.match(req);

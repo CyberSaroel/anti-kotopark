@@ -977,6 +977,12 @@ export async function startAntiLevel(root, levelId) {
     // Непрерывное пиканье при 10 и менее секундах (частота растёт к нулю).
     audioManager.updateWarningSound(levelRemainingMs);
 
+    // Красная подсветка при нехватке времени/ходов (как в royal-socio-cats):
+    // время — красным при 30 и менее секундах, ходы — красным при меньше 20.
+    const isTimerCritical = secondsLeft <= 30;
+    const timerColor = isTimerCritical ? "color: #ff3333; font-weight: bold;" : "";
+    const movesColor = movesRemaining < 20 ? "color: #ff3333; font-weight: bold;" : "";
+
     const movesMade = game.getMoveCount();
     const kingsCount = won ? kingsAtWin : getKingsThisLevel();
     const rocketsCount = getRockets();
@@ -987,13 +993,14 @@ export async function startAntiLevel(root, levelId) {
     const testAddFishBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button"><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Добавить 5 рыбок</button>`;
 
     // На мобильной версии текст короче — счётчики идут по два в ряд, места мало.
+    // Красным число оставшихся ходов и слово «осталось», когда их меньше 20 (как в royal-socio-cats).
     const movesStatHtml = isCompactUI()
-      ? `<div class="stat-item">🎯 Ходы: (${movesRemaining}/${movesMade})</div>`
-      : `<div class="stat-item">🎯 Ходы: осталось | сделано (${movesRemaining}/${movesMade})</div>`;
+      ? `<div class="stat-item">🎯 Ходы: (<span style="${movesColor}">${movesRemaining}</span>/${movesMade})</div>`
+      : `<div class="stat-item">🎯 Ходы: <span style="${movesColor}">осталось</span> | сделано (<span style="${movesColor}">${movesRemaining}</span>/${movesMade})</div>`;
 
     const statItemsHtml = [
       movesStatHtml,
-      `<div class="stat-item">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>`,
+      `<div class="stat-item" style="${timerColor}">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>`,
       `<div class="stat-item">⏰ На уровне: ${formatTime(elapsedMs)}</div>`,
       `<div class="stat-item">😊 Довольные: ${happy}</div>`,
       `<div class="stat-item">😾 Недовольные: ${unhappy}</div>`,

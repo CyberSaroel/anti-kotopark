@@ -6,7 +6,8 @@ import { audioManager } from "./core/audioManager.js";
 import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard, getStatsContentWidth } from "./core/boardLayout.js";
 import { fetchLevel } from "./levels/levelLoader.js";
-import { getBestKings, saveLevelKingsRecord } from "./levels/levelRecords.js";
+import { getBestKings, saveLevelKingsRecord, saveLevelRecord, saveLevelTimeRecord } from "./levels/levelRecords.js";
+import { markCompleted } from "./levels/levelProgress.js";
 import {
   onKingCreated,
   onKingLost,
@@ -785,6 +786,12 @@ export async function startAntiLevel(root, levelId) {
       // проходах: в следующий раз зачислят только прибавку над этим числом.
       saveLevelKingsRecord(levelId, kingsAtWin);
       cleanupLevel();
+      // Как в royal-socio-cats: помечаем уровень пройденным и сохраняем
+      // рекорды ходов/времени — в меню уровней появится галочка «✓»
+      // и трофей 🏆 с лучшими ходами.
+      markCompleted(levelId);
+      saveLevelRecord(levelId, game.getMoveCount());
+      saveLevelTimeRecord(levelId, elapsedMs);
       // Короли: настроение >= 6
       let kings = 0;
       for (const cat of game.board.allCats()) {

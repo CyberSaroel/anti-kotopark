@@ -178,6 +178,11 @@ export class AudioManager {
   // Обновление звукового предупреждения в зависимости от оставшегося времени (в миллисекундах)
   updateWarningSound(remainingMs) {
     const secondsLeft = Math.ceil(remainingMs / 1000);
+    if (secondsLeft <= 0) {
+      // Время вышло — гарантированно глушим пищалку, иначе интервал продолжит пикать вечно.
+      this.stopWarningBeeps();
+      return;
+    }
     if (secondsLeft > 10) {
       this.stopWarningBeeps();
       return;

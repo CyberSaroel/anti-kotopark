@@ -1176,6 +1176,9 @@ export async function startAntiLevel(root, levelId) {
     levelActive = false;
     if (timerId) { clearInterval(timerId); timerId = null; }
     if (royalTimerId !== null) { clearInterval(royalTimerId); royalTimerId = null; }
+    // Глушим пищалки-напоминалки при любом выходе с уровня
+    // (импичмент, победа, кнопка «Выйти», навигация) — как в royal-socio-cats.
+    audioManager.stopWarningBeeps();
     // Копим общее время игры (адаптация addTotalTime из royal-socio-cats)
     if (!levelCleaned) {
       levelCleaned = true;

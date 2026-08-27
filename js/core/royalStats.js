@@ -123,7 +123,7 @@ export function addRockets(n) {
   return rockets;
 }
 
-/** Установить точное число рыбок (сброс при выходе с уровня). */
+/** Установить точное число рыбок (служебное; в игре больше не вызывается — баланс общий и не сбрасывается между уровнями). */
 export function setRockets(n) {
   rockets = n;
   saveToStorage();

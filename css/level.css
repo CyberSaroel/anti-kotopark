@@ -3,21 +3,17 @@
 /* Тап-состояния кота */
 /* Красная подсветка выбранного кота с непрерывной пульсацией яркости:
    свечение плавно нарастает и затухает, цвет остаётся красным
-   (меняется только альфа/размер свечения, тон не сдвигается).
+   (пульсация 1s — как в royal-socio-cats cellSelectPulse).
    Анимация работает, пока класс присутствует на клетке. */
 .cell.cat--selected {
-  outline: 3px solid #ff3b3b;
+  outline: 3px solid red;
   z-index: 5;
-  animation: catSelectedPulse 1.6s ease-in-out infinite;
+  animation: catSelectedPulse 1s ease-in-out infinite;
 }
 
 @keyframes catSelectedPulse {
-  0%, 100% {
-    box-shadow: 0 0 6px rgba(255, 59, 59, 0.55), 0 0 14px rgba(255, 59, 59, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 14px rgba(255, 59, 59, 1), 0 0 30px rgba(255, 59, 59, 0.8);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.6); }
+  50%      { box-shadow: 0 0 12px 4px rgba(255, 0, 0, 0.9); }
 }
 
 .cell.cat--error {

@@ -6,7 +6,7 @@ import { audioManager } from "./core/audioManager.js";
 import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard, getStatsContentWidth } from "./core/boardLayout.js";
 import { fetchLevel } from "./levels/levelLoader.js";
-import { getBestKings } from "./levels/levelRecords.js";
+import { getBestKings, saveLevelKingsRecord } from "./levels/levelRecords.js";
 import {
   onKingCreated,
   onKingLost,
@@ -16,7 +16,6 @@ import {
   getRockets,
   spendRocket,
   addRockets,
-  setRockets,
   addTotalMoves,
   addTotalTime
 } from "./core/royalStats.js";
@@ -101,10 +100,9 @@ export async function startAntiLevel(root, levelId) {
   // ==== Дополнительные счётчики (адаптация royal-socio-cats) ====
   // Сброс королей уровня (если предыдущий уровень не был завершён).
   resetLevel();
-  // Рыбки — пер-уровневая валюта теста: при старте уровня их всегда 0.
-  // Накопить рыбки можно только кнопкой «Добавить 5 рыбок» (тестовая);
-  // при выходе с уровня или переходе на другой уровень они сбрасываются в 0.
-  setRockets(0);
+  // Рыбки — общий баланс на всю игру (как в royal-socio-cats): копятся
+  // за королей и выдаются ТОЛЬКО после победы (commitLevel в checkWin),
+  // а тратятся кнопкой «Рыбки» на любом уровне. При старте не сбрасываем.
   let levelStartTime = Date.now();
   let elapsedMs = 0;                 // ⏰ На уровне
   let levelRemainingMs = START_TIME * 1000; // ⏱️ Время: осталось (новый счётчик)
@@ -783,6 +781,9 @@ export async function startAntiLevel(root, levelId) {
         ? kingsAtWin
         : Math.max(0, kingsAtWin - prevBestKings);
       commitLevel(kingsDelta);
+      // Сохраняем рекорд королей уровня — для анти-фарма при повторных
+      // проходах: в следующий раз зачислят только прибавку над этим числом.
+      saveLevelKingsRecord(levelId, kingsAtWin);
       cleanupLevel();
       // Короли: настроение >= 6
       let kings = 0;
@@ -796,7 +797,7 @@ export async function startAntiLevel(root, levelId) {
       showResultOverlay("Победа!", "Все коты довольны!", [
         { label: "Заново", fn: () => startAntiLevel(root, levelId) },
         { label: "В меню", fn: showMenu }
-      ], `Ошибки: ${errorsMade} | Короли: ${kings} | Бонус: +${bonusErrors} прав на ошибку (за каждые 3 короля)`);
+      ], `Ошибки: ${errorsMade} | Короли: ${kings} | Рыбки: +${kingsDelta} (всего: ${getRockets()}) | Бонус: +${bonusErrors} прав на ошибку (за каждые 3 короля)`);
     }
   }
 
@@ -873,15 +874,9 @@ export async function startAntiLevel(root, levelId) {
       }
     }
 
-    // ==== Механика: +рыбки за королей ====
-    // Каждый новый король (настроение >= 6) сразу даёт +1 рыбку на текущем
-    // уровне. Рыбки тратятся кнопкой «🐠 Рыбки» (+10 ходов / +20 сек).
-    if (newKings.size > 0) {
-      addRockets(newKings.size);
-      updateStats();
-      showStatBoost(stats.querySelector("#rocket-btn"), `+${newKings.size}`, true);
-      showFloatingBonus(`+${newKings.size} 🐠 за королей`);
-    }
+    // Рыбки за королей на уровне НЕ начисляются: короли копятся в
+    // kingsThisLevel, а рыбки (1 рыбка за каждого короля) выдаются ТОЛЬКО
+    // после победы в checkWin() через commitLevel() — как в royal-socio-cats.
     return newKings;
   }
 
@@ -1150,9 +1145,6 @@ export async function startAntiLevel(root, levelId) {
     window.removeEventListener("resize", statsResizeListener);
     window.visualViewport?.removeEventListener("resize", statsResizeListener);
     window.visualViewport?.removeEventListener("scroll", statsResizeListener);
-    // Сброс рыбок при выходе с уровня / переходе на другой уровень
-    // (включая победу и импичмент): следующий уровень всегда стартует с 0.
-    setRockets(0);
   }
 
   // Возврат на экран выбора уровней (используется в оверлеях победы/импичмента

@@ -16,6 +16,12 @@ const ROCKETS_KEY = "ak_rockets";
 const TOTAL_MOVES_KEY = "ak_total_moves";
 const TOTAL_TIME_KEY = "ak_total_time_ms";
 
+// Устаревшие ключи старого модуля экономики (копия royal-socio-cats).
+// При переходе на единую экономику переносим накопленные значения,
+// чтобы игрок не потерял рыбок и королей.
+const LEGACY_KINGS_TOTAL_KEY = "socio-cats:kingsTotal";
+const LEGACY_ROCKETS_KEY = "socio-cats:rockets";
+
 let kingsThisLevel = 0;
 let kingsTotal = 0;
 let rockets = 0;
@@ -28,6 +34,18 @@ function loadFromStorage() {
     rockets = parseInt(localStorage.getItem(ROCKETS_KEY), 10) || 0;
     totalMoves = parseInt(localStorage.getItem(TOTAL_MOVES_KEY), 10) || 0;
     totalTimeMs = parseInt(localStorage.getItem(TOTAL_TIME_KEY), 10) || 0;
+
+    // Миграция со старого хранилища (royalEconomy.js, ключи "socio-cats:*"):
+    // если в новой экономике ещё ничего нет, а в старой уже было — переносим.
+    if (kingsTotal === 0 && rockets === 0) {
+      const legacyKings = parseInt(localStorage.getItem(LEGACY_KINGS_TOTAL_KEY), 10) || 0;
+      const legacyRockets = parseInt(localStorage.getItem(LEGACY_ROCKETS_KEY), 10) || 0;
+      if (legacyKings > 0 || legacyRockets > 0) {
+        kingsTotal = legacyKings;
+        rockets = legacyRockets;
+        saveToStorage();
+      }
+    }
   } catch (e) {
     kingsTotal = 0;
     rockets = 0;

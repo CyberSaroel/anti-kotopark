@@ -117,6 +117,9 @@ export async function startAntiLevel(root, levelId) {
   let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
   let levelCleaned = false;          // защита от двойного addTotalTime
   let royalTimerId = null;           // таймер новых счётчиков (200 мс)
+  let lastSecondBeeped = Infinity;   // для однократных пиков на 30/20 секундах
+  let beeped30 = false;              // пик на 30 сек уже прозвучал
+  let beeped20 = false;              // пик на 20 сек уже прозвучал
 
   // --- Отображение ---
   root.innerHTML = "";
@@ -346,6 +349,10 @@ export async function startAntiLevel(root, levelId) {
       if (result.needRedraw) {
        if (result.moved) {
          movesRemaining--;
+         // Пищалка: мало ходов (<= 20) — тихий пик низкой тональности (как в royal-socio-cats)
+         if (movesRemaining <= 20) {
+           audioManager.playBeep(440, 0.08, 0.08);
+         }
          addTotalMoves(1); // общий счётчик ходов (адаптация royal-socio-cats)
          // Красная вспышка штрафа на счётчике ходов (адаптация boost-glow/boost-float)
          showStatBoost(findStatItem(stats, "Ходы"), "-1", false);
@@ -945,6 +952,30 @@ export async function startAntiLevel(root, levelId) {
     }
     lastHappyCount = happy;
     lastUnhappyCount = unhappy;
+
+    // ==== Пищалки-напоминалки о нехватке времени (адаптация royal-socio-cats) ====
+    // Однократные пики на 30 и 20 секундах.
+    const secondsLeft = Math.ceil(levelRemainingMs / 1000);
+    if (secondsLeft !== lastSecondBeeped) {
+      lastSecondBeeped = secondsLeft;
+      if (secondsLeft === 30 && !beeped30) {
+        audioManager.playBeep(1100, 0.2);
+        beeped30 = true;
+      }
+      if (secondsLeft === 20 && !beeped20) {
+        audioManager.playBeep(1200, 0.2);
+        beeped20 = true;
+      }
+    }
+    // Если время добавили (рыбка/бонус) — разрешаем пикнуть ещё раз.
+    if (secondsLeft > 30) {
+      beeped30 = false;
+    }
+    if (secondsLeft > 20) {
+      beeped20 = false;
+    }
+    // Непрерывное пиканье при 10 и менее секундах (частота растёт к нулю).
+    audioManager.updateWarningSound(levelRemainingMs);
 
     const movesMade = game.getMoveCount();
     const kingsCount = won ? kingsAtWin : getKingsThisLevel();

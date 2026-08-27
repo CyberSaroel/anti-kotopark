@@ -127,14 +127,14 @@ function buildWinStats(moveCount, timeMs, moveRecord, timeRecord, kingsThisLevel
 
   if (rocketsTotal !== undefined) {
     stats.appendChild(buildStatRow({
-      label: "Ракет получено",
+      label: "Рыбок получено",
       value: `+${rocketsGained}`
     }));
   }
 
   if (rocketsTotal !== undefined) {
     stats.appendChild(buildStatRow({
-      label: "Ракет всего",
+      label: "Рыбок всего",
       value: String(rocketsTotal)
     }));
   }

@@ -48,7 +48,7 @@ export function showRecordsScreen(root) {
 
   const rocketsBanner = document.createElement("div");
   rocketsBanner.className = "kings-total-banner";
-  rocketsBanner.textContent = `🚀 Ракет сейчас: ${getRockets()}`;
+  rocketsBanner.textContent = `🐠 Рыбок сейчас: ${getRockets()}`;
   root.appendChild(rocketsBanner);
 
   const levelsDoneBanner = document.createElement("div");

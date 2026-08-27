@@ -30,7 +30,7 @@ export function showStatsScreen(root) {
 
   const statCards = [
     { label: "👑 Королей всего", value: kingsTotal },
-    { label: "🚀 Ракет сейчас", value: rockets },
+    { label: "🐠 Рыбок сейчас", value: rockets },
     { label: "✅ Пройдено уровней", value: levelsDone },
     { label: "🏅 Рекорд королей за уровень", value: bestKings }
   ];

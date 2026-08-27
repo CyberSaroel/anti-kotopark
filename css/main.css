@@ -262,7 +262,7 @@ button:hover { background: var(--button-hover); }
 }
 
 /* Responsive styles for stat items - all breakpoints.
-   Размеры синхронизированы с кнопкой «Ракета» (.rocket-btn): тот же внешний контур. */
+   Размеры синхронизированы с кнопкой «Рыбка» (.rocket-btn): тот же внешний контур. */
 @media (min-width: 320px) and (max-width: 575.98px) { /* xs */
   .game-stage .stats .stat-item {
     font-size: 10px;

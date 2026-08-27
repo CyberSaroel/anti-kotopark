@@ -101,7 +101,7 @@ export async function startAntiLevel(root, levelId) {
   // ==== Дополнительные счётчики (адаптация royal-socio-cats) ====
   // Сброс королей уровня (если предыдущий уровень не был завершён).
   resetLevel();
-  // Рыбки (ракеты) — пер-уровневая валюта теста: при старте уровня их всегда 0.
+  // Рыбки — пер-уровневая валюта теста: при старте уровня их всегда 0.
   // Накопить рыбки можно только кнопкой «Добавить 5 рыбок» (тестовая);
   // при выходе с уровня или переходе на другой уровень они сбрасываются в 0.
   setRockets(0);
@@ -777,7 +777,7 @@ export async function startAntiLevel(root, levelId) {
       won = true;
       // Фиксируем королей до очистки (для HUD)
       kingsAtWin = getKingsThisLevel();
-      // Анти-фарм: в общий счёт королей/ракет идёт только прибавка над прошлым рекордом
+      // Анти-фарм: в общий счёт королей/рыбок идёт только прибавка над прошлым рекордом
       const prevBestKings = getBestKings(levelId);
       const kingsDelta = (prevBestKings === undefined)
         ? kingsAtWin
@@ -997,13 +997,13 @@ export async function startAntiLevel(root, levelId) {
     schedulePositionStats();
   }
 
-  // ==== Ракета (адаптация royal-socio-cats: useRocket + showRocketBoost) ====
+  // ==== Рыбка (адаптация royal-socio-cats: useRocket + showRocketBoost) ====
   function useRocket() {
     if (won || impeached) return;
     if (!spendRocket()) return;
     audioManager.initAudioContext();
     audioManager.playSoundEffect("assets/sounds/click.mp3");
-    startTimer();                // таймер счётчиков стартует и по клику на ракету
+    startTimer();                // таймер счётчиков стартует и по клику на рыбку
     movesRemaining += 10;        // +10 ходов
     levelRemainingMs += 20_000;  // +20 сек
     timeRemaining += 20;         // синхронизация с существующим счётчиком AK
@@ -1055,7 +1055,7 @@ export async function startAntiLevel(root, levelId) {
     showFloatingBonus("🧠 Типы всех котов открыты");
   }
 
-  // «Добавить 5 рыбок»: +5 к балансу рыбок (ракет).
+  // «Добавить 5 рыбок»: +5 к балансу рыбок.
   function addTestFish() {
     addRockets(5);
     updateStats();

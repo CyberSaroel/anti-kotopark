@@ -6,8 +6,8 @@
  * localStorage — с префиксом "ak_" (как в js/storage.js).
  *
  * - Короли (mood >= 6) на уровне копятся в kingsThisLevel.
- * - При победе commitLevel() переводит их в общий счёт и даёт ракеты.
- * - Ракеты тратятся кнопкой «🚀 Ракеты» (+10 ходов, +20 сек).
+ * - При победе commitLevel() переводит их в общий счёт и даёт рыбки.
+ * - Рыбки тратятся кнопкой «🐠 Рыбки» (+10 ходов, +20 сек).
  * - Суммарные ходы и время на уровне копятся в общей статистике.
  */
 
@@ -62,7 +62,7 @@ export function onKingLost() {
 }
 
 /**
- * Зачислить королей уровня в общий счёт и начислить ракеты.
+ * Зачислить королей уровня в общий счёт и начислить рыбки.
  * @param {number} [amountToAdd] — сколько королей реально засчитать
  *   (анти-фарм: только прибавка над прошлым рекордом уровня).
  */
@@ -85,10 +85,10 @@ export function getKingsThisLevel() { return kingsThisLevel; }
 /** Всего королей за всю игру. */
 export function getKingsTotal() { return kingsTotal; }
 
-/** Доступные ракеты. */
+/** Доступные рыбки. */
 export function getRockets() { return rockets; }
 
-/** Потратить ракету. Возвращает true, если удалось. */
+/** Потратить рыбку. Возвращает true, если удалось. */
 export function spendRocket() {
   if (rockets > 0) {
     rockets--;
@@ -98,14 +98,14 @@ export function spendRocket() {
   return false;
 }
 
-/** Добавить ракеты (рыбки) — тестовая кнопка для заказчика. */
+/** Добавить рыбки — тестовая кнопка для заказчика. */
 export function addRockets(n) {
   rockets += n;
   saveToStorage();
   return rockets;
 }
 
-/** Установить точное число ракет (сброс рыбок при выходе с уровня). */
+/** Установить точное число рыбок (сброс при выходе с уровня). */
 export function setRockets(n) {
   rockets = n;
   saveToStorage();

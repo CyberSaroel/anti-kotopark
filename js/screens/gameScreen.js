@@ -392,7 +392,7 @@ export async function showGameScreen(root, levelId) {
     showRocketBoost();   // потом показываем поверх: куда прибавилось + полёт рыбки
   }
 
-  // Показываем, КУДА прибавились цифры (надпись + подсветка над счётчиком) и запускаем ракету.
+  // Показываем, КУДА прибавились цифры (надпись + подсветка над счётчиком) и запускаем рыбку.
   function showRocketBoost() {
     const items = Array.from(stats.querySelectorAll(".stat-item"));
     const find = (word) => items.find((el) => el.textContent.includes(word));
@@ -446,7 +446,7 @@ export async function showGameScreen(root, levelId) {
   stats.addEventListener("click", (e) => {
     if (e.target.closest("#rocket-btn")) {
       // Повторный click в течение 500 мс после pointerdown игнорируем,
-      // чтобы не потратить ракету дважды за одно нажатие (как в royal-socio-cats).
+      // чтобы не потратить рыбку дважды за одно нажатие (как в royal-socio-cats).
       if (Date.now() - lastRocketPointerTime > 500) useRocket();
     }
   });

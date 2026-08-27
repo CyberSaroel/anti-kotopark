@@ -949,9 +949,9 @@ export async function startAntiLevel(root, levelId) {
     const rocketsCount = getRockets();
     const canUseRocket = rocketsCount > 0 && !won && !impeached;
     const rocketBtnClass = `rocket-btn ${!canUseRocket ? "rocket-btn-disabled" : ""}`;
-    const rocketBtnHtml = `<button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}>🐠 Рыбки: ${rocketsCount}</button>`;
+    const rocketBtnHtml = `<button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: ${rocketsCount}</button>`;
     const testRevealBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`;
-    const testAddFishBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button">🐠 Добавить 5 рыбок</button>`;
+    const testAddFishBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button"><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Добавить 5 рыбок</button>`;
 
     // На мобильной версии текст короче — счётчики идут по два в ряд, места мало.
     const movesStatHtml = isCompactUI()
@@ -1017,7 +1017,7 @@ export async function startAntiLevel(root, levelId) {
     const targets = [
       { el: find("Ходы"), text: "+10 ходов" },
       { el: find("Время"), text: "+20 сек" },
-      { el: find("Рыбки"), text: "-1 🐠" },
+      { el: find("Рыбки"), text: '-1 <img class="fish-icon" src="assets/icons/fish.png" alt="">' },
     ];
     for (const t of targets) {
       if (!t.el) continue;
@@ -1032,7 +1032,7 @@ export async function startAntiLevel(root, levelId) {
       glow.addEventListener("animationend", () => glow.remove());
       const float = document.createElement("div");
       float.className = "boost-float";
-      float.textContent = t.text;
+      float.innerHTML = t.text;
       float.style.left = (rect.left + rect.width / 2) + "px";
       float.style.top = rect.top + "px";
       document.body.appendChild(float);
@@ -1040,7 +1040,7 @@ export async function startAntiLevel(root, levelId) {
     }
     const rocket = document.createElement("div");
     rocket.className = "rocket-fly-big";
-    rocket.textContent = "🐠";
+    rocket.innerHTML = '<img class="fish-icon" src="assets/icons/fish.png" alt="">';
     boardArea.appendChild(rocket);
     rocket.addEventListener("animationend", () => rocket.remove());
     boardArea.classList.add("screen-shake");

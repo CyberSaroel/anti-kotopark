@@ -399,7 +399,7 @@ export async function showGameScreen(root, levelId) {
     const targets = [
       { el: find("Ходы"),   text: "+10 ходов" },
       { el: find("Время"),  text: "+20 сек" },
-      { el: find("Рыбки"), text: "-1 🐠" },
+      { el: find("Рыбки"), text: '-1 <img class="fish-icon" src="assets/icons/fish.png" alt="">' },
     ];
     for (const t of targets) {
       if (!t.el) continue;
@@ -414,7 +414,7 @@ export async function showGameScreen(root, levelId) {
       glow.addEventListener("animationend", () => glow.remove());
       const float = document.createElement("div");
       float.className = "boost-float";
-      float.textContent = t.text;
+      float.innerHTML = t.text;
       float.style.left = (rect.left + rect.width / 2) + "px";
       float.style.top = rect.top + "px";
       document.body.appendChild(float);
@@ -422,7 +422,7 @@ export async function showGameScreen(root, levelId) {
     }
     const rocket = document.createElement("div");
     rocket.className = "rocket-fly-big";
-    rocket.textContent = "�";
+    rocket.innerHTML = '<img class="fish-icon" src="assets/icons/fish.png" alt="">';
     boardArea.appendChild(rocket);
     rocket.addEventListener("animationend", () => rocket.remove());
     boardArea.classList.add("screen-shake");
@@ -528,7 +528,7 @@ export async function showGameScreen(root, levelId) {
           <div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="stat-item">🎯 Ходы: ${remainingMovesHtml}|${movesMade}</div></div>
           <div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div></div>
           <div class="col-6 col-sm-4 col-md-3 col-lg-2"><div class="stat-item">👑 Короли: ${kingsCount}</div></div>
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2"><button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}>🐠 Рыбки: ${rocketsCount}</button></div>
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2"><button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: ${rocketsCount}</button></div>
         </div>
       </div>
     ` : `
@@ -539,7 +539,7 @@ export async function showGameScreen(root, levelId) {
       <div class="stat-item">😾 Недовольные: ${unhappy}</div>
       <div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>
       <div class="stat-item">👑 Короли: ${kingsCount}</div>
-      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}>🐠 Рыбки: ${rocketsCount}</button>
+      <button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? 'disabled' : ''}><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: ${rocketsCount}</button>
     `;
     // Кнопку рыбки теперь обрабатывает useRocket (делегированный слушатель выше).
     refitBoard();

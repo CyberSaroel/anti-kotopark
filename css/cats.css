@@ -247,12 +247,17 @@
   line-height: 1.3;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 6px 0 #000000, inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 8px 10px rgba(0, 0, 0, 0.35);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+/* Внутри кнопки: убираем лишние отступы иконки рыбки, чтобы пробел после картинки был ровно один (как в "Рыбки: N") */
+.rocket-btn .fish-icon {
+  margin: 0;
 }
 
 .rocket-btn:hover {
@@ -440,6 +445,14 @@
   0%   { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.6); }
   15%  { opacity: 1; }
   100% { opacity: 0; transform: translate(220px, -260px) rotate(35deg) scale(1.2); }
+}
+/* Иконка рыбки: картинка вместо эмодзи — удлинена по горизонтали в 1.5 раза (высота та же, что при ширине auto) */
+.fish-icon {
+  height: 1em;
+  width: calc(1em * 130 / 73 * 1.5);
+  vertical-align: middle;
+  display: inline-block;
+  margin: 0 0.1em;
 }
 
 /* ===== Коты: приземление после хода и превращение при смене настроения ===== */

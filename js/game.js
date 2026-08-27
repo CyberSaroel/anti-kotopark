@@ -22,6 +22,7 @@ import {
 } from "./core/royalStats.js";
 import { showStatBoost, findStatItem } from "./ui/statBoost.js";
 import { launchLevel } from "./screens/gameScreen.js";
+import { showImpeachmentScreen } from "./screens/impeachmentScreen.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -769,11 +770,14 @@ export async function startAntiLevel(root, levelId) {
   function checkImpeachment(reason) {
     if (won || impeached) return;
     impeached = true;
+    audioManager.playLoseSound();
     cleanupLevel();
-    showResultOverlay("Импичмент", reason, [
-      { label: "Заново", fn: () => startAntiLevel(root, levelId) },
-      { label: "В меню", fn: showMenu }
-    ]);
+    // Экран импичмента с видео — как в royal-socio-cats (assets/impeachment/impeachment.mp4).
+    // reason больше не показывается: в экране есть заголовок и кнопки «Заново»/«К выбору уровня».
+    showImpeachmentScreen(root, {
+      onRetry: () => startAntiLevel(root, levelId),
+      onMenu: showMenu
+    });
   }
 
   // ==== Победа ====

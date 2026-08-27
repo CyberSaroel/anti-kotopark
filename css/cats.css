@@ -349,10 +349,10 @@
 
 /* ===== Супер-анимации котов ===== */
 
-/* Пульсация выбранной клетки */
+/* Пульсация выбранной клетки (красное свечение, как в royal-socio-cats) */
 @keyframes cellSelectPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.6); }
-  50%      { box-shadow: 0 0 12px 4px rgba(255, 215, 0, 0.9); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.6); }
+  50%      { box-shadow: 0 0 12px 4px rgba(255, 59, 59, 0.9); }
 }
 #board .cell.selected {
   animation: cellSelectPulse 1s ease-in-out infinite;

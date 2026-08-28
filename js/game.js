@@ -827,9 +827,14 @@ export async function startAntiLevel(root, levelId) {
       for (const cat of game.board.allCats()) {
         if (game.moodAt(cat.r, cat.c) >= KING_MOOD) kings++;
       }
-      // Бонус за королей: за каждые 3 короля +1 право на ошибку
+      // Бонус за королей: +1 право на ошибку за каждые 3 короля.
+      // Анти-фарм как у рыбок: при повторном прохождении уровня начисляется
+      // только прибавка над лучшим прошлым результатом прав на этом же уровне.
+      // Например, в прошлый раз набрано 5 прав, в этот раз 7 — прибавится +2.
       const bonusErrors = Math.floor(kings / 3);
-      if (bonusErrors > 0) addBonusErrors(bonusErrors);
+      const prevBestBonusErrors = (prevBestKings === undefined) ? 0 : Math.floor(prevBestKings / 3);
+      const bonusErrorsDelta = Math.max(0, bonusErrors - prevBestBonusErrors);
+      if (bonusErrorsDelta > 0) addBonusErrors(bonusErrorsDelta);
       updateStats();
       // Экран победы — тот же визуал, что и в royal-socio-cats:
       // картинка «Уровень пройден», статистика рекордов и конфетти.
@@ -843,7 +848,7 @@ export async function startAntiLevel(root, levelId) {
         kingsTotal: getKingsTotal(),
         rocketsTotal: getRockets(),
         rocketsGained: kingsDelta,
-        bonusErrors,
+        bonusErrors: bonusErrorsDelta,
         nextLabel: "Следующий уровень",
         menuLabel: "В меню",
         onNext: () => leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId + 1), { replace: true })),

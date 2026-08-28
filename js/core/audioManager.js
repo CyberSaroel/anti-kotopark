@@ -70,92 +70,115 @@ export class AudioManager {
 
   // Инициализация Web Audio API (обязательно после взаимодействия с пользователем!)
   initAudioContext() {
-    if (!this.audioCtx) {
-      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (this.audioCtx.state === "suspended") {
-      this.audioCtx.resume();
+    try {
+      if (!this.audioCtx) {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (this.audioCtx.state === "suspended") {
+        this.audioCtx.resume();
+      }
+    } catch (e) {
+      // Не даём ошибке инициализации аудио сломать игру
     }
   }
 
   // Один короткий "пик"
   playBeep(frequency = 900, duration = 0.1, volume = 0.1) {
     if (!isSfxEnabled() || !this.audioCtx) return;
-    const oscillator = this.audioCtx.createOscillator();
-    const gainNode = this.audioCtx.createGain();
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(frequency, this.audioCtx.currentTime);
-    const finalVolume = volume * getSfxVolume();
-    gainNode.gain.setValueAtTime(finalVolume, this.audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001,
-      this.audioCtx.currentTime + duration
-    );
-    oscillator.connect(gainNode);
-    gainNode.connect(this.audioCtx.destination);
-    oscillator.start();
-    oscillator.stop(this.audioCtx.currentTime + duration);
+    try {
+      const oscillator = this.audioCtx.createOscillator();
+      const gainNode = this.audioCtx.createGain();
+      oscillator.type = "square";
+      oscillator.frequency.setValueAtTime(frequency, this.audioCtx.currentTime);
+      const finalVolume = Math.max(0.0001, volume * getSfxVolume());
+      gainNode.gain.setValueAtTime(finalVolume, this.audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.001,
+        this.audioCtx.currentTime + duration
+      );
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(this.audioCtx.currentTime + duration);
+    } catch (e) {
+      // Звук не критичен для игры
+    }
   }
 
   // Звук "Дзинь!" — приятный колокольчик при росте числа довольных котов
   playDing() {
     if (!isSfxEnabled() || !this.audioCtx) return;
-    const now = this.audioCtx.currentTime;
-    const oscillator = this.audioCtx.createOscillator();
-    const gainNode = this.audioCtx.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(1568, now); // высокая чистая нота (G6)
-    const finalVolume = 0.3 * getSfxVolume();
-    gainNode.gain.setValueAtTime(finalVolume, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-    oscillator.connect(gainNode);
-    gainNode.connect(this.audioCtx.destination);
-    oscillator.start(now);
-    oscillator.stop(now + 0.5);
+    try {
+      const now = this.audioCtx.currentTime;
+      const oscillator = this.audioCtx.createOscillator();
+      const gainNode = this.audioCtx.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(1568, now); // высокая чистая нота (G6)
+      const finalVolume = Math.max(0.0001, 0.3 * getSfxVolume());
+      gainNode.gain.setValueAtTime(finalVolume, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.5);
+    } catch (e) {
+      // Звук не критичен для игры
+    }
   }
 
   // Звук правильного угадывания социотипа — весёлое восходящее арпеджио
   playCorrectGuess() {
     if (!isSfxEnabled() || !this.audioCtx) return;
-    const now = this.audioCtx.currentTime;
-    const notes = [1046.5, 1318.5, 1568]; // C6 → E6 → G6
-    notes.forEach((freq, i) => {
-      const oscillator = this.audioCtx.createOscillator();
-      const gainNode = this.audioCtx.createGain();
-      const t = now + i * 0.09;
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(freq, t);
-      const finalVolume = 0.25 * getSfxVolume();
-      gainNode.gain.setValueAtTime(finalVolume, t);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-      oscillator.connect(gainNode);
-      gainNode.connect(this.audioCtx.destination);
-      oscillator.start(t);
-      oscillator.stop(t + 0.4);
-    });
+    try {
+      const now = this.audioCtx.currentTime;
+      const notes = [1046.5, 1318.5, 1568]; // C6 → E6 → G6
+      notes.forEach((freq, i) => {
+        const oscillator = this.audioCtx.createOscillator();
+        const gainNode = this.audioCtx.createGain();
+        const t = now + i * 0.09;
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(freq, t);
+        const finalVolume = Math.max(0.0001, 0.25 * getSfxVolume());
+        gainNode.gain.setValueAtTime(finalVolume, t);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioCtx.destination);
+        oscillator.start(t);
+        oscillator.stop(t + 0.4);
+      });
+    } catch (e) {
+      // Звук не критичен для игры
+    }
   }
 
   // Звук поражения
   playLoseSound() {
-    if (!isSfxEnabled() || !this.audioCtx) return;
-    const oscillator = this.audioCtx.createOscillator();
-    const gainNode = this.audioCtx.createGain();
-    oscillator.type = "sawtooth";
-    oscillator.frequency.setValueAtTime(500, this.audioCtx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(
-      120,
-      this.audioCtx.currentTime + 0.6
-    );
-    const finalVolume = 0.3 * getSfxVolume();
-    gainNode.gain.setValueAtTime(finalVolume, this.audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001,
-      this.audioCtx.currentTime + 0.6
-    );
-    oscillator.connect(gainNode);
-    gainNode.connect(this.audioCtx.destination);
-    oscillator.start();
-    oscillator.stop(this.audioCtx.currentTime + 0.6);
+    if (!isSfxEnabled()) return;
+    try {
+      // Гарантируем готовый к работе контекст: на некоторых устройствах
+      // (особенно Android) AudioContext сам переходит в "suspended", и звук
+      // пропадает после первого воспроизведения.
+      this.initAudioContext();
+      if (!this.audioCtx) return;
+      const now = this.audioCtx.currentTime;
+      const volume = getSfxVolume();
+      // Всегда ненулевая амплитуда, иначе exponentialRampToValueAtTime
+      // выбрасывает RangeError и повторные писки пропадают.
+      const finalVolume = Math.max(0.0001, 0.3 * (Number.isFinite(volume) && volume > 0 ? volume : 0.5));
+      const oscillator = this.audioCtx.createOscillator();
+      const gainNode = this.audioCtx.createGain();
+      oscillator.type = "sawtooth";
+      oscillator.frequency.setValueAtTime(500, now);
+      oscillator.frequency.exponentialRampToValueAtTime(120, now + 0.6);
+      gainNode.gain.setValueAtTime(finalVolume, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.6);
+    } catch (e) {
+      // Звук не критичен: не даём ошибке прервать обработку хода
+    }
   }
 
   // Остановить текущее пиканье

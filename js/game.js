@@ -692,6 +692,9 @@ export async function startAntiLevel(root, levelId) {
       movesRemaining = Math.max(0, movesRemaining - MOVE_PENALTY_ERROR);
       timeRemaining = Math.max(0, timeRemaining - TIME_PENALTY_ERROR);
       levelRemainingMs = Math.max(0, levelRemainingMs - TIME_PENALTY_ERROR * 1000);
+      // Противный писк за каждую ошибку: перед воспроизведением убеждаемся,
+      // что аудиоконтекст не "заснул" (на Android он часто переходит в suspended).
+      audioManager.initAudioContext();
       audioManager.playLoseSound();
       flashCatRed();
        showFloatingBonus(`-${MOVE_PENALTY_ERROR} 👣 -${TIME_PENALTY_ERROR} ⏱`);

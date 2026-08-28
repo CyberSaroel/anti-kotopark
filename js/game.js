@@ -98,7 +98,10 @@ export async function startAntiLevel(root, levelId) {
   let timeRemaining = START_TIME;
   let movesRemaining = START_MOVES;
   let errorsMade = 0;
-  let currentErrorsRemaining = START_ERRORS + bonusErrorsLeft;
+  // Базовое право на ошибку на уровне — всегда 3. Накопленные бонусные права
+  // (+1 за каждые 3 короля на пройденных уровнях) показываются отдельно
+  // счётчиком «Бонус» и тратятся по одной, когда базовые закончились.
+  let currentErrorsRemaining = START_ERRORS;
   let won = false;
   let impeached = false;
   let timerStarted = false;
@@ -675,17 +678,19 @@ export async function startAntiLevel(root, levelId) {
      } else {
       // Ошибка: НЕ показываем правильный ответ — низкий противный звук.
       // За неправильное угадывание убавляются ходы и время (как в royal-socio-cats).
-      // Когда ошибок осталось 0 и игрок ошибается ещё раз — наступает импичмент.
-      // Пока остаток больше 0, тратим его: первые 3 ошибки — базовые, дальше
-      // списываются накопленные бонусные права (их можно копить и тратить на любых уровнях).
+      // Сначала тратим базовые 3 ошибки уровня. Когда «Осталось» = 0 — следующая
+      // ошибка списывается с накопленного бонусного права (+1 за каждые 3 короля).
+      // Импичмент наступает только когда исчерпаны и базовые, и бонусные права.
       errorsMade++;
       let outOfErrors = false;
       if (currentErrorsRemaining > 0) {
         currentErrorsRemaining--;
-        if (currentErrorsRemaining < START_ERRORS && bonusErrorsLeft > 0) {
-          bonusErrorsLeft--;
-          spendBonusError();
-        }
+      } else if (bonusErrorsLeft > 0) {
+        bonusErrorsLeft--;
+        spendBonusError();
+        // Визуальный фидбек, что ошибку покрыло бонусное право
+        showFloatingBonus("❤️ Бонусное право на ошибку");
+        showStatBoost(findStatItem(stats, "Ошибки"), "💛", false);
       } else {
         outOfErrors = true;
       }

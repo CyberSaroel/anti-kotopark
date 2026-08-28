@@ -28,15 +28,16 @@ export function addBonusErrors(n) {
   return cur + n;
 }
 
-/** Снять все накопленные бонусные ошибки (используются при старте уровня). */
-export function consumeBonusErrors() {
-  const b = getBonusErrors();
+/** Списать одно накопленное бонусное право на ошибку. Возвращает true, если удалось. */
+export function spendBonusError() {
+  const cur = getBonusErrors();
+  if (cur <= 0) return false;
   try {
-    localStorage.setItem(LS_BONUS, "0");
+    localStorage.setItem(LS_BONUS, String(cur - 1));
   } catch {
     // ignore
   }
-  return b;
+  return true;
 }
 
 // ==== Музыка / звук ====

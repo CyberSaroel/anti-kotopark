@@ -1,7 +1,7 @@
 import { AntiGame } from "./core/antiGame.js";
 import { renderAntiBoard } from "./core/antiRenderer.js";
 import { TYPES, getTypeDisplayName } from "./socionics/types.js";
-import { consumeBonusErrors, addBonusErrors } from "./storage.js";
+import { getBonusErrors, spendBonusError, addBonusErrors } from "./storage.js";
 import { audioManager } from "./core/audioManager.js";
 import NavigationService from "./core/navigation.js";
 import { stopBoardLayoutListener, refitBoard, getStatsContentWidth } from "./core/boardLayout.js";
@@ -77,9 +77,11 @@ export async function startAntiLevel(root, levelId) {
   if (levelActive) return;
   levelActive = true;
 
-  const bonus = consumeBonusErrors();
-  // Право на ошибку при старте/рестарте уровня всегда не меньше 3
-  const errorsRemaining = Math.max(3, START_ERRORS + bonus);
+  // Базовое право на ошибку на уровне — 3. Накопленные бонусные права
+  // (за королей на пройденных уровнях: +1 за каждые 3 короля) НЕ сгорают
+  // при старте уровня: они тратятся по одному, когда базовые закончились,
+  // и их можно копить и тратить на любых уровнях.
+  const bonusErrorsLeft = getBonusErrors();
 
   let level;
   try {
@@ -96,7 +98,7 @@ export async function startAntiLevel(root, levelId) {
   let timeRemaining = START_TIME;
   let movesRemaining = START_MOVES;
   let errorsMade = 0;
-  let currentErrorsRemaining = errorsRemaining;
+  let currentErrorsRemaining = START_ERRORS;
   let won = false;
   let impeached = false;
   let timerStarted = false;
@@ -673,8 +675,19 @@ export async function startAntiLevel(root, levelId) {
      } else {
       // Ошибка: НЕ показываем правильный ответ — низкий противный звук.
       // За неправильное угадывание убавляются ходы и время (как в royal-socio-cats).
+      // Сначала тратим базовое право на ошибку уровня (3); когда они кончились —
+      // списываем накопленное бонусное право (+1 за каждые 3 короля на пройденных
+      // уровнях). Бонусные права не привязаны к уровню: их можно тратить на любых.
       errorsMade++;
-      currentErrorsRemaining--;
+      let outOfErrors = false;
+      if (currentErrorsRemaining > 0) {
+        currentErrorsRemaining--;
+      } else if (bonusErrorsLeft > 0) {
+        bonusErrorsLeft--;
+        spendBonusError();
+      } else {
+        outOfErrors = true;
+      }
       movesRemaining = Math.max(0, movesRemaining - MOVE_PENALTY_ERROR);
       timeRemaining = Math.max(0, timeRemaining - TIME_PENALTY_ERROR);
       levelRemainingMs = Math.max(0, levelRemainingMs - TIME_PENALTY_ERROR * 1000);
@@ -685,7 +698,7 @@ export async function startAntiLevel(root, levelId) {
        showStatBoost(findStatItem(stats, "Ходы"), `-${MOVE_PENALTY_ERROR}`, false);
        showStatBoost(findStatItem(stats, "Время"), `-${TIME_PENALTY_ERROR}`, false);
        showStatBoost(findStatItem(stats, "Ошибки"), "-1", false);
-       if (currentErrorsRemaining <= 0) {
+       if (outOfErrors) {
         catState = "idle";
         hideSocioMenu();
         if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
@@ -826,6 +839,7 @@ export async function startAntiLevel(root, levelId) {
         kingsTotal: getKingsTotal(),
         rocketsTotal: getRockets(),
         rocketsGained: kingsDelta,
+        bonusErrors,
         nextLabel: "Следующий уровень",
         menuLabel: "В меню",
         onNext: () => leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId + 1), { replace: true })),
@@ -1001,7 +1015,7 @@ export async function startAntiLevel(root, levelId) {
       `<div class="stat-item">😾 Недовольные: ${unhappy}</div>`,
       `<div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>`,
       `<div class="stat-item">👑 Короли: ${kingsCount}</div>`,
-      `<div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}</div>`,
+      `<div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}${bonusErrorsLeft > 0 ? ` | Бонус: ${bonusErrorsLeft}` : ""}</div>`,
       `<div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>`
     ];
 

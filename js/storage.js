@@ -3,8 +3,6 @@
  */
 
 const LS_BONUS = "ak_bonus_errors";
-const LS_MUSIC = "ak_music_on";
-const LS_SFX = "ak_sfx_on";
 const LS_THEME = "ak_theme";
 
 // ==== Бонусные ошибки за королей ====
@@ -38,40 +36,6 @@ export function spendBonusError() {
     // ignore
   }
   return true;
-}
-
-// ==== Музыка / звук ====
-
-export function isMusicOn() {
-  try {
-    return localStorage.getItem(LS_MUSIC) !== "0";
-  } catch {
-    return true;
-  }
-}
-
-export function setMusicOn(on) {
-  try {
-    localStorage.setItem(LS_MUSIC, on ? "1" : "0");
-  } catch {
-    // ignore
-  }
-}
-
-export function isSfxOn() {
-  try {
-    return localStorage.getItem(LS_SFX) !== "0";
-  } catch {
-    return true;
-  }
-}
-
-export function setSfxOn(on) {
-  try {
-    localStorage.setItem(LS_SFX, on ? "1" : "0");
-  } catch {
-    // ignore
-  }
 }
 
 // ==== Тема ====

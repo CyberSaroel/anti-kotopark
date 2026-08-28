@@ -81,7 +81,7 @@ export async function startAntiLevel(root, levelId) {
   // (+1 за каждые 3 короля на пройденных уровнях). Когда общий остаток
   // опускается ниже базовых 3 — ошибки списываются с бонусного пула.
   // Бонусы НЕ сгорают при старте: их можно копить и тратить на любых уровнях.
-  const bonusErrorsLeft = getBonusErrors();
+  let bonusErrorsLeft = getBonusErrors();
 
   let level;
   try {

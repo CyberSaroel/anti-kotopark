@@ -475,6 +475,11 @@ button:hover { background: var(--button-hover); }
   color: #fff;
 }
 
+/* Текст кнопок окна победы всегда в одну строчку */
+#win-screen .win-btn {
+  white-space: nowrap;
+}
+
 #intro-screen {
   display: flex;
   flex-direction: column;

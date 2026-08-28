@@ -826,9 +826,9 @@ export async function startAntiLevel(root, levelId) {
         kingsTotal: getKingsTotal(),
         rocketsTotal: getRockets(),
         rocketsGained: kingsDelta,
-        nextLabel: "Заново",
+        nextLabel: "Следующий уровень",
         menuLabel: "В меню",
-        onNext: () => startAntiLevel(root, levelId),
+        onNext: () => leaveLevel(() => NavigationService.navigate("game", () => launchLevel(root, levelId + 1), { replace: true })),
         onMenu: showMenu
       });
     }

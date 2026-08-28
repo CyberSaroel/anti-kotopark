@@ -152,6 +152,8 @@ export function showWinScreen(root, level, {
   kingsTotal,
   rocketsTotal,
   rocketsGained,
+  nextLabel = "Следующий уровень",
+  menuLabel = "К выбору уровня",
   onNext,
   onMenu
 }) {
@@ -174,7 +176,7 @@ export function showWinScreen(root, level, {
   btns.style.justifyContent = "center";
   const next = document.createElement("button");
   next.className = "win-btn";
-  next.textContent = "Следующий уровень";
+  next.textContent = nextLabel;
   next.addEventListener("click", () => {
     audioManager.playSoundEffect("assets/sounds/click.mp3");
     overlay.remove();
@@ -182,7 +184,7 @@ export function showWinScreen(root, level, {
   });
   const menu = document.createElement("button");
   menu.className = "win-btn";
-  menu.textContent = "К выбору уровня";
+  menu.textContent = menuLabel;
   menu.addEventListener("click", () => {
     audioManager.playSoundEffect("assets/sounds/click.mp3");
     overlay.remove();

@@ -14,6 +14,7 @@ import {
   commitLevel,
   resetLevel,
   getKingsThisLevel,
+  getKingsTotal,
   getRockets,
   spendRocket,
   addRockets,
@@ -23,6 +24,7 @@ import {
 import { showStatBoost, findStatItem } from "./ui/statBoost.js";
 import { launchLevel } from "./screens/gameScreen.js";
 import { showImpeachmentScreen } from "./screens/impeachmentScreen.js";
+import { showWinScreen } from "./screens/winScreen.js";
 
 /**
  * Уровень 10 «Антикотопарк» (план v4).
@@ -793,16 +795,16 @@ export async function startAntiLevel(root, levelId) {
         ? kingsAtWin
         : Math.max(0, kingsAtWin - prevBestKings);
       commitLevel(kingsDelta);
-      // Сохраняем рекорд королей уровня — для анти-фарма при повторных
-      // проходах: в следующий раз зачислят только прибавку над этим числом.
-      saveLevelKingsRecord(levelId, kingsAtWin);
       cleanupLevel();
       // Как в royal-socio-cats: помечаем уровень пройденным и сохраняем
       // рекорды ходов/времени — в меню уровней появится галочка «✓»
       // и трофей 🏆 с лучшими ходами.
       markCompleted(levelId);
-      saveLevelRecord(levelId, game.getMoveCount());
-      saveLevelTimeRecord(levelId, elapsedMs);
+      const moveRecord = saveLevelRecord(levelId, game.getMoveCount());
+      const timeRecord = saveLevelTimeRecord(levelId, elapsedMs);
+      // Рекорд королей уровня — для анти-фарма при повторных проходах:
+      // в следующий раз зачислят только прибавку над этим числом.
+      const kingsRecord = saveLevelKingsRecord(levelId, kingsAtWin);
       // Короли: настроение >= 6
       let kings = 0;
       for (const cat of game.board.allCats()) {
@@ -812,35 +814,24 @@ export async function startAntiLevel(root, levelId) {
       const bonusErrors = Math.floor(kings / 3);
       if (bonusErrors > 0) addBonusErrors(bonusErrors);
       updateStats();
-      showResultOverlay("Победа!", "Все коты довольны!", [
-        { label: "Заново", fn: () => startAntiLevel(root, levelId) },
-        { label: "В меню", fn: showMenu }
-      ], `Ошибки: ${errorsMade} | Короли: ${kings} | Рыбки: +${kingsDelta} (всего: ${getRockets()}) | Бонус: +${bonusErrors} прав на ошибку (за каждые 3 короля)`);
-    }
-  }
-
-  function showResultOverlay(heading, sub, actions, extra) {
-    const overlay = document.createElement("div");
-    overlay.className = "level10-result-overlay";
-    overlay.innerHTML = `
-      <div class="level10-result-card">
-        <h2>${heading}</h2>
-        <p>${sub}</p>
-        ${extra ? `<p class="level10-result-extra">${extra}</p>` : ""}
-      </div>
-    `;
-    const card = overlay.querySelector(".level10-result-card");
-    actions.forEach(a => {
-      const btn = document.createElement("button");
-      btn.className = "win-btn";
-      btn.textContent = a.label;
-      btn.addEventListener("click", () => {
-        overlay.remove();
-        a.fn();
+      // Экран победы — тот же визуал, что и в royal-socio-cats:
+      // картинка «Уровень пройден», статистика рекордов и конфетти.
+      showWinScreen(root, level, {
+        moveCount: game.getMoveCount(),
+        timeMs: elapsedMs,
+        moveRecord,
+        timeRecord,
+        kingsThisLevel: kings,
+        kingsRecord,
+        kingsTotal: getKingsTotal(),
+        rocketsTotal: getRockets(),
+        rocketsGained: kingsDelta,
+        nextLabel: "Заново",
+        menuLabel: "В меню",
+        onNext: () => startAntiLevel(root, levelId),
+        onMenu: showMenu
       });
-      card.appendChild(btn);
-    });
-    root.appendChild(overlay);
+    }
   }
 
   // ==== Отслеживание королей (адаптация royal-socio-cats: updateKingTracking) ====

@@ -77,10 +77,10 @@ export async function startAntiLevel(root, levelId) {
   if (levelActive) return;
   levelActive = true;
 
-  // Базовое право на ошибку на уровне — 3. Накопленные бонусные права
-  // (за королей на пройденных уровнях: +1 за каждые 3 короля) НЕ сгорают
-  // при старте уровня: они тратятся по одному, когда базовые закончились,
-  // и их можно копить и тратить на любых уровнях.
+  // Общий запас ошибок на уровне = 3 базовых + накопленные бонусные права
+  // (+1 за каждые 3 короля на пройденных уровнях). Когда общий остаток
+  // опускается ниже базовых 3 — ошибки списываются с бонусного пула.
+  // Бонусы НЕ сгорают при старте: их можно копить и тратить на любых уровнях.
   const bonusErrorsLeft = getBonusErrors();
 
   let level;
@@ -98,7 +98,7 @@ export async function startAntiLevel(root, levelId) {
   let timeRemaining = START_TIME;
   let movesRemaining = START_MOVES;
   let errorsMade = 0;
-  let currentErrorsRemaining = START_ERRORS;
+  let currentErrorsRemaining = START_ERRORS + bonusErrorsLeft;
   let won = false;
   let impeached = false;
   let timerStarted = false;
@@ -675,16 +675,17 @@ export async function startAntiLevel(root, levelId) {
      } else {
       // Ошибка: НЕ показываем правильный ответ — низкий противный звук.
       // За неправильное угадывание убавляются ходы и время (как в royal-socio-cats).
-      // Сначала тратим базовое право на ошибку уровня (3); когда они кончились —
-      // списываем накопленное бонусное право (+1 за каждые 3 короля на пройденных
-      // уровнях). Бонусные права не привязаны к уровню: их можно тратить на любых.
+      // Когда ошибок осталось 0 и игрок ошибается ещё раз — наступает импичмент.
+      // Пока остаток больше 0, тратим его: первые 3 ошибки — базовые, дальше
+      // списываются накопленные бонусные права (их можно копить и тратить на любых уровнях).
       errorsMade++;
       let outOfErrors = false;
       if (currentErrorsRemaining > 0) {
         currentErrorsRemaining--;
-      } else if (bonusErrorsLeft > 0) {
-        bonusErrorsLeft--;
-        spendBonusError();
+        if (currentErrorsRemaining < START_ERRORS && bonusErrorsLeft > 0) {
+          bonusErrorsLeft--;
+          spendBonusError();
+        }
       } else {
         outOfErrors = true;
       }

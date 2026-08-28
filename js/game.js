@@ -708,13 +708,8 @@ export async function startAntiLevel(root, levelId) {
        showStatBoost(findStatItem(stats, "Время"), `-${TIME_PENALTY_ERROR}`, false);
        showStatBoost(findStatItem(stats, "Ошибки"), "-1", false);
        if (outOfErrors) {
-        catState = "idle";
-        hideSocioMenu();
-        if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
-        selectedCatEl = null;
-        selectedCatRC = null;
-        currentCatIndex = null;
-        render();
+        // Импичмент вызываем СРАЗУ — чтобы сброс выделения/перерисовка поля
+        // не могли помешать показать экран проигрыша (иначе получится «бессмертие»).
         checkImpeachment("Ошибки типирования сверх лимита");
         return;
       }

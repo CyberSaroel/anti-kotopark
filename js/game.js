@@ -17,7 +17,6 @@ import {
   getKingsTotal,
   getRockets,
   spendRocket,
-  addRockets,
   addTotalMoves,
   addTotalTime
 } from "./core/royalStats.js";
@@ -1007,8 +1006,12 @@ export async function startAntiLevel(root, levelId) {
     const canUseRocket = rocketsCount > 0 && !won && !impeached;
     const rocketBtnClass = `rocket-btn ${!canUseRocket ? "rocket-btn-disabled" : ""}`;
     const rocketBtnHtml = `<button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: ${rocketsCount}</button>`;
-    const testRevealBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`;
-    const testAddFishBtnHtml = `<button class="rocket-btn test-tool-btn" id="test-add-fish-btn" type="button"><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Добавить 5 рыбок</button>`;
+    // Тестовая кнопка «Открыть типы всех котов» для заказчика:
+    // показывается только на уровнях 1–30, на 31–100 скрыта.
+    const showTestRevealBtn = levelId <= 30;
+    const testRevealBtnHtml = showTestRevealBtn
+      ? `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`
+      : "";
 
     // На мобильной версии текст короче — счётчики идут по два в ряд, места мало.
     // Красным число оставшихся ходов и слово «осталось», когда их меньше 20 (как в royal-socio-cats).
@@ -1037,8 +1040,7 @@ export async function startAntiLevel(root, levelId) {
           <div class="row g-2">
             ${statItemsHtml.map(h => `<div class="col-6">${h}</div>`).join("")}
             <div class="col-6">${rocketBtnHtml}</div>
-            <div class="col-12">${testRevealBtnHtml}</div>
-            <div class="col-12">${testAddFishBtnHtml}</div>
+            ${showTestRevealBtn ? `<div class="col-12">${testRevealBtnHtml}</div>` : ""}
           </div>
         </div>
       `;
@@ -1046,9 +1048,7 @@ export async function startAntiLevel(root, levelId) {
       stats.innerHTML = `
         ${statItemsHtml.join("")}
         ${rocketBtnHtml}
-        <!-- Тестовые кнопки для заказчика -->
-        ${testRevealBtnHtml}
-        ${testAddFishBtnHtml}
+        ${showTestRevealBtn ? testRevealBtnHtml : ""}
       `;
     }
     // После перерисовки (в т.ч. смены мобиль/десктоп) счётчики позиционируются
@@ -1113,14 +1113,6 @@ export async function startAntiLevel(root, levelId) {
     showFloatingBonus("🧠 Типы всех котов открыты");
   }
 
-  // «Добавить 5 рыбок»: +5 к балансу рыбок.
-  function addTestFish() {
-    addRockets(5);
-    updateStats();
-    showStatBoost(stats.querySelector("#test-add-fish-btn"), "+5", true);
-    showFloatingBonus("+5 🐠");
-  }
-
   // Один слушатель на весь блок статистики — переживает перерисовку кнопки
   // (updateStats перезаписывает innerHTML при каждом обновлении).
   let lastRocketPointerTime = 0;
@@ -1133,25 +1125,16 @@ export async function startAntiLevel(root, levelId) {
       revealAllTypesTest();
       return;
     }
-    if (e.target.closest("#test-add-fish-btn")) {
-      lastTestBtnPointerTime = Date.now();
-      addTestFish();
-      return;
-    }
     if (e.target.closest("#rocket-btn")) {
       lastRocketPointerTime = Date.now();
       useRocket();
     }
   });
   stats.addEventListener("click", (e) => {
-    // Тестовые кнопки: повторный click после pointerdown игнорируем,
+    // Тестовая кнопка: повторный click после pointerdown игнорируем,
     // чтобы действие не сработало дважды за одно нажатие.
     if (e.target.closest("#test-reveal-btn")) {
       if (Date.now() - lastTestBtnPointerTime > 500) revealAllTypesTest();
-      return;
-    }
-    if (e.target.closest("#test-add-fish-btn")) {
-      if (Date.now() - lastTestBtnPointerTime > 500) addTestFish();
       return;
     }
     if (e.target.closest("#rocket-btn")) {

@@ -1,4 +1,4 @@
-const VERSION = "1.0.0"; // это число будет менять tools/bumpVersion.js
+const VERSION = "1.1.0"; // это число будет менять tools/bumpVersion.js
 const CACHE = "anti-kotopark-" + VERSION;
 
 // Ставим новую версию воркера сразу, не ждём закрытия вкладок

@@ -17,6 +17,7 @@ import {
   getKingsTotal,
   getRockets,
   spendRocket,
+  addRockets,
   addTotalMoves,
   addTotalTime
 } from "./core/royalStats.js";
@@ -123,6 +124,15 @@ export async function startAntiLevel(root, levelId) {
   let prevAntiMoods = {};            // настроение котов на прошлой отрисовке (индекс → mood)
   let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
   let levelCleaned = false;          // защита от двойного addTotalTime
+
+  // ==== Чит-код «Aushra» ====
+  // Игрок набирает «Aushra» на клавиатуре прямо на странице игры → +1000 рыбок,
+  // появляется кнопка «Открыть типы всех котов» (с анимацией) и на игровом поле
+  // всплывает надпись «Чит-код активирован» (исчезает через ~1 секунду).
+  const CHEAT_CODE = "aushra";
+  let cheatUnlocked = false;        // чит-код активирован
+  let cheatBuffer = "";             // буфер последних нажатых клавиш
+  let cheatBtnAnimUntil = 0;        // окно: до этого момента HUD не перерисовываем
   let royalTimerId = null;           // таймер новых счётчиков (200 мс)
   let lastSecondBeeped = Infinity;   // для однократных пиков на 30/20 секундах
   let beeped30 = false;              // пик на 30 сек уже прозвучал
@@ -660,6 +670,19 @@ export async function startAntiLevel(root, levelId) {
   };
   document.addEventListener("keydown", onModalKeyDown);
 
+  // ==== Чит-код «Aushra»: набор прямо на странице игры ====
+  // Собираем печатные символы в буфер и сравниваем с кодом (без учёта регистра).
+  const onCheatKeyDown = (e) => {
+    if (cheatUnlocked) return;
+    // Игнорируем модификаторы и служебные клавиши (Escape, Shift, стрелки…)
+    if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) return;
+    cheatBuffer = (cheatBuffer + e.key).slice(-CHEAT_CODE.length).toLowerCase();
+    if (cheatBuffer === CHEAT_CODE) {
+      activateCheat();
+    }
+  };
+  document.addEventListener("keydown", onCheatKeyDown);
+
   // ==== Обработка выбора социотипа ====
   function handleGuess(catIndex, guessedType) {
     if (won || impeached) return;
@@ -925,6 +948,9 @@ export async function startAntiLevel(root, levelId) {
 
   // ==== Обновление HUD ====
   function updateStats() {
+    // Чит-код «Aushra»: пока идёт анимация появления кнопки (≈0.6 с),
+    // не перерисовываем статистику, чтобы анимация проигралась один раз.
+    if (cheatUnlocked && Date.now() < cheatBtnAnimUntil) return;
     const seconds = Math.max(0, Math.ceil(timeRemaining));
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
     const ss = String(seconds % 60).padStart(2, "0");
@@ -1006,9 +1032,9 @@ export async function startAntiLevel(root, levelId) {
     const canUseRocket = rocketsCount > 0 && !won && !impeached;
     const rocketBtnClass = `rocket-btn ${!canUseRocket ? "rocket-btn-disabled" : ""}`;
     const rocketBtnHtml = `<button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: ${rocketsCount}</button>`;
-    // Тестовая кнопка «Открыть типы всех котов» для заказчика:
-    // показывается только на уровнях 1–30, на 31–100 скрыта.
-    const showTestRevealBtn = levelId <= 30;
+    // Кнопка «Открыть типы всех котов»: на уровнях 1–30 доступна всегда,
+    // а после чит-кода «Aushra» появляется (с анимацией) на любом уровне.
+    const showTestRevealBtn = cheatUnlocked || levelId <= 30;
     const testRevealBtnHtml = showTestRevealBtn
       ? `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`
       : "";
@@ -1113,6 +1139,25 @@ export async function startAntiLevel(root, levelId) {
     showFloatingBonus("🧠 Типы всех котов открыты");
   }
 
+  // ==== Чит-код «Aushra»: +1000 рыбок + кнопка «Открыть типы всех котов» ====
+  function activateCheat() {
+    if (cheatUnlocked) return;
+    cheatUnlocked = true;
+    addRockets(1000);            // +1000 рыбок
+    updateStats();               // перерисовать HUD: счётчик рыбок + кнопка
+    // Начинаем окно анимации: HUD не перерисовывается ~0.6 с, чтобы кнопка
+    // успела появиться с анимацией один раз и не «мигала» при перерисовках.
+    cheatBtnAnimUntil = Date.now() + 600;
+    const btn = stats.querySelector("#test-reveal-btn");
+    if (btn) btn.classList.add("test-tool-btn-appear");
+    // Надпись на игровом поле: появляется и через ~1 секунду исчезает.
+    const msg = document.createElement("div");
+    msg.className = "cheat-code-float";
+    msg.textContent = "Чит-код активирован";
+    boardArea.appendChild(msg);
+    msg.addEventListener("animationend", () => msg.remove());
+  }
+
   // Один слушатель на весь блок статистики — переживает перерисовку кнопки
   // (updateStats перезаписывает innerHTML при каждом обновлении).
   let lastRocketPointerTime = 0;
@@ -1188,6 +1233,7 @@ export async function startAntiLevel(root, levelId) {
     }
     stopBoardLayoutListener();
     document.removeEventListener("keydown", onModalKeyDown);
+    document.removeEventListener("keydown", onCheatKeyDown);
     document.removeEventListener("pointerdown", onDocPointerDown);
     window.removeEventListener("resize", onViewportResize);
     window.visualViewport?.removeEventListener("resize", onViewportResize);

@@ -355,3 +355,47 @@
 .test-tool-btn:active {
   transform: scale(0.98);
 }
+
+/* ==== Чит-код «Aushra» ====
+   Набор «Aushra» на клавиатуре: +1000 рыбок, кнопка «Открыть типы всех котов»
+   появляется с анимацией, на игровом поле всплывает и гаснет надпись
+   «Чит-код активирован». */
+
+/* Анимация появления кнопки после чит-кода */
+.test-tool-btn-appear {
+  animation: cheatBtnAppear 0.5s ease-out;
+}
+
+@keyframes cheatBtnAppear {
+  0%   { opacity: 0; transform: scale(0.6); }
+  60%  { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Надпись на игровом поле: появляется и через ~1 секунду исчезает */
+.cheat-code-float {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(212, 154, 60, 0.95) 0%, rgba(243, 210, 122, 0.95) 100%);
+  color: #2a0a14;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #f3d27a;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  z-index: 1001;
+  animation: cheatCodeFloat 1s ease forwards;
+}
+
+@keyframes cheatCodeFloat {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.7); }
+  20%  { opacity: 1; transform: translateX(-50%) scale(1.06); }
+  30%  { transform: translateX(-50%) scale(1); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-24px); }
+}

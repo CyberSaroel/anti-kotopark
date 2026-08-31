@@ -146,7 +146,8 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
         };
 
         typeLabel.addEventListener("touchend", (e) => {
-          e.preventDefault();
+          // NB: touchend НЕ отменяем (cancelable=false) — preventDefault() тут
+          // вызывал бы intervention-предупреждение в консоли Chrome.
           e.stopPropagation();
           markTouch();
           fireCatClick();
@@ -160,7 +161,8 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
           guardClick();
         });
         cell.addEventListener("touchend", (e) => {
-          e.preventDefault();
+          // NB: touchend НЕ отменяем (cancelable=false) — preventDefault() тут
+          // вызывал бы intervention-предупреждение в консоли Chrome.
           e.stopPropagation();
           markTouch();
           fireCatClick();

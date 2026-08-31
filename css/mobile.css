@@ -470,6 +470,15 @@ button {
     box-sizing: border-box;
   }
 
+  /* Анти-режим: номер кота ближе к верхнему правому краю и мельче */
+  .cell .cat-number {
+    top: 0;
+    right: 0;
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 0 10px 0 6px;
+  }
+
   /* Reduce spacing in game stage for mobile */
   .game-stage {
     gap: 6px;

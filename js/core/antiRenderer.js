@@ -28,16 +28,22 @@ async function loadSkinPath() {
   }
 }
 
-// Уменьшить шрифт подписи, чтобы имя социотипа помещалось в одну строку
+// Уменьшить шрифт подписи, чтобы имя социотипа помещалось в одну строку.
+// На мобильных (<=768px) разрешаем уменьшать шрифт до 5px, чтобы длинные
+// имена (например «Достоевский») целиком помещались в одну строку в узких
+// клетках; на ПК минимум остаётся прежним (7px).
 function fitTypeLabel(label) {
   requestAnimationFrame(() => {
     const cellEl = label.closest(".cell");
     if (!cellEl) return;
     const maxW = cellEl.clientWidth - 6;
     if (maxW <= 0) return;
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    const minFs = isMobile ? 5 : 7;
+    const maxAttempts = isMobile ? 16 : 12;
     let fs = parseFloat(getComputedStyle(label).fontSize) || 11;
     let attempts = 0;
-    while (label.scrollWidth > maxW && fs > 7 && attempts < 12) {
+    while (label.scrollWidth > maxW && fs > minFs && attempts < maxAttempts) {
       fs -= 0.5;
       label.style.fontSize = `${fs}px`;
       attempts++;

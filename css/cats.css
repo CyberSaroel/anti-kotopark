@@ -640,9 +640,8 @@
 }
 
 /* Мобильная адаптация блока социотипа под котом (360–768px, брейкпоинты Bootstrap):
-   имя социотипа переносится на 2 строки вместо обрезки (дополнительно к
-   Bootstrap-утилитам .text-wrap/.text-break), кот компактнее — подпись целиком
-   помещается в клетку и не смещается за нижнюю границу видимой области. */
+   имя социотипа всегда в ОДНУ строку — шрифт при необходимости дополнительно
+   уменьшает JS (fitTypeLabel), перенос на две строки отключён. */
 @media (max-width: 767.98px) {
   #board .cell img.cat {
     width: calc(var(--cat-size) * 0.8);
@@ -650,13 +649,14 @@
   }
 
   .cell .cat-type-label {
-    white-space: normal;
-    overflow-wrap: anywhere;
-    overflow: visible;
+    white-space: nowrap;
+    overflow: hidden;
+    overflow-wrap: normal;
     text-overflow: clip;
     line-height: 1.05;
-    padding: 2px 3px;
+    padding: 1px 2px;
     margin-top: 2px;
-    max-width: calc(var(--cell-w, 90px) - 8px);
+    font-size: 8px;
+    max-width: calc(var(--cell-w, 90px) - 4px);
   }
 }

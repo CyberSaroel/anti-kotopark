@@ -1,12 +1,32 @@
-const MUSIC_KEY = "socio-cats:musicEnabled";
-const SFX_KEY = "socio-cats:sfxEnabled";
-const MUSIC_VOLUME_KEY = "socio-cats:musicVolume";
-const SFX_VOLUME_KEY = "socio-cats:sfxVolume";
+const MUSIC_KEY = "ak_music_enabled";
+const SFX_KEY = "ak_sfx_enabled";
+const MUSIC_VOLUME_KEY = "ak_music_volume";
+const SFX_VOLUME_KEY = "ak_sfx_volume";
 // Уменьшаем максимальную громкость музыки в три раза
 const MUSIC_VOLUME_SCALE = 1 / 3;
 
+// Устаревшие ключи старого хранилища (royal-socio-cats). Разовая миграция
+// при чтении: если новый ключ пуст, а старый — нет, берём значение из
+// старого и сразу сохраняем под новым ключом.
+const LEGACY_MUSIC_KEY = "socio-cats:musicEnabled";
+const LEGACY_SFX_KEY = "socio-cats:sfxEnabled";
+const LEGACY_MUSIC_VOLUME_KEY = "socio-cats:musicVolume";
+const LEGACY_SFX_VOLUME_KEY = "socio-cats:sfxVolume";
+
+/** Перенести значение из legacy-ключа в новый, если оно ещё не перенесено. */
+function migrateFromLegacy(newKey, legacyKey) {
+  try {
+    if (localStorage.getItem(newKey) !== null) return;
+    const legacy = localStorage.getItem(legacyKey);
+    if (legacy !== null) localStorage.setItem(newKey, legacy);
+  } catch (e) {
+    // Игнорируем ошибки хранилища
+  }
+}
+
 export function isMusicEnabled() {
   try {
+    migrateFromLegacy(MUSIC_KEY, LEGACY_MUSIC_KEY);
     const value = localStorage.getItem(MUSIC_KEY);
     return value === null ? true : value === "true"; // По умолчанию true
   } catch {
@@ -20,6 +40,7 @@ export function setMusicEnabled(enabled) {
 
 export function isSfxEnabled() {
   try {
+    migrateFromLegacy(SFX_KEY, LEGACY_SFX_KEY);
     const value = localStorage.getItem(SFX_KEY);
     return value === null ? true : value === "true"; // По умолчанию true
   } catch {
@@ -33,6 +54,7 @@ export function setSfxEnabled(enabled) {
 
 export function getMusicVolume() {
   try {
+    migrateFromLegacy(MUSIC_VOLUME_KEY, LEGACY_MUSIC_VOLUME_KEY);
     const value = localStorage.getItem(MUSIC_VOLUME_KEY);
     return value === null ? 0.5 : parseFloat(value);
   } catch {
@@ -46,6 +68,7 @@ export function setMusicVolume(volume) {
 
 export function getSfxVolume() {
   try {
+    migrateFromLegacy(SFX_VOLUME_KEY, LEGACY_SFX_VOLUME_KEY);
     const value = localStorage.getItem(SFX_VOLUME_KEY);
     return value === null ? 0.5 : parseFloat(value);
   } catch {

@@ -1,4 +1,9 @@
-const RECORDS_KEY = "socio-cats:levelRecords";
+const RECORDS_KEY = "ak_level_records";
+
+// Устаревший ключ старого хранилища (royal-socio-cats). Разовая миграция
+// при чтении: если новый ключ пуст, а старый — нет, берём значение из
+// старого и сразу сохраняем под новым ключом.
+const LEGACY_RECORDS_KEY = "socio-cats:levelRecords";
 
 function normalizeRecord(raw) {
   if (raw === undefined || raw === null) return {};
@@ -16,7 +21,14 @@ function getRecordEntry(records, levelId) {
 
 export function getLevelRecords() {
   try {
-    const data = localStorage.getItem(RECORDS_KEY);
+    let data = localStorage.getItem(RECORDS_KEY);
+    if (data === null) {
+      const legacy = localStorage.getItem(LEGACY_RECORDS_KEY);
+      if (legacy !== null) {
+        localStorage.setItem(RECORDS_KEY, legacy);
+        data = legacy;
+      }
+    }
     if (!data) return {};
     return JSON.parse(data);
   } catch {

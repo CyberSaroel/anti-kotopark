@@ -61,7 +61,22 @@ const GULENKO_NAMES = {
 };
 
 // Ключ для localStorage
-export const NAMING_KEY = "socio-cats:namingStyle";
+export const NAMING_KEY = "ak_naming_style";
+
+// Устаревший ключ старого хранилища (royal-socio-cats). Разовая миграция
+// при чтении: если новый ключ пуст, а старый — нет, берём значение из
+// старого и сразу сохраняем под новым ключом.
+const LEGACY_NAMING_KEY = "socio-cats:namingStyle";
+
+function migrateFromLegacy() {
+  try {
+    if (localStorage.getItem(NAMING_KEY) !== null) return;
+    const legacy = localStorage.getItem(LEGACY_NAMING_KEY);
+    if (legacy !== null) localStorage.setItem(NAMING_KEY, legacy);
+  } catch (e) {
+    // Игнорируем ошибки хранилища
+  }
+}
 
 /**
  * Получить текущий стиль наименований из localStorage.
@@ -69,6 +84,7 @@ export const NAMING_KEY = "socio-cats:namingStyle";
  */
 export function getNamingStyle() {
   try {
+    migrateFromLegacy();
     const saved = localStorage.getItem(NAMING_KEY);
     if (saved === "gulenko") return "gulenko";
     return "aushra";

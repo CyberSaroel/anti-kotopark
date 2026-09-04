@@ -3,21 +3,6 @@ import NavigationService from "../core/navigation.js";
 
 const VICTORY_SOUND_KEY = "ak_selected_victory_sound";
 
-// Устаревший ключ старого хранилища (royal-socio-cats). Разовая миграция
-// при чтении: если новый ключ пуст, а старый — нет, берём значение из
-// старого и сразу сохраняем под новым ключом.
-const LEGACY_VICTORY_SOUND_KEY = "socio-cats:selectedVictorySound";
-
-function migrateFromLegacy() {
-  try {
-    if (localStorage.getItem(VICTORY_SOUND_KEY) !== null) return;
-    const legacy = localStorage.getItem(LEGACY_VICTORY_SOUND_KEY);
-    if (legacy !== null) localStorage.setItem(VICTORY_SOUND_KEY, legacy);
-  } catch (e) {
-    // Игнорируем ошибки хранилища
-  }
-}
-
 const VICTORY_SOUNDS = [
   {
     id: "1",
@@ -35,7 +20,6 @@ const VICTORY_SOUNDS = [
 
 export function getSelectedVictorySound() {
   try {
-    migrateFromLegacy();
     const saved = localStorage.getItem(VICTORY_SOUND_KEY);
     if (saved && VICTORY_SOUNDS.some(s => s.id === saved)) return saved;
     return "1";

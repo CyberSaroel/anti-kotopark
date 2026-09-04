@@ -3,24 +3,8 @@ import NavigationService from "../core/navigation.js";
 
 const SKIN_KEY = "ak_selected_skin";
 
-// Устаревший ключ старого хранилища (royal-socio-cats). Разовая миграция
-// при чтении: если новый ключ пуст, а старый — нет, берём значение из
-// старого и сразу сохраняем под новым ключом.
-const LEGACY_SKIN_KEY = "socio-cats:selectedSkin";
-
-function migrateFromLegacy() {
-  try {
-    if (localStorage.getItem(SKIN_KEY) !== null) return;
-    const legacy = localStorage.getItem(LEGACY_SKIN_KEY);
-    if (legacy !== null) localStorage.setItem(SKIN_KEY, legacy);
-  } catch (e) {
-    // Игнорируем ошибки хранилища
-  }
-}
-
 export function getSelectedSkin() {
   try {
-    migrateFromLegacy();
     return localStorage.getItem(SKIN_KEY) || "classic";
   } catch { return "classic"; }
 }

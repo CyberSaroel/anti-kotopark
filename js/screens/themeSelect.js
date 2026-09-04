@@ -6,24 +6,8 @@ import NavigationService from "../core/navigation.js";
 // своей жизнью.
 const THEME_KEY = "ak_selected_theme";
 
-// Устаревший ключ старого хранилища (royal-socio-cats). Разовая миграция
-// при чтении: если новый ключ пуст, а старый — нет, берём значение из
-// старого и сразу сохраняем под новым ключом.
-const LEGACY_THEME_KEY = "socio-cats:selectedTheme";
-
-function migrateFromLegacy() {
-  try {
-    if (localStorage.getItem(THEME_KEY) !== null) return;
-    const legacy = localStorage.getItem(LEGACY_THEME_KEY);
-    if (legacy !== null) localStorage.setItem(THEME_KEY, legacy);
-  } catch (e) {
-    // Игнорируем ошибки хранилища
-  }
-}
-
 export function getSelectedTheme() {
   try {
-    migrateFromLegacy();
     const saved = localStorage.getItem(THEME_KEY) || "anti-kotopark";
     if (saved === "brutal") return "vampire";
     if (saved === "royal-book") return "anti-kotopark";
@@ -46,7 +30,6 @@ export function setSelectedTheme(themeId) {
 export async function restoreSelectedTheme() {
   let saved = null;
   try {
-    migrateFromLegacy();
     saved = localStorage.getItem(THEME_KEY);
   } catch {
     return;

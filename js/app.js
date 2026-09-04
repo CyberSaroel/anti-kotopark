@@ -1,8 +1,13 @@
+import { runFreshStartOnce } from "./core/freshStart.js";
 import { showIntroScreen } from "./screens/introScreen.js";
 import { applyTheme } from "./theme.js";
 import { restoreSelectedTheme } from "./screens/themeSelect.js";
 import NavigationService from "./core/navigation.js";
 import { VERSION, saveVersion } from "./core/version.js";
+
+// Одноразовый форс-сброс кэша прогресса/настроек для новой версии.
+// Выполняется самым первым — до чтения любого прогресса/настроек/статистики.
+runFreshStartOnce();
 
 const root = document.getElementById("app");
 

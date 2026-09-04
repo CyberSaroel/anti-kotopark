@@ -332,6 +332,18 @@ export async function startAntiLevel(root, levelId) {
   let selectedCatEl = null;
   let selectedCatRC = null; // {r, c} выбранного кота
   let currentCatIndex = null; // индекс выбранного кота
+  // Время последнего выделения кота. На тач-экранах после touchend браузер
+  // шлёт эмуляционный click: render() пересоздаёт клетку, и «защита от
+  // двойного вызова» по старому узлу не срабатывает — тот же физический тап
+  // может вызвать onCatClick дважды и сразу открыть меню («после первого
+  // нажатия»). Чтобы меню открывалось только после ОСОЗНАННОГО второго тапа,
+  // игнорируем повторное срабатывание в коротком окне после выделения.
+  let lastSelectTs = 0;
+  // Момент, когда модальное окно было ПОКАЗАНО. Эмуляционный click (который
+  // браузер шлёт после touchend/клика, открывшего окно) может «долететь» уже
+  // до кнопок и автоматически «нажать» социотип. Игнорируем нажатия кнопок в
+  // небольшом окне после открытия, чтобы тип не выбирался сам.
+  let menuOpenedAt = 0;
 
   // --- Рендер ---
   function render() {
@@ -374,8 +386,18 @@ export async function startAntiLevel(root, levelId) {
          // Красная вспышка штрафа на счётчике ходов (адаптация boost-glow/boost-float)
          showStatBoost(findStatItem(stats, "Ходы"), "-1", false);
          audioManager.playSoundEffect("assets/sounds/move.mp3");
-          // Рамка выбора следует за котом на новую позицию
-          selectedCatRC = { r, c };
+          // Мобильная версия (узкий экран, vendor/bootstrap): после перемещения
+          // кота («?» в т.ч.) снимаем выбор. Иначе кот остаётся «наведённым на
+          // меню», и следующий тап по нему сразу откроет модальное окно социотипов
+          // — т.е. оно покажется «после первого же нажатия» и сразу после хода.
+          // Нужный сценарий: первый тап выбирает кота, второй — уже осознанно
+          // открывает меню. На десктопе выбор по-прежнему следует за котом.
+          if (isCompactUI()) {
+            resetCatSelection();
+          } else {
+            // Рамка выбора следует за котом на новую позицию
+            selectedCatRC = { r, c };
+          }
           render();
           if (movesRemaining <= 0) {
             checkImpeachment("Ходы закончились");
@@ -505,6 +527,7 @@ export async function startAntiLevel(root, levelId) {
     catState = "selected";
     selectedCatRC = { r, c };
     currentCatIndex = catIndex;
+    lastSelectTs = Date.now();
     if (selectedCatEl) selectedCatEl.classList.remove("cat--selected");
     selectedCatEl = findCatCell(r, c);
     if (selectedCatEl) selectedCatEl.classList.add("cat--selected");
@@ -527,8 +550,16 @@ export async function startAntiLevel(root, levelId) {
       return;
     }
 
-    // Кот уже выбран рамкой: открыть меню социотипов
+    // Кот уже выбран рамкой: открыть меню социотипов.
+    // На тач-экранах один физический тап может прийти сюда ДВАЖДЫ (touchend +
+    // эмуляционный click после перерисовки клетки). Окно открываем только на
+    // ОСОЗНАННОМ повторном тапе, т.е. когда кот был выделен заметное время
+    // назад — иначе меню «выскочит после первого же нажатия».
     if (currentCatIndex === catIndex) {
+      const repeatWindow = 400; // мс — окно эмуляционного повторного события
+      if (isCompactUI() && Date.now() - lastSelectTs < repeatWindow) {
+        return; // это повтор того же тапа: кот выделен, меню пока не открываем
+      }
       catState = "choosing";
       showSocioMenu(catIndex);
       return;
@@ -552,6 +583,10 @@ export async function startAntiLevel(root, levelId) {
       btn.textContent = getTypeDisplayName(type);
       btn.addEventListener("click", () => {
         if (currentCatIndex === null) return;
+        // Если окно только что открылось (меньше 500 мс назад), этот клик —
+        // «долетевший» эмуляционный повтор тапа, открывшего окно. Пропускаем,
+        // чтобы социотип НЕ выбирался автоматически сразу после появления окна.
+        if (Date.now() - menuOpenedAt < 500) return;
         audioManager.initAudioContext();
         const catIdx = currentCatIndex;
         hideSocioMenu();
@@ -640,6 +675,9 @@ export async function startAntiLevel(root, levelId) {
     currentCatIndex = catIndex;
     socioModalTitle.textContent = `Выберите социотип — кот №${catIndex + 1}`;
     createTypeButtons();
+    // Фиксируем момент открытия, чтобы подавить «долетевший» эмуляционный
+    // клик, который иначе автоматически нажал бы социотип сразу после появления окна.
+    menuOpenedAt = Date.now();
     // Перезапуск анимации появления, если окно закрывалось анимацией
     socioModalCard.classList.remove("closing");
     socioModal.hidden = false;

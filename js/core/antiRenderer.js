@@ -28,21 +28,27 @@ async function loadSkinPath() {
   }
 }
 
-// Уменьшить шрифт подписи, чтобы имя социотипа помещалось в одну строку.
-// На мобильных (<=768px) разрешаем уменьшать шрифт до 5px, чтобы длинные
-// имена (например «Достоевский») целиком помещались в одну строку в узких
-// клетках; на ПК минимум остаётся прежним (7px).
+// Уменьшить шрифт подписи, чтобы имя социотипа помещалось в ОДНУ строку
+// (перенос строк отключён CSS white-space:nowrap). Уменьшаем до тех пор,
+// пока текст не влезет по ширине клетки: мобильный минимум ниже, чтобы
+// длинные имена Гуленко («Предприниматель» и т.п.) целиком умещались;
+// на ПК минимум чуть больше, но подгонка всё равно доводит до одной строки.
 function fitTypeLabel(label) {
   requestAnimationFrame(() => {
     const cellEl = label.closest(".cell");
     if (!cellEl) return;
-    const maxW = cellEl.clientWidth - 6;
+    // Максимальная ширина текста с учётом паддингов/рамок подписи
+    const style = getComputedStyle(label);
+    const padLR = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    const borderLR = (parseFloat(style.borderLeftWidth) || 0) + (parseFloat(style.borderRightWidth) || 0);
+    const maxW = cellEl.clientWidth - padLR - borderLR - 4;
     if (maxW <= 0) return;
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    const minFs = isMobile ? 5 : 7;
-    const maxAttempts = isMobile ? 16 : 12;
-    let fs = parseFloat(getComputedStyle(label).fontSize) || 11;
+    const minFs = isMobile ? 4.5 : 6;
+    const maxAttempts = 40;
+    let fs = parseFloat(style.fontSize) || 11;
     let attempts = 0;
+    // Метка по ширине контента (textContent уже вставлен до вызова)
     while (label.scrollWidth > maxW && fs > minFs && attempts < maxAttempts) {
       fs -= 0.5;
       label.style.fontSize = `${fs}px`;
@@ -119,9 +125,10 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
           const typeName = game.getGuessedType(catIndex);
           typeLabel.textContent = getTypeDisplayName(typeName);
           typeLabel.classList.add("known");
-          // Bootstrap-утилиты (vendor): переносим длинные имена социотипов
-          // по словам и внутри слов, чтобы текст не обрезался на узких экранах
-          typeLabel.classList.add("text-wrap", "text-break");
+          // Имя социотипа держим в ОДНУ строку (white-space:nowrap из CSS) —
+          // перенос строк включён bootstrap-классами text-wrap/text-break,
+          // поэтому их здесь не добавляем. Шрифт при необходимости уменьшает
+          // fitTypeLabel ниже, чтобы длинные имена целиком помещались.
           fitTypeLabel(typeLabel);
         } else {
           typeLabel.textContent = "?";

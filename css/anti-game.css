@@ -102,10 +102,13 @@
   pointer-events: auto;
   box-sizing: border-box;
   position: relative;
-  /* Плавное появление: затухание + лёгкое увеличение 0.9 → 1 за 300 мс */
+  /* Быстрое появление: короткое затухание + лёгкое увеличение (150 мс),
+     а одновременно вокруг окна «выходит» огненный ореол (flame burst). */
   transform-origin: center;
   will-change: transform, opacity;
-  animation: socio-modal-in 300ms ease-out;
+  animation:
+    socio-modal-in 150ms ease-out,
+    socio-modal-fire-in 620ms ease-out;
 }
 
 /* Изображения декорации в модальном окне социотипов */
@@ -137,15 +140,19 @@
   z-index: 1;
 }
 
-/* Закрытие: плавное затухание + уменьшение 1 → 0.9 за 300 мс */
+/* Закрытие: быстрое затухание окна (200 мс) вместе с коротким огненным
+   «всплеском», гаснущим одновременно — окно уходит «в огонь», а не просто
+   пропадает. Длительности держим равными, чтобы hide сработал синхронно. */
 .socio-modal-card.closing {
-  animation: socio-modal-out 300ms ease-in forwards;
+  animation:
+    socio-modal-out 200ms ease-in forwards,
+    socio-modal-fire-out 200ms ease-in forwards;
 }
 
 @keyframes socio-modal-in {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
@@ -160,8 +167,29 @@
   }
   to {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
+}
+
+/* ===== Огненный ореол вокруг модального окна =====
+   Анимируем box-shadow самой карточки (она не обрезается своим overflow),
+   поэтому «пламя» живёт за границей золотой рамки. Вспышка на ПОЯВЛЕНИЕ
+   разгорается и чуть «дрожит», на ЗАКРЫТИЕ — коротко ярче и гаснет. */
+@keyframes socio-modal-fire-in {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 150, 0, 0),    0 0 0 0 rgba(255, 60, 0, 0),     0 0 0 0 rgba(255, 220, 60, 0); }
+  18%  { box-shadow: 0 0 6px 1px rgba(255, 150, 0, .45),  0 0 14px 4px rgba(255, 80, 0, .18), 0 0 22px 10px rgba(255, 220, 60, .10); }
+  32%  { box-shadow: 0 0 9px 2px rgba(255, 170, 0, .55),  0 0 18px 6px rgba(255, 100, 0, .26), 0 0 26px 12px rgba(255, 230, 120, .16); }
+  47%  { box-shadow: 0 0 7px 1px rgba(255, 130, 0, .42),  0 0 16px 5px rgba(255, 80, 0, .22),  0 0 24px 11px rgba(255, 200, 60, .14); }
+  62%  { box-shadow: 0 0 10px 3px rgba(255, 170, 0, .5),  0 0 19px 7px rgba(255, 100, 0, .26), 0 0 28px 13px rgba(255, 236, 130, .18); }
+  80%  { box-shadow: 0 0 7px 1px rgba(255, 140, 0, .38),  0 0 12px 3px rgba(255, 70, 0, .16),  0 0 18px 6px rgba(212, 154, 60, .16); }
+  100% { box-shadow: 0 0 16px 2px rgba(212, 154, 60, .35), 0 0 26px 10px rgba(212, 154, 60, .12); }
+}
+
+@keyframes socio-modal-fire-out {
+  0%   { box-shadow: 0 0 16px 2px rgba(212, 154, 60, .35),  0 0 26px 10px rgba(212, 154, 60, .12); }
+  35%  { box-shadow: 0 0 10px 3px rgba(255, 170, 0, .6),    0 0 24px 9px rgba(255, 100, 0, .3),  0 0 32px 15px rgba(255, 220, 60, .2); }
+  70%  { box-shadow: 0 0 6px 1px rgba(255, 130, 0, .45),    0 0 12px 4px rgba(255, 70, 0, .22),  0 0 16px 8px rgba(212, 154, 60, .1); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 120, 0, 0),          0 0 0 0 rgba(255, 60, 0, 0),        0 0 0 0 rgba(212, 154, 60, 0); }
 }
 
 .socio-modal-header {

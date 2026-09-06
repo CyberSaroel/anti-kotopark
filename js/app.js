@@ -36,14 +36,26 @@ NavigationService.saveCurrentRender(() => showIntroScreen(root));
 showIntroScreen(root);
 
 // ==== Автообновление игры (service worker) ====
+// Намеренно не делаем мгновенный reload на ЛЮБОЙ controllerchange: из-за
+// skipWaiting в sw.js новый воркер активируется сразу, и на самой первой
+// загрузке/деплое контрол переходит к воркеру прямо во время игры, из-за чего
+// страница «сбрасывается» на стартовый экран без причины.
+//
+// Правило:
+//  - если вкладка УЖЕ была под управлением воркера при старте (hadController)
+//    и потом к контролю пришёл новый воркер — это реальное обновление, релоадим;
+//  - если на момент загрузки контролёра ещё не было (первый заход после деплоя) —
+//    первый переход контроля игнорируем, чтобы не выбрасывать игрока с уровня.
 if ("serviceWorker" in navigator) {
-  let refreshing = false;
-  // Когда новая версия воркера берёт управление — сами перезагружаем страницу
+  const hadController = navigator.serviceWorker.controller !== null;
+  let autoReloading = false;
+
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
+    if (!hadController || autoReloading) return;
+    autoReloading = true;
     window.location.reload();
   });
+
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })
       .then((reg) => {

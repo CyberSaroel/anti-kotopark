@@ -456,13 +456,16 @@
 }
 
 /* ===== Коты: приземление после хода и превращение при смене настроения ===== */
+/* Анимация «приземления» играет ровно в момент перемещения кота на новую
+   клетку (cat-land, класс добавляет игра). Ускорена для мгновенного отклика
+   и быстрого визуала движения; остальные анимации (mood-change, jump и пр.)
+   не трогаем. */
 @keyframes catLand {
-  0%   { transform: translateY(-30%) scale(0.8); }
-  60%  { transform: translateY(6%) scale(1.08); }
+  0%   { transform: translateY(-30%) scale(0.85); }
   100% { transform: translateY(0) scale(1); }
 }
 #board .cell .cat.cat-land {
-  animation: catLand 0.3s ease-out !important;
+  animation: catLand 0.12s ease-out !important;
   z-index: 6;
 }
 @keyframes moodChange {

@@ -634,6 +634,10 @@ export async function startAntiLevel(root, levelId) {
   // экрана/поля/масштабировании. Окно не выходит за границы видимой области —
   // при необходимости позиция корректируется.
   function positionSocioModal() {
+    // На мобильном (<=768px) окно полноэкранное: CSS сам растягивает подложку
+    // и карточку на весь вьюпорт. Инлайн left/top здесь НЕ нужны и могли бы
+    // конфликтовать с полноэкранной вёрсткой.
+    if (window.matchMedia("(max-width: 768px)").matches) return;
     const boardRect = boardEl.getBoundingClientRect();
     const modalRect = socioModal.getBoundingClientRect();
     const pad = 8;

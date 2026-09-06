@@ -203,7 +203,7 @@
 }
 
 .socio-modal-title {
-  font-size: 16px;
+  font-size: 14px;               /* чуть крупнее не нужен, чтобы не конкурировать с ✕ */
   font-weight: bold;
   color: var(--gilt-highlight, #f3d27a);
   text-align: center;
@@ -211,6 +211,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transform: translateY(21px);    /* текст «Выберите социотип — кот №N» ниже кнопки ✕ */
 }
 
 .socio-modal-close {
@@ -381,7 +382,7 @@
   }
 
   .socio-modal-title {
-    font-size: 15px;
+    font-size: 14px;
     white-space: normal;
     line-height: 1.3;
   }

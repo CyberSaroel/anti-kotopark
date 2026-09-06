@@ -322,9 +322,11 @@
 }
 
 /* Mobile responsive: поле по центру, статистика внизу.
-   Модальное окно выбора социотипа на телефонах — НА ВЕСЬ ЭКРАН и подстраивается
-   под фактический размер окна/устройства (включая dynamic viewport 100dvh для
-   мобильных адресных строк). */
+   Окно выбора социотипа на телефоне — КОМПАКТНОЕ (не растягивается на весь
+   экран): подложка затемняет всё, но само окно центрировано и ограничено по
+   ширине/высоте так, чтобы помещаться на любом маленьком экране. Кнопки
+   социотипов всегда остаются в ДВА СТОЛБЦА и прокручиваются внутри окна,
+   если не хватает высоты. */
 @media (max-width: 768px) {
   .anti-game-stage {
     flex-direction: column;
@@ -343,8 +345,9 @@
     max-width: 400px;
   }
 
-  /* Полноэкранная подложка модалки. !important перекрывает left/top, которые
-     раньше выставлял JS по центру игрового поля. */
+  /* Полноэкранная затемняющая подложка (фон). !important перекрывает left/top,
+     которые раньше ставил JS по центру игрового поля. Карточка остаётся
+     компактной (см. ниже). */
   .socio-modal {
     padding: 0;
     inset: 0 !important;
@@ -359,21 +362,24 @@
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.6);
-    pointer-events: none; /* фон сама не блокирует клики — они идут на поле,
-                             карточка внутри снова pointer-events:auto из базового стиля */
+    pointer-events: none; /* события на поле не блокируем (карточка кликабельна) */
     box-sizing: border-box;
     overflow: hidden;
   }
 
-  /* Карточка занимает почти весь экран, сетка типов внутри прокручивается,
-     заголовок и кнопка «✕» остаются наверху */
+  /* Компактная карточка: авто-ширина под 2 колонки, но не шире экрана;
+     высота по содержимому, но не выше вьюпорта. */
   .socio-modal-card {
-    width: 100%;
-    height: 100%;
+    width: min(420px, calc(100vw - 24px));
     min-width: 0;
     max-width: none;
-    max-height: none;
-    border-radius: 0;
+    height: auto;
+    max-height: calc(100dvh - 40px);
+    max-height: calc(100vh - 40px); /* фолбэк без dvh */
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .socio-modal-header {
@@ -394,27 +400,26 @@
     font-size: 22px;
   }
 
-  /* Список социотипов прокручивается, если окно низкое (сужается клавиатура и т.п.) */
+  /* Кнопки социотипов — строго в 2 столбца на любом маленьком экране.
+     Если высоты не хватает, список прокручивается внутри окна. */
   .socio-modal-list {
     flex: 1 1 auto;
     min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     padding: 10px;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .socio-modal-list .socio-modal-type-btn {
     font-size: 13px;
     padding: 12px 8px;
     min-height: 48px;
-  }
-
-  /* На совсем маленьких экранах возвращаем один столбец кнопок */
-  @media (max-width: 359px) {
-    .socio-modal-list {
-      grid-template-columns: 1fr;
-    }
+    word-break: normal;
+    overflow-wrap: break-word;
   }
 }
 

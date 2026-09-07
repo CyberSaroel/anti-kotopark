@@ -689,6 +689,15 @@ export async function startAntiLevel(root, levelId) {
     void socioModalCard.offsetWidth; // принудительный reflow для перезапуска
     socioModalCard.style.animation = "";
 
+    // При первом/любом открытии ни один вариант ответа не должен выглядеть
+    // «отмеченным». Снимаем возможный фокус/подсветку с кнопок типа (иначе
+    // браузер держал бы его от предыдущего активного элемента и кнопка
+    // выглядела бы выбранной без действий игрока).
+    const modalActiveEl = document.activeElement;
+    if (modalActiveEl && modalActiveEl.closest(".socio-modal-card")) {
+      modalActiveEl.blur();
+    }
+
     // --- Позиционирование по центру игрового поля ---
     // Скрываем окно до вычисления координат, чтобы оно не мелькало в углу
     socioModal.style.visibility = "hidden";

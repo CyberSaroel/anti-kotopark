@@ -265,6 +265,18 @@
   color: #fff;
 }
 
+/* При первом открытии ни один вариант не должен быть «отмечен»: фокус-подсветка
+   появляется только у элемента, к которому реально перешли (клавиатурой).
+   Фокус от мыши/тача кнопке рамку не добавляет — иначе браузер показывал бы
+   один из вариантов выделенным ещё до выбора игрока. */
+.socio-modal-type-btn:focus {
+  outline: none;
+}
+.socio-modal-type-btn:focus-visible {
+  outline: 2px solid #ffd700;
+  outline-offset: 1px;
+}
+
 /* Highlight for type-selected cat */
 .cell.type-selected {
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.8), 0 0 15px rgba(255, 152, 0, 0.5);

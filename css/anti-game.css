@@ -399,7 +399,7 @@
   }
 
   .socio-modal-title {
-    font-size: 8px; /* в 2 раза меньше мобильного 14px, как просили */
+    font-size: 8px; /* в 2 раза меньше мобильного 14px */
     white-space: normal;
     line-height: 1.3;
   }
@@ -426,7 +426,7 @@
   }
 
   .socio-modal-list .socio-modal-type-btn {
-    font-size: 13px;
+    font-size: 25px; /* текст в кнопках: в 2 раза крупнее (было 13px) */
     padding: 12px 8px;
     min-height: 48px;
     word-break: normal;

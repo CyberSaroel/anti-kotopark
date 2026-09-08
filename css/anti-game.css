@@ -91,11 +91,12 @@
   border: 2px solid var(--gilt, #d49a3c);
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 16px rgba(212, 154, 60, 0.2);
-  /* Компактное окно: ширина подстраивается под контент */
-  width: max-content;
-  min-width: 260px;
-  max-width: calc(100vw - 16px);
-  max-height: min(70vh, 520px);
+  /* На ПК окно квадратное: сторона определяется более узкой осью вьюпорта,
+     чтобы не вылезти за экран. (Мобильная ≤768px перекрывается ниже.) */
+  width: min(820px, 92vmin);
+  height: min(820px, 92vmin);
+  max-width: none;
+  max-height: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -237,16 +238,20 @@
   transform: rotate(90deg);
 }
 
-/* Сетка типов: 4 столбца × 4 строки (по 4 социотипа в каждом столбце) */
+/* Сетка типов: 4 столбца × 4 строки (по 4 социотипа в каждом столбце).
+   На ПК окно квадратное — список растянут на всю доступную площадь, при
+   нехватке места прокручивается. */
 .socio-modal-list {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr; /* ячейки равной высоты, заполняют квадрат */
   gap: 6px;
   padding: 12px;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  min-height: 0;
-  width: min(460px, calc(100vw - 16px));
   box-sizing: border-box;
 }
 

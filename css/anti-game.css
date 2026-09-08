@@ -399,7 +399,7 @@
   }
 
   .socio-modal-title {
-    font-size: 14px;
+    font-size: 8px; /* в 2 раза меньше мобильного 14px, как просили */
     white-space: normal;
     line-height: 1.3;
   }

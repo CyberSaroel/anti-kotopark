@@ -254,7 +254,7 @@
    длинные имена аккуратно переносятся внутри ячейки */
 .socio-modal-list .socio-modal-type-btn {
   text-align: center;
-  font-size: 13px;
+  font-size: 25px; /* ПК-версия: 25px */
   padding: 8px 4px;
   justify-self: stretch;
   align-self: stretch;

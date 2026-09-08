@@ -538,9 +538,10 @@ export async function startAntiLevel(root, levelId) {
 
   // Логика выбора: первое нажатие выбирает кота, второе по тому же — открывает меню.
   // Нажатие на нового кота считается первым (выбор переключается на него).
+  // NB: для котов без типа («?») не играем click.mp3 — по просьбе минимизировать
+  // шум «нажатий» при работе с такими котами (в т.ч. во время их перемещения).
   function onCatClick(catIndex, r, c) {
     audioManager.initAudioContext();
-    audioManager.playSoundEffect("assets/sounds/click.mp3");
     if (won || impeached) return;
 
     // Меню открыто: повторный тап по тому же коту закрывает его, но оставляет кот выделенным

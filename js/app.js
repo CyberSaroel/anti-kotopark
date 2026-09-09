@@ -49,12 +49,27 @@ showIntroScreen(root);
 if ("serviceWorker" in navigator) {
   const hadController = navigator.serviceWorker.controller !== null;
   let autoReloading = false;
+  let updatePending = false;
+
+  // Перезагрузка выполняется только в «безопасной» точке — главном меню (intro).
+  // Так автообновление не выбросит игрока посреди уровня («переход на стартовую»).
+  const tryReloadInIntro = () => {
+    if (autoReloading) return;
+    if (updatePending && NavigationService.currentScreen === "intro") {
+      autoReloading = true;
+      window.location.reload();
+    }
+  };
 
   navigator.serviceWorker.addEventListener("controllerchange", () => {
+    // Первый заход/деплой (контролёра ещё не было) не сбрасываем вкладку.
     if (!hadController || autoReloading) return;
-    autoReloading = true;
-    window.location.reload();
+    updatePending = true;
+    tryReloadInIntro();
   });
+
+  // Ждём момент, когда игрок вернётся в главное меню, чтобы применить обновление.
+  setInterval(tryReloadInIntro, 1000);
 
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })

@@ -1,4 +1,4 @@
-export const VERSION = "1.8.5";
+export const VERSION = "1.8.1";
 
 const STORAGE_KEY = "ak_version";
 

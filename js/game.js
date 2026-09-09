@@ -680,15 +680,16 @@ export async function startAntiLevel(root, levelId) {
 
   function showSocioMenu(catIndex) {
     currentCatIndex = catIndex;
-    // Разделяем заголовок на 2 части: mobile CSS складывает их в два ряда
-    // (1-я строка «Выберите социотип —», 2-я «кот №N»), desktop — в одну строку.
+    // Заголовок условно «Выберите <br> социотип — кот №N»:
+    // на мобильной версии CSS укладывает spans в 2 ряда — 1-я строка
+    // «Выберите», 2-я «социотип — кот №N». На desktop они в одной строке.
     socioModalTitle.replaceChildren();
     const titlePrefix = document.createElement("span");
     titlePrefix.className = "socio-modal-title-prefix";
-    titlePrefix.textContent = "Выберите социотип — ";
+    titlePrefix.textContent = "Выберите ";
     const titleCat = document.createElement("span");
     titleCat.className = "socio-modal-title-cat";
-    titleCat.textContent = `кот №${catIndex + 1}`;
+    titleCat.textContent = `социотип — кот №${catIndex + 1}`;
     socioModalTitle.append(titlePrefix, titleCat);
     createTypeButtons();
     // Фиксируем момент открытия, чтобы подавить «долетевший» эмуляционный

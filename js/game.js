@@ -53,6 +53,8 @@ export const LEVEL10_ID = 10;
 
 let levelActive = false;
 let timerId = null;
+// Таймер подавления «выделения» вариантов при первом появлении окна
+let modalHoldTimer = null;
 
 /**
  * Загрузить конфигурацию анти-уровня.
@@ -710,6 +712,19 @@ export async function startAntiLevel(root, levelId) {
       }
       positionSocioModal();
       socioModal.style.visibility = "";
+
+      // Чтобы ни одна кнопка в момент появления окна не выглядела «выделенной»:
+      // временно глушим hover/focus (класс socio-modal-hold) на короткое время,
+      // пока игрок не совершит реального действия.
+      socioModalCard.classList.remove("socio-modal-hold");
+      if (modalHoldTimer) clearTimeout(modalHoldTimer);
+      requestAnimationFrame(() => {
+        socioModalCard.classList.add("socio-modal-hold");
+        modalHoldTimer = setTimeout(() => {
+          socioModalCard.classList.remove("socio-modal-hold");
+          modalHoldTimer = null;
+        }, 500);
+      });
     });
   }
 

@@ -277,6 +277,22 @@
   outline-offset: 1px;
 }
 
+/* Пока окно не открыли для реального выбора, кнопки не должны выглядеть
+   «полными как выбранные». appearance в вариантах как default системных
+   контролов; фокус, полученный мышь/тачем (не клавиатурой), рамки не даёт. */
+.socio-modal-list .socio-modal-type-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+.socio-modal-type-btn:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+/* пока держится «hold»-класс — гасим и hover, и фокус-подсветку одновременно */
+.socio-modal-card.socio-modal-hold .socio-modal-type-btn:hover {
+  box-shadow: none;
+}
+
 /* Highlight for type-selected cat */
 .cell.type-selected {
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.8), 0 0 15px rgba(255, 152, 0, 0.5);

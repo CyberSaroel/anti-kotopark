@@ -416,7 +416,7 @@
   }
 
   .socio-modal-title {
-    font-size: 8px; /* в 2 раза меньше мобильного 14px */
+    font-size: 14px; /* как было в git до правки фиксмодал (было 8px) */
     white-space: normal;
     line-height: 1.3;
   }

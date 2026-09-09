@@ -91,12 +91,12 @@
   border: 2px solid var(--gilt, #d49a3c);
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 16px rgba(212, 154, 60, 0.2);
-  /* На ПК окно квадратное: сторона определяется более узкой осью вьюпорта,
-     чтобы не вылезти за экран. (Мобильная ≤768px перекрывается ниже.) */
-  width: min(820px, 92vmin);
-  height: min(820px, 92vmin);
-  max-width: none;
-  max-height: none;
+  /* ПК: прямоугольное окно — ширина по контенту, высота ограничена так,
+     чтобы влезать на экран. Мобильная версия (≤768px) задаётся ниже. */
+  width: max-content;
+  min-width: 260px;
+  max-width: calc(100vw - 16px);
+  max-height: min(70vh, 520px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -238,17 +238,14 @@
   transform: rotate(90deg);
 }
 
-/* Сетка типов: 4 столбца × 4 строки (по 4 социотипа в каждом столбце).
-   На ПК окно квадратное — список растянут на всю доступную площадь, при
-   нехватке места прокручивается. */
+/* Сетка типов: колонки шириной по самой длинной кнопке (текст в одну строку,
+   ничего не обрезается). Окно само расширяется по ширине содержимого. */
 .socio-modal-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 1fr; /* ячейки равной высоты, заполняют квадрат */
+  grid-template-columns: repeat(4, max-content);
   gap: 6px;
   padding: 12px;
-  width: 100%;
-  flex: 1 1 auto;
+  width: max-content;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -263,8 +260,7 @@
   padding: 8px 4px;
   justify-self: stretch;
   align-self: stretch;
-  white-space: normal;
-  overflow-wrap: break-word;
+  white-space: nowrap; /* текст типа — всегда в одну строку */
   line-height: 1.2;
   color: #fff;
 }
@@ -434,8 +430,7 @@
     font-size: 25px; /* текст в кнопках: в 2 раза крупнее (было 13px) */
     padding: 12px 8px;
     min-height: 48px;
-    word-break: normal;
-    overflow-wrap: break-word;
+    white-space: nowrap; /* одна строка без переноса */
   }
 }
 

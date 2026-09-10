@@ -450,7 +450,7 @@
   }
 
   .socio-modal-list .socio-modal-type-btn {
-    font-size: 25px; /* текст в кнопках: в 2 раза крупнее (было 13px) */
+    font-size: 22px; /* текст в кнопках: в 2 раза крупнее (было 13px) */
     padding: 12px 8px;
     min-height: 48px;
     white-space: nowrap; /* одна строка без переноса */

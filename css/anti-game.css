@@ -102,8 +102,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 60px;
-  height: 60px;
+  width: 72px; /* было 60px — чуть увеличил */
+  height: 72px; /* было 60px — чуть увеличил */
   background-image: url("../assets/socio-modal/left.png");
   background-size: contain;
   background-repeat: no-repeat;

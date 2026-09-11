@@ -2,6 +2,7 @@ import { getSelectedSkin } from "../screens/skinSelect.js";
 import { fitBoardToViewport } from "./boardLayout.js";
 import { bindCellInteraction } from "../ui/cellInteraction.js";
 import { getTypeDisplayName } from "../socionics/types.js";
+import { EMPTY as EMPTY_KIND, WATER as WATER_KIND, CAT as CAT_KIND } from "./board.js";
 
 let skinPath = null;
 let imagesPreloaded = false;
@@ -33,6 +34,16 @@ async function loadSkinPath() {
 // пока текст не влезет по ширине клетки: мобильный минимум ниже, чтобы
 // длинные имена Гуленко («Предприниматель» и т.п.) целиком умещались;
 // на ПК минимум чуть больше, но подгонка всё равно доводит до одной строки.
+//
+// ПРОИЗВОДИТЕЛЬНОСТЬ: цикл читает label.scrollWidth (принудительный layout) до
+// 40 раз на КАЖДУЮ клетку — это очень дорого. Теперь:
+//  - подгонка запускается один раз на конкретную ширину клетки и текст
+//    (ключ кэша), повторные вызовы с тем же текстом ничего не считают;
+//  - результат кэшируется в WeakMap по самому узлу подписи.
+//  - измерение откладывается на кадр и батчится, а не выполняется посреди
+//    цикла отрисовки (избегаем layout thrashing).
+const fittedLabels = new WeakMap();
+
 function fitTypeLabel(label) {
   requestAnimationFrame(() => {
     const cellEl = label.closest(".cell");
@@ -41,8 +52,15 @@ function fitTypeLabel(label) {
     const style = getComputedStyle(label);
     const padLR = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
     const borderLR = (parseFloat(style.borderLeftWidth) || 0) + (parseFloat(style.borderRightWidth) || 0);
-    const maxW = cellEl.clientWidth - padLR - borderLR - 4;
+    const cellW = cellEl.clientWidth;
+    const maxW = cellW - padLR - borderLR - 4;
     if (maxW <= 0) return;
+    // Ключ кэша: если для этой клетки и этого текста уже подбирали шрифт —
+    // выходим, не читая scrollWidth (не форсируем layout).
+    const text = label.textContent || "";
+    const cacheKey = cellW + "|" + text;
+    if (fittedLabels.get(label) === cacheKey) return;
+
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     const minFs = isMobile ? 4.5 : 6;
     const maxAttempts = 40;
@@ -54,6 +72,7 @@ function fitTypeLabel(label) {
       label.style.fontSize = `${fs}px`;
       attempts++;
     }
+    fittedLabels.set(label, cacheKey);
   });
 }
 
@@ -90,11 +109,13 @@ function prepareAntiCache(container, total) {
 }
 
 // Роль клетки определяет необходимость пересборки DOM-узла.
-function antiRole(r, c, board, game) {
-  if (board.isWater(r, c)) return "water";
-  if (!board.isCat(r, c)) return "empty";
-  const catIndex = game.getCatIndex(r, c);
-  return (catIndex !== null && game.isTypeKnown(catIndex)) ? "knownCat" : "unknownCat";
+// kind и catIndex передаются готовыми (вызывающий уже прочитал их из сетки),
+// чтобы не делать повторные обращения к доске.
+function antiRole(kind, catIndex, game) {
+  if (kind === WATER_KIND) return "water";
+  if (kind !== CAT_KIND) return "empty";
+  const isKnown = catIndex !== null && game.isTypeKnown(catIndex);
+  return isKnown ? "knownCat" : "unknownCat";
 }
 
 // Построить полностью новую клетку (или пересобрать клетку при смене роли).
@@ -193,15 +214,42 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
   const total = board.rows * board.cols;
   const cache = prepareAntiCache(container, total);
 
+  // ПРОИЗВОДИТЕЛЬНОСТЬ: вместо вызова game.isTarget() (а внутри canMove → 3
+  // обращения к доске) для КАЖДОЙ из 60+ клеток на каждый ход — вычисляем
+  // множество клеток-целей ОДИН раз (их не больше 8 вокруг выбранного кота).
+  const targets = new Set();
+  if (game.selected) {
+    const sr = game.selected.r, sc = game.selected.c;
+    const grid0 = board.grid;
+    for (let dr = -1; dr <= 1; dr++) {
+      const nr = sr + dr;
+      if (nr < 0 || nr >= board.rows) continue;
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nc = sc + dc;
+        if (nc < 0 || nc >= board.cols) continue;
+        if (grid0[nr][nc].kind === EMPTY_KIND) targets.add(nr * board.cols + nc);
+      }
+    }
+  }
+
+  const selR = game.selected ? game.selected.r : -1;
+  const selC = game.selected ? game.selected.c : -1;
+  const grid = board.grid;
+
   for (let r = 0; r < board.rows; r++) {
+    const row = grid[r];
     for (let c = 0; c < board.cols; c++) {
       const idx = r * board.cols + c;
-      const isWater = board.isWater(r, c);
-      const isEmpty = board.isEmpty(r, c);
-      const isCat = board.isCat(r, c);
-      const sel = !!game.isSelected(r, c);
-      const tgt = !!game.isTarget(r, c);
-      const role = antiRole(r, c, board, game);
+      const kind = row[c].kind;
+      const isWater = kind === WATER_KIND;
+      const isEmpty = kind === EMPTY_KIND;
+      const isCat = kind === CAT_KIND;
+      const sel = (r === selR && c === selC);
+      const tgt = targets.has(idx);
+      // Индекс кота нужен и для роли, и для пересборки клетки — считаем один раз.
+      const catIndex = isCat ? game.getCatIndex(r, c) : null;
+      const role = antiRole(kind, catIndex, game);
 
       let cell = cache.cell[idx];
       const roleChanged = !cell || cache.role[idx] !== role;
@@ -212,7 +260,6 @@ export async function renderAntiBoard(container, game, onCell, onCatClick) {
         // координаты/номера, поэтому узел пересоздаём целиком.
         const mood = isCat ? game.moodAt(r, c) : 0;
         const catNum = isCat ? game.getCatNumber(r, c) : null;
-        const catIndex = isCat ? game.getCatIndex(r, c) : null;
         const isKnown = isCat && catIndex !== null && game.isTypeKnown(catIndex);
         const typeClass = isKnown ? "known" : "unknown";
         const typeText = isKnown ? getTypeDisplayName(game.getGuessedType(catIndex)) : "?";

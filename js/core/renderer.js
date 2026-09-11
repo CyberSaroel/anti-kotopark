@@ -2,6 +2,7 @@ import { getSelectedSkin } from "../screens/skinSelect.js";
 import { fitBoardToViewport } from "./boardLayout.js";
 import { bindCellInteraction } from "../ui/cellInteraction.js";
 import { getTypeDisplayName } from "../socionics/types.js";
+import { EMPTY as EMPTY_KIND, WATER as WATER_KIND, CAT as CAT_KIND } from "./board.js";
 
 let skinPath = null;
 let imagesPreloaded = false;
@@ -77,14 +78,36 @@ export async function renderBoard(container, game, onCell) {
   const total = board.rows * board.cols;
   const cache = ensureBoardCache(container, total);
 
+  // ПРОИЗВОДИТЕЛЬНОСТЬ: клетки-цели вычисляются один раз (см. antiRenderer.js).
+  const targets = new Set();
+  if (game.selected) {
+    const sr = game.selected.r, sc = game.selected.c;
+    const g0 = board.grid;
+    for (let dr = -1; dr <= 1; dr++) {
+      const nr = sr + dr;
+      if (nr < 0 || nr >= board.rows) continue;
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nc = sc + dc;
+        if (nc < 0 || nc >= board.cols) continue;
+        if (g0[nr][nc].kind === EMPTY_KIND) targets.add(nr * board.cols + nc);
+      }
+    }
+  }
+  const selR = game.selected ? game.selected.r : -1;
+  const selC = game.selected ? game.selected.c : -1;
+  const grid = board.grid;
+
   for (let r = 0; r < board.rows; r++) {
+    const row = grid[r];
     for (let c = 0; c < board.cols; c++) {
       const idx = r * board.cols + c;
-      const isWater = board.isWater(r, c);
-      const isEmpty = board.isEmpty(r, c);
-      const isCat = board.isCat(r, c);
-      const sel = !!game.isSelected(r, c);
-      const tgt = !!game.isTarget(r, c);
+      const kind = row[c].kind;
+      const isWater = kind === WATER_KIND;
+      const isEmpty = kind === EMPTY_KIND;
+      const isCat = kind === CAT_KIND;
+      const sel = (r === selR && c === selC);
+      const tgt = targets.has(idx);
 
       // --- Клетка: создаём один раз и переиспользуем между ходами ---
       let cell = cache.cell[idx];

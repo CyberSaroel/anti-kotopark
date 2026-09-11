@@ -21,7 +21,7 @@ import {
   addTotalMoves,
   addTotalTime
 } from "./core/royalStats.js";
-import { showStatBoost, findStatItem } from "./ui/statBoost.js";
+import { showStatBoost } from "./ui/statBoost.js";
 import { launchLevel } from "./screens/gameScreen.js";
 import { showImpeachmentScreen } from "./screens/impeachmentScreen.js";
 import { showWinScreen } from "./screens/winScreen.js";
@@ -124,6 +124,9 @@ export async function startAntiLevel(root, levelId) {
   let previousKings = new Set();     // короли на прошлой отрисовке («клетка»)
   let prevAntiCatCells = null;       // клетки с котами на прошлой отрисовке (Set индексов)
   let prevAntiMoods = {};            // настроение котов на прошлой отрисовке (индекс → mood)
+  // Переиспользуемые контейнеры для анимации котов (без аллокаций на каждый ход).
+  const antiAnimIdx = new Set();
+  let antiCurMoods = {};
   let kingsAtWin = 0;                // 👑 короли, зафиксированные при победе
   let levelCleaned = false;          // защита от двойного addTotalTime
 
@@ -370,7 +373,7 @@ export async function startAntiLevel(root, levelId) {
          }
          addTotalMoves(1); // общий счётчик ходов (адаптация royal-socio-cats)
          // Красная вспышка штрафа на счётчике ходов (адаптация boost-glow/boost-float)
-         showStatBoost(findStatItem(stats, "Ходы"), "-1", false);
+         showStatBoost(statEl("Ходы"), "-1", false);
          audioManager.playSoundEffect("assets/sounds/move.mp3");
           // Мобильная версия (узкий экран, vendor/bootstrap): после перемещения
           // кота («?» в т.ч.) снимаем выбор. Иначе кот остаётся «наведённым на
@@ -417,18 +420,24 @@ export async function startAntiLevel(root, levelId) {
     // - кот «приземлился» на новую клетку  → cat-land;
     // - настроение любого кота ИЗМЕНИЛОСЬ (вверх или вниз) → mood-change.
     // CSS-классы cat-land/mood-change уже есть в css/cats.css.
-    const antiAnimCells = boardEl.querySelectorAll(".cell");
-    const antiCurMoods = {};
-    const antiCurCatCells = new Set();
-    antiAnimCells.forEach((cell, index) => {
-      if (cell.dataset.mood === undefined) return;
-      antiCurCatCells.add(index);
+    //
+    // ПРОИЗВОДИТЕЛЬНОСТЬ: раньше тут делался boardEl.querySelectorAll(".cell")
+    // (построение NodeList на 64 узла) и ДВА прохода по нему + cell.querySelector
+    // для каждой клетки на КАЖДЫЙ рендер. Теперь идём только по клеткам с
+    // котами (их ≤ 20, известны из board.allCats()) и берём узлы из кэша.
+    antiAnimIdx.clear();
+    antiCurMoods = {};
+    const catsNow = game.board.allCats();
+    const cellsNow = boardEl.children;
+    for (let i = 0; i < catsNow.length; i++) {
+      const { r, c } = catsNow[i];
+      const index = r * game.board.cols + c;
+      const cell = cellsNow[index];
+      if (!cell || cell.dataset.mood === undefined) continue;
+      antiAnimIdx.add(index);
       antiCurMoods[index] = cell.dataset.mood;
-    });
-    antiAnimCells.forEach((cell, index) => {
-      if (cell.dataset.mood === undefined) return;
-      const catImg = cell.querySelector(".cat");
-      if (!catImg) return;
+      const catImg = cell.firstElementChild;
+      if (!catImg || !catImg.classList.contains("cat")) continue;
       const arrived = prevAntiCatCells && !prevAntiCatCells.has(index);
       const moodChanged = prevAntiMoods[index] !== undefined && prevAntiMoods[index] !== antiCurMoods[index];
       if (arrived) {
@@ -438,9 +447,9 @@ export async function startAntiLevel(root, levelId) {
         catImg.classList.add("mood-change");
         catImg.addEventListener("animationend", () => catImg.classList.remove("mood-change"), { once: true });
       }
-    });
+    }
     prevAntiMoods = antiCurMoods;
-    prevAntiCatCells = antiCurCatCells;
+    prevAntiCatCells = antiAnimIdx;
 
     updateKingTracking();
     updateStats();
@@ -460,14 +469,23 @@ export async function startAntiLevel(root, levelId) {
   // Позиционирование счётчиков: игровое поле остаётся строго по центру экрана,
   // статистика — справа от поля с тем же отступом 20px, что был раньше
   // (flex gap в .anti-game-stage), верх счётчиков — по верху поля.
-  function positionStats() {
+  //
+  // ПРОИЗВОДИТЕЛЬНОСТЬ: читает getBoundingClientRect() (синхронный reflow).
+  // Раньше вызывалась на КАЖДЫЙ updateStats (раз в 200 мс) и на каждый ход.
+  // Теперь позиция кэшируется: если геометрия поля не изменилась — не трогаем
+  // style вообще. Форс-пересчёт доступен через positionStats(true).
+  let lastStatsPos = null;
+  function positionStats(force = false) {
     try {
       if (isCompactUI()) {
-        stats.style.position = "";
-        stats.style.left = "";
-        stats.style.top = "";
-        stats.style.right = "";
-        stats.style.transform = "";
+        if (lastStatsPos !== "compact") {
+          stats.style.position = "";
+          stats.style.left = "";
+          stats.style.top = "";
+          stats.style.right = "";
+          stats.style.transform = "";
+          lastStatsPos = "compact";
+        }
         return;
       }
       stats.style.position = "absolute";
@@ -488,8 +506,17 @@ export async function startAntiLevel(root, levelId) {
       // если счётчики временно стоят у края).
       const statsW = getStatsContentWidth() || stats.offsetWidth;
       const maxLeft = window.innerWidth - statsW - 12;
-      stats.style.left = Math.max(12, Math.min(left, maxLeft)) + "px";
-      stats.style.top = top + "px";
+      const posLeft = Math.max(12, Math.min(left, maxLeft));
+      const posTop = top;
+      // Геометрия не изменилась — не пишем style (это вызывает лишний reflow).
+      if (!force && lastStatsPos &&
+          lastStatsPos.left === posLeft && lastStatsPos.top === posTop &&
+          lastStatsPos.statsW === statsW) {
+        return;
+      }
+      lastStatsPos = { left: posLeft, top: posTop, statsW };
+      stats.style.left = posLeft + "px";
+      stats.style.top = posTop + "px";
       stats.style.right = "";
       stats.style.transform = "";
     } catch (e) {
@@ -499,8 +526,13 @@ export async function startAntiLevel(root, levelId) {
 
   // Пересчёт позиции счётчиков после отрисовки поля: renderAntiBoard асинхронный
   // (клетки строятся после await загрузки скинов), поэтому ждём кадр.
+  // Батчинг: несколько вызовов в одном кадре схлопываются в один пересчёт.
+  let posStatsScheduled = false;
   function schedulePositionStats() {
+    if (posStatsScheduled) return;
+    posStatsScheduled = true;
     requestAnimationFrame(() => {
+      posStatsScheduled = false;
       if (levelActive) positionStats();
     });
   }
@@ -557,8 +589,10 @@ export async function startAntiLevel(root, levelId) {
   }
 
   function findCatCell(r, c) {
+    // ПРОИЗВОДИТЕЛЬНОСТЬ: boardEl.children — живая коллекция, доступ по индексу
+    // O(1), без построения NodeList через querySelectorAll на каждый вызов.
     const idx = r * game.board.cols + c;
-    return boardEl.querySelectorAll(".cell")[idx] || null;
+    return boardEl.children[idx] || null;
   }
 
   // Кнопки социотипов в модальном окне (существующие стили анти-тайп-кнопок)
@@ -622,7 +656,9 @@ export async function startAntiLevel(root, levelId) {
   // поле пересобирается под новый размер, счётчики остаются справа от него.
   const statsResizeListener = () => {
     refitBoard();
-    schedulePositionStats();
+    // При resize геометрия могла измениться — снимаем кэш позиции и
+    // пересчитываем принудительно (positionStats(true) в следующем кадре).
+    positionStats(true);
   };
   window.addEventListener("resize", statsResizeListener);
   window.visualViewport?.addEventListener("resize", statsResizeListener);
@@ -701,8 +737,8 @@ export async function startAntiLevel(root, levelId) {
       levelRemainingMs += TIME_BONUS_HAPPY * 1000; // синхронизация нового счётчика
        showFloatingBonus(`+${MOVE_BONUS_HAPPY} 👣 +${TIME_BONUS_HAPPY} ⏱`);
        // Золотая анимация бонуса на счётчиках ходов и времени (как boost у рыбок)
-       showStatBoost(findStatItem(stats, "Ходы"), `+${MOVE_BONUS_HAPPY}`, true);
-       showStatBoost(findStatItem(stats, "Время"), `+${TIME_BONUS_HAPPY}`, true);
+       showStatBoost(statEl("Ходы"), `+${MOVE_BONUS_HAPPY}`, true);
+       showStatBoost(statEl("Время"), `+${TIME_BONUS_HAPPY}`, true);
      } else {
       // Ошибка: НЕ показываем правильный ответ — низкий противный звук.
       // За неправильное угадывание убавляются ходы и время (как в royal-socio-cats).
@@ -718,7 +754,7 @@ export async function startAntiLevel(root, levelId) {
         spendBonusError();
         // Визуальный фидбек, что ошибку покрыло бонусное право
         showFloatingBonus("❤️ Бонусное право на ошибку");
-        showStatBoost(findStatItem(stats, "Ошибки"), "💛", false);
+        showStatBoost(statEl("Ошибки"), "💛", false);
       } else {
         outOfErrors = true;
       }
@@ -732,9 +768,9 @@ export async function startAntiLevel(root, levelId) {
       flashCatRed();
        showFloatingBonus(`-${MOVE_PENALTY_ERROR} 👣 -${TIME_PENALTY_ERROR} ⏱`);
        // Красная анимация штрафа на счётчиках ходов, времени и ошибок
-       showStatBoost(findStatItem(stats, "Ходы"), `-${MOVE_PENALTY_ERROR}`, false);
-       showStatBoost(findStatItem(stats, "Время"), `-${TIME_PENALTY_ERROR}`, false);
-       showStatBoost(findStatItem(stats, "Ошибки"), "-1", false);
+       showStatBoost(statEl("Ходы"), `-${MOVE_PENALTY_ERROR}`, false);
+       showStatBoost(statEl("Время"), `-${TIME_PENALTY_ERROR}`, false);
+       showStatBoost(statEl("Ошибки"), "-1", false);
        if (outOfErrors) {
         // Импичмент вызываем СРАЗУ — чтобы сброс выделения/перерисовка поля
         // не могли помешать показать экран проигрыша (иначе получится «бессмертие»).
@@ -808,8 +844,8 @@ export async function startAntiLevel(root, levelId) {
        showFloatingBonus(`+${happy} 👣 +${happy * 2} ⏱`);
        updateStats();
        // Золотая анимация бонуса за довольных котов
-       showStatBoost(findStatItem(stats, "Ходы"), `+${happy}`, true);
-       showStatBoost(findStatItem(stats, "Время"), `+${happy * 2}`, true);
+       showStatBoost(statEl("Ходы"), `+${happy}`, true);
+       showStatBoost(statEl("Время"), `+${happy * 2}`, true);
      }
    }
 
@@ -916,10 +952,10 @@ export async function startAntiLevel(root, levelId) {
 
     // Золотая вспышка на счётчике королей при появлении каждого короля
     if (newKings.size > 0) {
-      showStatBoost(findStatItem(stats, "Короли"), `+${newKings.size}`, true);
+      showStatBoost(statEl("Короли"), `+${newKings.size}`, true);
     }
     if (newKings.size > 0) {
-      const cells = boardEl.querySelectorAll(".cell");
+      const cells = boardEl.children;
       for (const key of newKings) {
         const [r, c] = key.split(",").map(Number);
         const index = r * game.board.cols + c;
@@ -980,8 +1016,8 @@ export async function startAntiLevel(root, levelId) {
       movesRemaining += 5;
       maxHappyCats = happy;
       // Красивая анимация бонуса на счётчиках ходов и времени
-      showStatBoost(findStatItem(stats, "Ходы"), "+5", true);
-      showStatBoost(findStatItem(stats, "Время"), "+10", true);
+      showStatBoost(statEl("Ходы"), "+5", true);
+      showStatBoost(statEl("Время"), "+10", true);
       // Звук "Дзинь!" — за каждое увеличение максимума довольных на 1,
       // как в royal-socio-cats (не за изменение mood отдельных котов).
       for (let i = 0; i < increase; i++) {
@@ -994,10 +1030,10 @@ export async function startAntiLevel(root, levelId) {
 
     // Анимации на счётчиках довольных/недовольных при их изменении
     if (lastHappyCount !== null && happy !== lastHappyCount) {
-      showStatBoost(findStatItem(stats, "Довольные"), `${happy - lastHappyCount > 0 ? "+" : ""}${happy - lastHappyCount}`, happy > lastHappyCount);
+      showStatBoost(statEl("Довольные"), `${happy - lastHappyCount > 0 ? "+" : ""}${happy - lastHappyCount}`, happy > lastHappyCount);
     }
     if (lastUnhappyCount !== null && unhappy !== lastUnhappyCount) {
-      showStatBoost(findStatItem(stats, "Недовольные"), `${unhappy - lastUnhappyCount > 0 ? "+" : ""}${unhappy - lastUnhappyCount}`, unhappy < lastUnhappyCount);
+      showStatBoost(statEl("Недовольные"), `${unhappy - lastUnhappyCount > 0 ? "+" : ""}${unhappy - lastUnhappyCount}`, unhappy < lastUnhappyCount);
     }
     lastHappyCount = happy;
     lastUnhappyCount = unhappy;
@@ -1033,58 +1069,163 @@ export async function startAntiLevel(root, levelId) {
     const movesColor = movesRemaining < 20 ? "color: #ff3333; font-weight: bold;" : "";
 
     const movesMade = game.getMoveCount();
+    // Пока идёт победа — показываем зафиксированное число королей.
     const kingsCount = won ? kingsAtWin : getKingsThisLevel();
     const rocketsCount = getRockets();
     const canUseRocket = rocketsCount > 0 && !won && !impeached;
-    const rocketBtnClass = `rocket-btn ${!canUseRocket ? "rocket-btn-disabled" : ""}`;
-    const rocketBtnHtml = `<button class="${rocketBtnClass}" id="rocket-btn" ${!canUseRocket ? "disabled" : ""}><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: ${rocketsCount}</button>`;
     // Кнопка «Открыть типы всех котов»: на уровнях 1–30 доступна всегда,
     // а после чит-кода «Aushra» появляется (с анимацией) на любом уровне.
     const showTestRevealBtn = cheatUnlocked || levelId <= 30;
-    const testRevealBtnHtml = showTestRevealBtn
+
+    // ПРОИЗВОДИТЕЛЬНОСТЬ: раньше updateStats() полностью перезаписывал
+    // stats.innerHTML КАЖДЫЕ 200 мс (таймер) и на каждый ход. Это парсинг HTML,
+    // пересоздание всех узлов, 6+ вызовов findStatItem (querySelectorAll +
+    // textContent.includes) и повторный reflow. Теперь структура HUD строится
+    // ОДИН раз, а дальнейшие обновления меняют только textContent по ссылкам.
+    updateStatsDom(stats, {
+      compact: isCompactUI(),
+      movesRemaining, movesMade, movesColor,
+      timerColor, levelRemainingMs, elapsedMs,
+      happy, unhappy, maxHappyCats, kingsCount,
+      errorsMade, currentErrorsRemaining, bonusErrorsLeft,
+      totalCats: game.board.allCats().length,
+      canUseRocket,
+      showTestRevealBtn
+    });
+
+    // Позиция счётчиков пересчитывается только при смене раскладки/размера.
+    schedulePositionStats();
+  }
+
+  // Хранит ссылки на узлы HUD, чтобы не искать их каждый раз.
+  const statsRefs = {
+    built: false,
+    compact: null,
+    movesVal: null, movesVal2: null, movesWord: null,
+    time: null, timeItem: null, elapsed: null, happy: null, unhappy: null,
+    maxHappy: null, kings: null, errMade: null, errLeft: null, errBonus: null,
+    goal: null, rockets: null, rocketBtn: null, testBtn: null
+  };
+
+  // Собрать структуру HUD ОДИН раз для текущей раскладки (мобильная/десктоп).
+  function buildStatsDom(container, compact, hasTestBtn) {
+    const items = [
+      `<div class="stat-item">🎯 Ходы: ${
+        compact
+          ? `(<span data-k="movesVal"></span>/<span data-k="movesMade"></span>)`
+          : `<span data-k="movesWord"></span> | сделано (<span data-k="movesVal"></span>/<span data-k="movesMade"></span>)`
+      }</div>`,
+      `<div class="stat-item" data-k="timeItem">⏱️ Время: осталось <span data-k="time"></span></div>`,
+      `<div class="stat-item">⏰ На уровне: <span data-k="elapsed"></span></div>`,
+      `<div class="stat-item">😊 Довольные: <span data-k="happy"></span></div>`,
+      `<div class="stat-item">😾 Недовольные: <span data-k="unhappy"></span></div>`,
+      `<div class="stat-item">⭐ Макс. довольных: <span data-k="maxHappy"></span></div>`,
+      `<div class="stat-item">👑 Короли: <span data-k="kings"></span></div>`,
+      `<div class="stat-item">❌ Ошибки: <span data-k="errMade"></span> | Осталось: <span data-k="errLeft"></span><span data-k="errBonus"></span></div>`,
+      `<div class="stat-item">🏆 Цель: зелёные <span data-k="goal"></span></div>`
+    ];
+
+    const rocketBtn = `<button class="rocket-btn" id="rocket-btn"><img class="fish-icon" src="assets/icons/fish.png" alt="">&nbsp;Рыбки: <span data-k="rockets"></span></button>`;
+    const testBtn = hasTestBtn
       ? `<button class="rocket-btn test-tool-btn" id="test-reveal-btn" type="button">🧠 Открыть типы всех котов</button>`
       : "";
 
-    // На мобильной версии текст короче — счётчики идут по два в ряд, места мало.
-    // Красным число оставшихся ходов и слово «осталось», когда их меньше 20 (как в royal-socio-cats).
-    const movesStatHtml = isCompactUI()
-      ? `<div class="stat-item">🎯 Ходы: (<span style="${movesColor}">${movesRemaining}</span>/${movesMade})</div>`
-      : `<div class="stat-item">🎯 Ходы: <span style="${movesColor}">осталось</span> | сделано (<span style="${movesColor}">${movesRemaining}</span>/${movesMade})</div>`;
-
-    const statItemsHtml = [
-      movesStatHtml,
-      `<div class="stat-item" style="${timerColor}">⏱️ Время: осталось ${formatTime(levelRemainingMs)}</div>`,
-      `<div class="stat-item">⏰ На уровне: ${formatTime(elapsedMs)}</div>`,
-      `<div class="stat-item">😊 Довольные: ${happy}</div>`,
-      `<div class="stat-item">😾 Недовольные: ${unhappy}</div>`,
-      `<div class="stat-item">⭐ Макс. довольных: ${maxHappyCats}</div>`,
-      `<div class="stat-item">👑 Короли: ${kingsCount}</div>`,
-      `<div class="stat-item">❌ Ошибки: ${errorsMade} | Осталось: ${currentErrorsRemaining}${bonusErrorsLeft > 0 ? ` | Бонус: ${bonusErrorsLeft}` : ""}</div>`,
-      `<div class="stat-item">🏆 Цель: зелёные ${happy}/${game.board.allCats().length}</div>`
-    ];
-
-    if (isCompactUI()) {
-      // Мобильная версия: Bootstrap-сетка из vendor/bootstrap/bootstrap-grid.min.css.
-      // Счётчики и кнопка «Рыбки» — по два в ряд (.row > .col-6), тестовые кнопки
-      // заказчика занимают всю ширину (col-12), чтобы текст не обрезался.
-      stats.innerHTML = `
+    if (compact) {
+      // Мобильная версия: Bootstrap-сетка (vendor/bootstrap/bootstrap-grid.min.css).
+      container.innerHTML = `
         <div class="container-fluid px-0">
           <div class="row g-2">
-            ${statItemsHtml.map(h => `<div class="col-6">${h}</div>`).join("")}
-            <div class="col-6">${rocketBtnHtml}</div>
-            ${showTestRevealBtn ? `<div class="col-12">${testRevealBtnHtml}</div>` : ""}
+            ${items.map(h => `<div class="col-6">${h}</div>`).join("")}
+            <div class="col-6">${rocketBtn}</div>
+            ${hasTestBtn ? `<div class="col-12">${testBtn}</div>` : ""}
           </div>
         </div>
       `;
     } else {
-      stats.innerHTML = `
-        ${statItemsHtml.join("")}
-        ${rocketBtnHtml}
-        ${showTestRevealBtn ? testRevealBtnHtml : ""}
-      `;
+      container.innerHTML = `${items.join("")}${rocketBtn}${testBtn}`;
     }
-    // После перерисовки (в т.ч. смены мобиль/десктоп) счётчики позиционируются
-    schedulePositionStats();
+
+    const q = (k) => container.querySelector(`[data-k="${k}"]`);
+    statsRefs.movesVal = q("movesVal");
+    statsRefs.movesVal2 = q("movesMade");
+    statsRefs.movesWord = q("movesWord");
+    statsRefs.time = q("time");
+    statsRefs.timeItem = q("timeItem");
+    statsRefs.elapsed = q("elapsed");
+    statsRefs.happy = q("happy");
+    statsRefs.unhappy = q("unhappy");
+    statsRefs.maxHappy = q("maxHappy");
+    statsRefs.kings = q("kings");
+    statsRefs.errMade = q("errMade");
+    statsRefs.errLeft = q("errLeft");
+    statsRefs.errBonus = q("errBonus");
+    statsRefs.goal = q("goal");
+    statsRefs.rockets = q("rockets");
+    statsRefs.rocketBtn = container.querySelector("#rocket-btn");
+    statsRefs.testBtn = container.querySelector("#test-reveal-btn");
+    statsRefs.built = true;
+    statsRefs.compact = compact;
+    // Индекс .stat-item по подстроке-ключу — строится один раз, чтобы
+    // showStatBoost() не делал querySelectorAll на каждый бонус.
+    buildStatItemIndex(container);
+  }
+
+  // Кэш .stat-item по ключевым словам («Ходы», «Время», «Довольные» и т.д.).
+  let statItemIndex = null;
+  function buildStatItemIndex(container) {
+    statItemIndex = new Map();
+    const items = container.querySelectorAll(".stat-item");
+    const keys = ["Ходы", "Время", "Довольные", "Недовольные", "Короли", "Ошибки"];
+    for (const key of keys) {
+      let found = null;
+      for (const el of items) {
+        if (el.textContent.includes(key)) { found = el; break; }
+      }
+      statItemIndex.set(key, found);
+    }
+  }
+
+  // Быстрый доступ к .stat-item без повторного поиска в DOM.
+  function statEl(word) {
+    if (!statItemIndex) buildStatItemIndex(stats);
+    return statItemIndex.get(word) || null;
+  }
+
+  // Обновить HUD: при первом вызове/смене раскладки/появлении кнопки — собрать
+  // структуру, далее менять только текст (дёшево, без пересборки DOM).
+  function updateStatsDom(container, d) {
+    const needRebuild = !statsRefs.built ||
+      statsRefs.compact !== d.compact ||
+      (!!statsRefs.testBtn !== d.showTestRevealBtn);
+    if (needRebuild) buildStatsDom(container, d.compact, d.showTestRevealBtn);
+
+    const set = (el, val) => { if (el && el.textContent !== val) el.textContent = val; };
+
+    set(statsRefs.movesVal, String(d.movesRemaining));
+    set(statsRefs.movesVal2, String(d.movesMade));
+    if (statsRefs.movesWord) {
+      set(statsRefs.movesWord, "осталось");
+      statsRefs.movesWord.style.cssText = d.movesColor;
+    }
+    if (statsRefs.movesVal) statsRefs.movesVal.style.cssText = d.movesColor;
+    if (statsRefs.movesVal2) statsRefs.movesVal2.style.cssText = d.movesColor;
+
+    set(statsRefs.time, formatTime(d.levelRemainingMs));
+    if (statsRefs.timeItem) statsRefs.timeItem.style.cssText = d.timerColor;
+    set(statsRefs.elapsed, formatTime(d.elapsedMs));
+    set(statsRefs.happy, String(d.happy));
+    set(statsRefs.unhappy, String(d.unhappy));
+    set(statsRefs.maxHappy, String(d.maxHappyCats));
+    set(statsRefs.kings, String(d.kingsCount));
+    set(statsRefs.errMade, String(d.errorsMade));
+    set(statsRefs.errLeft, String(d.currentErrorsRemaining));
+    set(statsRefs.errBonus, d.bonusErrorsLeft > 0 ? ` | Бонус: ${d.bonusErrorsLeft}` : "");
+    set(statsRefs.goal, `${d.happy}/${d.totalCats}`);
+    set(statsRefs.rockets, String(getRockets()));
+    if (statsRefs.rocketBtn) {
+      statsRefs.rocketBtn.classList.toggle("rocket-btn-disabled", !d.canUseRocket);
+      statsRefs.rocketBtn.disabled = !d.canUseRocket;
+    }
   }
 
   // ==== Рыбка (адаптация royal-socio-cats: useRocket + showRocketBoost) ====
@@ -1102,12 +1243,11 @@ export async function startAntiLevel(root, levelId) {
   }
 
   function showRocketBoost() {
-    const items = Array.from(stats.querySelectorAll(".stat-item"));
-    const find = (word) => items.find((el) => el.textContent.includes(word));
+    // Используем кэшированные ссылки на .stat-item (без querySelectorAll).
     const targets = [
-      { el: find("Ходы"), text: "+10 ходов" },
-      { el: find("Время"), text: "+20 сек" },
-      { el: find("Рыбки"), text: '-1 <img class="fish-icon" src="assets/icons/fish.png" alt="">' },
+      { el: statEl("Ходы"), text: "+10 ходов" },
+      { el: statEl("Время"), text: "+20 сек" },
+      { el: statEl("Рыбки"), text: '-1 <img class="fish-icon" src="assets/icons/fish.png" alt="">' },
     ];
     for (const t of targets) {
       if (!t.el) continue;

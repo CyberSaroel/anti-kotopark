@@ -68,24 +68,9 @@
   transform: scale(0.98);
 }
 
-/* ===== Всплывающее окно выбора социотипа ===== */
-.socio-modal {
-  /* Без затемнения поля: pointer-events только на карточке,
-     клики вне окна уходят на поле (закрытие — по Escape или повторному тапу). */
-  position: fixed;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.socio-modal[hidden] {
-  display: none;
-}
-
+/* ===== Всплывающее окно выбора социотипа =====
+   Каркас окна (подложка, центрирование, закрытие по фону/Escape) даёт Tingle.js;
+   ниже — оформление самой карточки контента. */
 .socio-modal-card {
   background: #220f13;
   border: 2px solid var(--gilt, #d49a3c);
@@ -204,7 +189,7 @@
 }
 
 .socio-modal-title {
-  font-size: 24px; /* ПК-версия: было 16px, чуть увеличил */
+  font-size: 23px; /* ПК-версия: было 16px, чуть увеличил */
   font-weight: bold;
   color: var(--gilt-highlight, #f3d27a);
   text-align: center;
@@ -373,27 +358,8 @@
     max-width: 400px;
   }
 
-  /* Полноэкранная затемняющая подложка (фон). !important перекрывает left/top,
-     которые раньше ставил JS по центру игрового поля. Карточка остаётся
-     компактной (см. ниже). */
-  .socio-modal {
-    padding: 0;
-    inset: 0 !important;
-    left: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100dvh !important;
-    height: 100vh; /* фолбэк для браузеров без dvh */
-    margin: 0 !important;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.6);
-    pointer-events: none; /* события на поле не блокируем (карточка кликабельна) */
-    box-sizing: border-box;
-    overflow: hidden;
-  }
+  /* Подложку и центрирование окна теперь даёт Tingle.js (см. css/tingle-theme.css),
+     поэтому здесь остаются только размеры компактной карточки. */
 
   /* Компактная карточка: авто-ширина под 2 колонки, но не шире экрана;
      высота по содержимому, но не выше вьюпорта. */

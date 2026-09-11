@@ -253,11 +253,9 @@ export async function startAntiLevel(root, levelId) {
   stage.appendChild(stats);
   root.appendChild(stage);
 
-  // Модальное окно выбора социотипа (вместо постоянного левого сайдбара)
-  const socioModal = document.createElement("div");
-  socioModal.className = "socio-modal";
-  socioModal.hidden = true;
-
+  // Модальное окно выбора социотипа (вместо постоянного левого сайдбара).
+  // Каркас (подложка, центрирование, закрытие по фону/Escape) даёт Tingle.js,
+  // содержимое окна — наша карточка .socio-modal-card.
   const socioModalCard = document.createElement("div");
   socioModalCard.className = "socio-modal-card";
 
@@ -295,39 +293,29 @@ export async function startAntiLevel(root, levelId) {
 
   socioModalCard.appendChild(socioModalHeader);
   socioModalCard.appendChild(socioModalList);
-  socioModal.appendChild(socioModalCard);
 
-  // Клик вне карточки (по полю/мимо) закрывает окно — как раньше по затемнению.
-  // Клик по коту не закрывает: его обрабатывает onCatClick (переключение/закрытие).
-  let suppressNextBoardClick = false;
-  const onDocPointerDown = (e) => {
-    if (socioModal.hidden) return;
-    if (socioModalCard.contains(e.target)) return;
-    // Клик по коту (или его подписи) — не закрываем, обработает onCatClick
-    const cell = e.target.closest && e.target.closest(".cell");
-    if (cell && cell.querySelector("img.cat")) return;
-    audioManager.initAudioContext();
-    closeSocioMenuKeepSelection();
-    // Если клик пришёлся на доступную цель выбранного кота — не подавляем его:
-    // окно закрылось, а то же нажатие передвинет кота на эту клетку.
-    let isTargetClick = false;
-    if (cell && selectedCatRC && game.selected) {
-      const idx = Array.prototype.indexOf.call(cell.parentNode.children, cell);
-      const r = Math.floor(idx / game.board.cols);
-      const c = idx % game.board.cols;
-      if (game.isTarget(r, c)) isTargetClick = true;
-    }
-    if (isTargetClick) {
-      suppressNextBoardClick = false;
-    } else {
-      // Этот клик уже ушёл на поле — не даём ему передвинуть кота/выделить клетку
-      suppressNextBoardClick = true;
-      setTimeout(() => { suppressNextBoardClick = false; }, 50);
-    }
-  };
-  document.addEventListener("pointerdown", onDocPointerDown);
-
-  root.appendChild(socioModal);
+  // Tingle.js даёт каркас окна: затемняющую подложку, центрирование,
+  // закрытие по клику вне окна (overlay) и по Escape. Свою кнопку закрытия
+  // Tingle не создаёт (её нет в closeMethods) — используем крестик в шапке.
+  if (!window.tingle) {
+    console.error("Tingle.js не загружен: проверьте vendor/tingle/tingle.min.js");
+  }
+  const socioTingle = new window.tingle.modal({
+    cssClass: ["socio-modal-tingle"],
+    closeMethods: ["overlay", "escape"],
+    onOpen() {
+      audioManager.initAudioContext();
+    },
+    onClose() {
+      // Закрытие модалки (фон/Escape/крестик): кот остаётся выделенным,
+      // при необходимости возвращаем состояние «выбран» и снимаем hold.
+      if (catState === "choosing") catState = "selected";
+      if (modalHoldTimer) { clearTimeout(modalHoldTimer); modalHoldTimer = null; }
+      socioModalCard.classList.remove("socio-modal-hold", "closing");
+      socioModalCard.style.animation = "";
+    },
+  });
+  socioTingle.setContent(socioModalCard);
 
   // --- Состояние выбора кота ---
   let catState = "idle"; // idle | selected | choosing
@@ -351,12 +339,8 @@ export async function startAntiLevel(root, levelId) {
   function render() {
     renderAntiBoard(boardEl, game, (r, c) => {
       // Пока открыто окно выбора социотипа, поле не реагирует на клики
-      // (раньше это обеспечивало затемнение) — игровая логика не меняется.
-      // Во время анимации ЗАКРЫТИЯ (closing) поле уже реагирует: клик по
-      // соседней клетке тут же передвинет выделенного кота.
-      if (!socioModal.hidden && !socioModalCard.classList.contains("closing")) return;
-      // Клик, который только что закрыл окно, не должен двигать кота
-      if (suppressNextBoardClick) return;
+      // (подложка Tingle перекрывает поле) — игровая логика не меняется.
+      if (socioTingle.isOpen()) return;
       // Клик по пустой клетке при выбранном коте снимает выбор, НО только если
       // это не доступный ход выбранного кота — иначе дальше clickCell
       // передвинет кота. Раньше resetCatSelection() обнулял game.selected даже
@@ -608,19 +592,21 @@ export async function startAntiLevel(root, levelId) {
     game.selected = null;
   }
 
+  // Закрыть окно социотипов через Tingle: сначала проигрываем нашу анимацию
+  // «ухода в огонь» (класс closing), затем прячем модалку средствами Tingle.
   function hideSocioMenu() {
-    // Уже скрыто или анимация закрытия уже запущена — повторно не запускаем
-    if (socioModal.hidden || socioModalCard.classList.contains("closing")) return;
+    // Уже скрыто или закрытие уже запущено — повторно не запускаем
+    if (!socioTingle.isOpen() || socioModalCard.classList.contains("closing")) return;
     socioModalCard.classList.add("closing");
     let finished = false;
     const finalize = () => {
       if (finished) return;
       finished = true;
       socioModalCard.classList.remove("closing");
-      socioModal.hidden = true;
+      socioTingle.close();
     };
     socioModalCard.addEventListener("animationend", finalize, { once: true });
-    // Страховка: если событие animationend не сработало (неактивная вкладка и т.п.)
+    // Страховка: если animationend не сработал (неактивная вкладка и т.п.)
     setTimeout(finalize, 350);
   }
 
@@ -631,42 +617,6 @@ export async function startAntiLevel(root, levelId) {
     if (catState === "choosing") catState = "selected";
     hideSocioMenu();
   }
-
-  // Центрирование модального окна строго по центру игрового поля (доски).
-  // Позиция пересчитывается при каждом открытии и при изменении размеров
-  // экрана/поля/масштабировании. Окно не выходит за границы видимой области —
-  // при необходимости позиция корректируется.
-  function positionSocioModal() {
-    // На мобильном (<=768px) окно полноэкранное: CSS сам растягивает подложку
-    // и карточку на весь вьюпорт. Инлайн left/top здесь НЕ нужны и могли бы
-    // конфликтовать с полноэкранной вёрсткой.
-    if (window.matchMedia("(max-width: 768px)").matches) return;
-    const boardRect = boardEl.getBoundingClientRect();
-    const modalRect = socioModal.getBoundingClientRect();
-    const pad = 8;
-
-    // Центр игрового поля
-    let left = boardRect.left + boardRect.width / 2 - modalRect.width / 2;
-    let top = boardRect.top + boardRect.height / 2 - modalRect.height / 2;
-
-    // Коррекция: окно не должно выходить за видимую область экрана
-    left = Math.min(Math.max(pad, left), Math.max(pad, window.innerWidth - modalRect.width - pad));
-    top = Math.min(Math.max(pad, top), Math.max(pad, window.innerHeight - modalRect.height - pad));
-
-    socioModal.style.left = `${left}px`;
-    socioModal.style.top = `${top}px`;
-    socioModal.style.transform = "none";
-  }
-
-  // Динамическое позиционирование: пересчёт по центру поля при изменении
-  // размеров окна браузера, разрешения экрана и масштабировании страницы,
-  // пока окно открыто. rAF — чтобы координаты доски уже были пересчитаны.
-  const onViewportResize = () => {
-    if (socioModal.hidden) return;
-    requestAnimationFrame(positionSocioModal);
-  };
-  window.addEventListener("resize", onViewportResize);
-  window.visualViewport?.addEventListener("resize", onViewportResize);
 
   // Пересчёт позиции счётчиков при изменении размеров окна/масштабировании:
   // поле пересобирается под новый размер, счётчики остаются справа от него.
@@ -697,7 +647,8 @@ export async function startAntiLevel(root, levelId) {
     menuOpenedAt = Date.now();
     // Перезапуск анимации появления, если окно закрывалось анимацией
     socioModalCard.classList.remove("closing");
-    socioModal.hidden = false;
+    // Открываем окно средствами Tingle (подложка, центрирование, скролл-лок)
+    socioTingle.open();
     socioModalCard.style.animation = "none";
     void socioModalCard.offsetWidth; // принудительный reflow для перезапуска
     socioModalCard.style.animation = "";
@@ -711,41 +662,19 @@ export async function startAntiLevel(root, levelId) {
       modalActiveEl.blur();
     }
 
-    // --- Позиционирование по центру игрового поля ---
-    // Скрываем окно до вычисления координат, чтобы оно не мелькало в углу
-    socioModal.style.visibility = "hidden";
-
+    // Чтобы ни одна кнопка в момент появления окна не выглядела «выделенной»:
+    // временно глушим hover/focus (класс socio-modal-hold) на короткое время,
+    // пока игрок не совершит реального действия.
+    socioModalCard.classList.remove("socio-modal-hold");
+    if (modalHoldTimer) clearTimeout(modalHoldTimer);
     requestAnimationFrame(() => {
-      if (socioModal.hidden) {
-        socioModal.style.visibility = "";
-        return;
-      }
-      positionSocioModal();
-      socioModal.style.visibility = "";
-
-      // Чтобы ни одна кнопка в момент появления окна не выглядела «выделенной»:
-      // временно глушим hover/focus (класс socio-modal-hold) на короткое время,
-      // пока игрок не совершит реального действия.
-      socioModalCard.classList.remove("socio-modal-hold");
-      if (modalHoldTimer) clearTimeout(modalHoldTimer);
-      requestAnimationFrame(() => {
-        socioModalCard.classList.add("socio-modal-hold");
-        modalHoldTimer = setTimeout(() => {
-          socioModalCard.classList.remove("socio-modal-hold");
-          modalHoldTimer = null;
-        }, 500);
-      });
+      socioModalCard.classList.add("socio-modal-hold");
+      modalHoldTimer = setTimeout(() => {
+        socioModalCard.classList.remove("socio-modal-hold");
+        modalHoldTimer = null;
+      }, 500);
     });
   }
-
-  // Закрытие модального окна по Escape
-  const onModalKeyDown = (e) => {
-    if (e.key === "Escape" && !socioModal.hidden) {
-      audioManager.initAudioContext();
-      closeSocioMenuKeepSelection();
-    }
-  };
-  document.addEventListener("keydown", onModalKeyDown);
 
   // ==== Чит-код «Aushra»: набор прямо на странице игры ====
   // Собираем печатные символы в буфер и сравниваем с кодом (без учёта регистра).
@@ -1309,11 +1238,10 @@ export async function startAntiLevel(root, levelId) {
       addTotalTime(elapsedMs);
     }
     stopBoardLayoutListener();
-    document.removeEventListener("keydown", onModalKeyDown);
+    // Закрываем и уничтожаем модальное окно Tingle (снимает свои слушатели)
+    if (modalHoldTimer) { clearTimeout(modalHoldTimer); modalHoldTimer = null; }
+    try { socioTingle.destroy(); } catch (e) { /* окно могло не открываться */ }
     document.removeEventListener("keydown", onCheatKeyDown);
-    document.removeEventListener("pointerdown", onDocPointerDown);
-    window.removeEventListener("resize", onViewportResize);
-    window.visualViewport?.removeEventListener("resize", onViewportResize);
     window.removeEventListener("resize", statsResizeListener);
     window.visualViewport?.removeEventListener("resize", statsResizeListener);
     window.visualViewport?.removeEventListener("scroll", statsResizeListener);
